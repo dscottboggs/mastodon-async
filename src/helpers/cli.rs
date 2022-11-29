@@ -1,9 +1,6 @@
 use std::io::{self, BufRead, Write};
 
-use errors::Result;
-use http_send::HttpSend;
-use registration::Registered;
-use Mastodon;
+use crate::{errors::Result, http_send::HttpSend, registration::Registered, Mastodon};
 
 /// Finishes the authentication process for the given `Registered` object,
 /// using the command-line

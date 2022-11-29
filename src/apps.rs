@@ -1,9 +1,12 @@
 use std::borrow::Cow;
 
-use try_from::TryInto;
+use serde::Serialize;
+// use try_from::TryInto;
 
-use errors::{Error, Result};
-use scopes::Scopes;
+use crate::{
+    errors::{Error, Result},
+    scopes::Scopes,
+};
 
 /// Represents an application that can be registered with a mastodon instance
 #[derive(Clone, Debug, Default, Serialize, PartialEq)]
@@ -18,10 +21,9 @@ pub struct App {
 impl App {
     /// Get an AppBuilder object
     ///
-    /// # Example
+    /// // Example
     ///
     /// ```
-    /// # extern crate elefren;
     /// use elefren::apps::App;
     ///
     /// let mut builder = App::builder();
@@ -32,21 +34,16 @@ impl App {
 
     /// Retrieve the list of scopes that apply to this App
     ///
-    /// # Example
+    /// // Example
     ///
     /// ```
-    /// # extern crate elefren;
-    /// # use elefren::Error;
     /// use elefren::{apps::App, scopes::Scopes};
     ///
-    /// # fn main() -> Result<(), Error> {
     /// let mut builder = App::builder();
     /// builder.client_name("elefren-test");
-    /// let app = builder.build()?;
+    /// let app = builder.build().unwrap();
     /// let scopes = app.scopes();
     /// assert_eq!(scopes, &Scopes::read_all());
-    /// #   Ok(())
-    /// # }
     /// ```
     pub fn scopes(&self) -> &Scopes {
         &self.scopes
@@ -55,15 +52,11 @@ impl App {
 
 /// Builder struct for defining your application.
 /// ```
-/// use elefren::apps::App;
-/// use std::error::Error;
+/// use elefren::{apps::App};
 ///
-/// # fn main() -> Result<(), Box<Error>> {
 /// let mut builder = App::builder();
 /// builder.client_name("elefren_test");
-/// let app = builder.build()?;
-/// #   Ok(())
-/// # }
+/// let app = builder.build().unwrap();
 /// ```
 #[derive(Clone, Debug, Default, PartialEq, Serialize)]
 pub struct AppBuilder<'a> {
@@ -129,16 +122,8 @@ impl<'a> AppBuilder<'a> {
     }
 }
 
-impl TryInto<App> for App {
-    type Err = Error;
-
-    fn try_into(self) -> Result<App> {
-        Ok(self)
-    }
-}
-
 impl<'a> TryInto<App> for AppBuilder<'a> {
-    type Err = Error;
+    type Error = Error;
 
     fn try_into(self) -> Result<App> {
         Ok(self.build()?)

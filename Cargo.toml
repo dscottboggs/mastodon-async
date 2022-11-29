@@ -12,14 +12,17 @@
 
 [package]
 name = "elefren"
-version = "0.22.0"
+version = "0.23.0"
 authors = ["Aaron Power <theaaronepower@gmail.com>", "Paul Woolcock <paul@woolcock.us>"]
 description = "A wrapper around the Mastodon API."
 readme = "README.md"
 keywords = ["api", "web", "social", "mastodon", "wrapper"]
 categories = ["web-programming", "web-programming::http-client", "api-bindings"]
 license = "MIT/Apache-2.0"
-repository = "https://github.com/pwoolcoc/elefren.git"
+edition = "2021"
+# TODO setup repo
+# repository = "https://github.com/pwoolcoc/elefren.git"
+
 [package.metadata.docs.rs]
 features = ["all"]
 [dependencies.chrono]
@@ -30,15 +33,16 @@ features = ["serde"]
 version = "0.3"
 
 [dependencies.envy]
-version = "0.4.0"
+version = "0.4"
 optional = true
 
+# Provides parsing for the link header in get_links() in page.rs
 [dependencies.hyper-old-types]
 version = "0.11.0"
 
 [dependencies.isolang]
-version = "1.0"
-features = ["serde_serialize"]
+version = "2.2"
+features = ["serde"]
 
 [dependencies.log]
 version = "0.4"
@@ -49,9 +53,7 @@ default-features = false
 
 [dependencies.serde]
 version = "1"
-
-[dependencies.serde_derive]
-version = "1"
+features = ["derive"]
 
 [dependencies.serde_json]
 version = "1"
@@ -66,30 +68,29 @@ version = "0.6.1"
 version = "1"
 
 [dependencies.toml]
-version = "0.5.0"
+version = "0.5"
 optional = true
-
-[dependencies.try_from]
-version = "0.3.2"
 
 [dependencies.tungstenite]
 version = "0.10.1"
 
 [dependencies.url]
 version = "1"
+
 [dev-dependencies.indoc]
-version = "0.3.1"
+version = "1.0"
 
 [dev-dependencies.pretty_env_logger]
 version = "0.3.0"
 
 [dev-dependencies.skeptic]
-version = "0.13.3"
+version = "0.13"
 
 [dev-dependencies.tempfile]
-version = "3.0.3"
+version = "3"
+
 [build-dependencies.skeptic]
-version = "0.13.3"
+version = "0.13"
 
 [features]
 all = ["toml", "json", "env"]

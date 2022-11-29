@@ -1,5 +1,7 @@
 //! A module about contexts of statuses.
 
+use serde::Deserialize;
+
 use super::status::Status;
 
 /// A context of a status returning a list of statuses it replied to and

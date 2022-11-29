@@ -1,18 +1,13 @@
-use entities::filter::FilterContext;
+use crate::entities::filter::FilterContext;
 use std::time::Duration;
 
 /// Form used to create a filter
 ///
-/// # Example
+/// // Example
 ///
 /// ```
-/// # extern crate elefren;
-/// # use std::error::Error;
 /// use elefren::{entities::filter::FilterContext, requests::AddFilterRequest};
-/// # fn main() -> Result<(), Box<Error>> {
 /// let request = AddFilterRequest::new("foo", FilterContext::Home);
-/// #   Ok(())
-/// # }
 /// ```
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct AddFilterRequest {

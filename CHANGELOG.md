@@ -52,10 +52,10 @@ This release adds support for all new API endpoints introduced in Mastodon 2.4.*
 * **scopes:** Implement granular OAuth scopes ([e284894d](e284894d), closes [#44](44))
 * **helpers:** cli::authenticate ([034bd4e6](034bd4e6))
 * **client:** Implement client.update\_credentials ([a57c7e2f](a57c7e2f))
-* **status:** Add language code to status builer ([989d9a59](989d9a59), closes [#55](55))
+* **status:** Add language code to status builder ([989d9a59](989d9a59), closes [#55](55))
 * **client:** Implement profile metadata update ([0ad1e374](0ad1e374), closes [#54](54))
 * **search:** Implement `GET /api/v2/search` ([28192e11](28192e11))
-* **client:** Implement push notifciations endpoints ([690b029d](690b029d), closes [#53](53))
+* **client:** Implement push notifications endpoints ([690b029d](690b029d), closes [#53](53))
 * **client:** Add `replies_count` property to `Status` entities ([7d752a9f](7d752a9f), closes [#73](73))
 * **client:** Implement Keyword filtering API ([7d164cb8](7d164cb8), closes [#71](71))
 * **client:** Implement the Follow Suggestions API ([7de1bdc0](7de1bdc0), closes [#72](72))
@@ -111,7 +111,7 @@ This release adds support for all new API endpoints introduced in Mastodon 2.4.*
   ```
 
   You can still call use the `Registration` & `AppBuilder` APIs like
-  before, but any App passed to `.register` will supercede anything app
+  before, but any App passed to `.register` will supersede anything app
   config set on the `Registration` object itself.
 
   In future releases, this will become a hard error.

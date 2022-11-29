@@ -8,13 +8,16 @@ use std::{
 
 use serde::ser::{Serialize, Serializer};
 
-use errors::Error;
-use serde::{Deserialize, Deserializer};
-use serde::de::{self, Visitor};
+use crate::errors::Error;
+use serde::{
+    de::{self, Visitor},
+    Deserialize,
+    Deserializer,
+};
 
 /// Represents a set of OAuth scopes
 ///
-/// # Example
+/// // Example
 ///
 /// ```rust
 /// use elefren::prelude::*;
@@ -64,15 +67,18 @@ impl<'de> Visitor<'de> for DeserializeScopesVisitor {
     }
 
     fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
-        where E: de::Error
+    where
+        E: de::Error,
     {
         Scopes::from_str(v).map_err(de::Error::custom)
     }
 }
 
 impl<'de> Deserialize<'de> for Scopes {
-    fn deserialize<D>(deserializer: D) -> Result<Self, <D as Deserializer<'de>>::Error> where
-        D: Deserializer<'de> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, <D as Deserializer<'de>>::Error>
+    where
+        D: Deserializer<'de>,
+    {
         deserializer.deserialize_str(DeserializeScopesVisitor)
     }
 }
@@ -81,15 +87,10 @@ impl Scopes {
     /// Represents all available oauth scopes: "read write follow push"
     ///
     /// ```
-    /// # extern crate elefren;
-    /// # use std::error::Error;
     /// use elefren::scopes::Scopes;
     ///
-    /// # fn main() -> Result<(), Box<Error>> {
     /// let scope = Scopes::all();
     /// assert_eq!(&format!("{}", scope), "read write follow push");
-    /// #   Ok(())
-    /// # }
     /// ```
     pub fn all() -> Scopes {
         Scopes::read_all() | Scopes::write_all() | Scopes::follow() | Scopes::push()
@@ -98,15 +99,10 @@ impl Scopes {
     /// Represents the full "read" scope
     ///
     /// ```
-    /// # extern crate elefren;
-    /// # use std::error::Error;
     /// use elefren::scopes::Scopes;
     ///
-    /// # fn main() -> Result<(), Box<Error>> {
     /// let scope = Scopes::read_all();
     /// assert_eq!(&format!("{}", scope), "read");
-    /// #   Ok(())
-    /// # }
     /// ```
     pub fn read_all() -> Scopes {
         Scopes::_read(None)
@@ -115,15 +111,10 @@ impl Scopes {
     /// Represents a specific "read:___" scope
     ///
     /// ```
-    /// # extern crate elefren;
-    /// # use std::error::Error;
     /// use elefren::scopes::{Read, Scopes};
     ///
-    /// # fn main() -> Result<(), Box<Error>> {
     /// let scope = Scopes::read(Read::Accounts);
     /// assert_eq!(&format!("{}", scope), "read:accounts");
-    /// #   Ok(())
-    /// # }
     /// ```
     pub fn read(subscope: Read) -> Scopes {
         Scopes::_read(Some(subscope))
@@ -132,15 +123,10 @@ impl Scopes {
     /// Represents the full "write" scope
     ///
     /// ```
-    /// # extern crate elefren;
-    /// # use std::error::Error;
     /// use elefren::scopes::Scopes;
     ///
-    /// # fn main() -> Result<(), Box<Error>> {
     /// let scope = Scopes::write_all();
     /// assert_eq!(&format!("{}", scope), "write");
-    /// #   Ok(())
-    /// # }
     /// ```
     pub fn write_all() -> Scopes {
         Scopes::_write(None)
@@ -149,15 +135,10 @@ impl Scopes {
     /// Represents a specific "write:___" scope
     ///
     /// ```
-    /// # extern crate elefren;
-    /// # use std::error::Error;
     /// use elefren::scopes::{Scopes, Write};
     ///
-    /// # fn main() -> Result<(), Box<Error>> {
     /// let scope = Scopes::write(Write::Accounts);
     /// assert_eq!(&format!("{}", scope), "write:accounts");
-    /// #   Ok(())
-    /// # }
     /// ```
     pub fn write(subscope: Write) -> Scopes {
         Scopes::_write(Some(subscope))
@@ -166,15 +147,10 @@ impl Scopes {
     /// Represents the "follow" scope
     ///
     /// ```
-    /// # extern crate elefren;
-    /// # use std::error::Error;
     /// use elefren::scopes::Scopes;
     ///
-    /// # fn main() -> Result<(), Box<Error>> {
     /// let scope = Scopes::follow();
     /// assert_eq!(&format!("{}", scope), "follow");
-    /// #   Ok(())
-    /// # }
     /// ```
     pub fn follow() -> Scopes {
         Scopes::new(Scope::Follow)
@@ -183,15 +159,10 @@ impl Scopes {
     /// Represents the full "push" scope
     ///
     /// ```
-    /// # extern crate elefren;
-    /// # use std::error::Error;
     /// use elefren::scopes::Scopes;
     ///
-    /// # fn main() -> Result<(), Box<Error>> {
     /// let scope = Scopes::push();
     /// assert_eq!(&format!("{}", scope), "push");
-    /// #   Ok(())
-    /// # }
     /// ```
     pub fn push() -> Scopes {
         Scopes::new(Scope::Push)
@@ -199,7 +170,7 @@ impl Scopes {
 
     /// Combines 2 scopes together
     ///
-    /// # Example
+    /// // Example
     ///
     /// ```rust
     /// use elefren::prelude::*;
@@ -764,7 +735,7 @@ mod tests {
             let expected = format!("\"{}\"", b);
             assert_eq!(&ser, &expected);
 
-            let des : Scopes = serde_json::from_str(&ser).expect("Couldn't deserialize Scopes");
+            let des: Scopes = serde_json::from_str(&ser).expect("Couldn't deserialize Scopes");
             assert_eq!(&des, a);
         }
     }

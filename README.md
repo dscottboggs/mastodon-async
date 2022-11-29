@@ -11,7 +11,7 @@
 
 [Documentation](https://docs.rs/elefren/)
 
-A wrapper around the [API](https://github.com/tootsuite/documentation/blob/master/docs/Using-the-API/API.md#tag) for [Mastodon](https://mastodon.social/)
+A wrapper around the [API](https://github.com/tootsuite/documentation/blob/master/docs/Using-the-API/API.md#tag) for [Mastodon](https://botsin.space/)
 
 ## Installation
 
@@ -33,7 +33,6 @@ elefren = { version = "0.22", features = ["toml"] }
 
 ```rust,no_run
 // src/main.rs
-extern crate elefren;
 
 use std::error::Error;
 
@@ -56,7 +55,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 }
 
 fn register() -> Result<Mastodon, Box<dyn Error>> {
-    let registration = Registration::new("https://mastodon.social")
+    let registration = Registration::new("https://botsin.space")
                                     .client_name("elefren-examples")
                                     .build()?;
     let mastodon = cli::authenticate(registration)?;
@@ -70,7 +69,7 @@ fn register() -> Result<Mastodon, Box<dyn Error>> {
 
 It also supports the [Streaming API](https://docs.joinmastodon.org/api/streaming):
 
-```no_run
+```rust,no_run
 use elefren::prelude::*;
 use elefren::entities::event::Event;
 

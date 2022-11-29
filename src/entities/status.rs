@@ -1,9 +1,9 @@
 //! Module containing all info relating to a status.
 
 use super::prelude::*;
+use crate::{entities::card::Card, status_builder::Visibility};
 use chrono::prelude::*;
-use entities::card::Card;
-use status_builder::Visibility;
+use serde::Deserialize;
 
 /// A status from the instance.
 #[derive(Debug, Clone, Deserialize, PartialEq)]

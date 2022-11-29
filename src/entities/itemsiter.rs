@@ -1,28 +1,16 @@
-use http_send::HttpSend;
-use page::Page;
+use crate::{http_send::HttpSend, page::Page};
 use serde::Deserialize;
 
 /// Abstracts away the `next_page` logic into a single stream of items
 ///
 /// ```no_run
-/// # extern crate elefren;
-/// # use elefren::prelude::*;
-/// # use std::error::Error;
-/// # fn main() -> Result<(), Box<Error>> {
-/// # let data = Data {
-/// #   base: "".into(),
-/// #   client_id: "".into(),
-/// #   client_secret: "".into(),
-/// #   redirect: "".into(),
-/// #   token: "".into(),
-/// # };
+/// use elefren::prelude::*;
+/// let data = Data::default();
 /// let client = Mastodon::from(data);
-/// let statuses = client.statuses("user-id", None)?;
+/// let statuses = client.statuses("user-id", None).unwrap();
 /// for status in statuses.items_iter() {
 ///     // do something with `status`
 /// }
-/// # Ok(())
-/// # }
 /// ```
 #[derive(Debug, Clone)]
 pub(crate) struct ItemsIter<'a, T: Clone + for<'de> Deserialize<'de>, H: 'a + HttpSend> {

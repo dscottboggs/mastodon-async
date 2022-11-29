@@ -4,6 +4,7 @@ use std::{error, fmt, io::Error as IoError};
 use envy::Error as EnvyError;
 use hyper_old_types::Error as HeaderParseError;
 use reqwest::{header::ToStrError as HeaderStrError, Error as HttpError, StatusCode};
+use serde::Deserialize;
 use serde_json::Error as SerdeError;
 use serde_qs::Error as SerdeQsError;
 use serde_urlencoded::ser::Error as UrlEncodedError;
@@ -11,8 +12,8 @@ use serde_urlencoded::ser::Error as UrlEncodedError;
 use tomlcrate::de::Error as TomlDeError;
 #[cfg(feature = "toml")]
 use tomlcrate::ser::Error as TomlSerError;
-use url::ParseError as UrlError;
 use tungstenite::error::Error as WebSocketError;
+use url::ParseError as UrlError;
 
 /// Convience type over `std::result::Result` with `Error` as the error type.
 pub type Result<T> = ::std::result::Result<T, Error>;
@@ -93,9 +94,7 @@ impl error::Error for Error {
             Error::SerdeQs(ref e) => e,
             Error::WebSocket(ref e) => e,
 
-            Error::Client(..) | Error::Server(..) => {
-                return None
-            },
+            Error::Client(..) | Error::Server(..) => return None,
             Error::ClientIdRequired => return None,
             Error::ClientSecretRequired => return None,
             Error::AccessTokenRequired => return None,
@@ -167,9 +166,6 @@ macro_rules! format_err {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use reqwest;
-    use serde_json;
-    use serde_urlencoded;
     use std::io;
 
     macro_rules! assert_is {

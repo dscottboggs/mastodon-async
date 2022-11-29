@@ -1,22 +1,19 @@
 use isolang::Language;
+use serde::{Deserialize, Serialize};
 
 /// A builder pattern struct for constructing a status.
 ///
-/// # Example
+/// // Example
 ///
 /// ```
-/// # extern crate elefren;
-/// # use elefren::{Language, StatusBuilder};
+/// use elefren::{Language, StatusBuilder};
 ///
-/// # fn main() -> Result<(), elefren::Error> {
 /// let status = StatusBuilder::new()
 ///     .status("a status")
 ///     .sensitive(true)
 ///     .spoiler_text("a CW")
 ///     .language(Language::Eng)
-///     .build()?;
-/// # Ok(())
-/// # }
+///     .build().unwrap();
 /// ```
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct StatusBuilder {
@@ -33,27 +30,19 @@ pub struct StatusBuilder {
 impl StatusBuilder {
     /// Create a StatusBuilder object
     ///
-    /// # Example
+    /// // Example
     ///
     /// ```rust,no_run
-    /// # use elefren::prelude::*;
-    /// # use elefren::status_builder::Visibility;
-    /// # fn main() -> Result<(), elefren::Error> {
-    /// # let data = Data {
-    /// #     base: "".into(),
-    /// #     client_id: "".into(),
-    /// #     client_secret: "".into(),
-    /// #     redirect: "".into(),
-    /// #     token: "".into(),
-    /// # };
-    /// # let client = Mastodon::from(data);
+    /// use elefren::{status_builder::Visibility, prelude::*};
+    ///
+    /// let data = Data::default();
+    /// let client = Mastodon::from(data);
     /// let status = StatusBuilder::new()
     ///     .status("a status")
     ///     .visibility(Visibility::Public)
-    ///     .build()?;
-    /// client.new_status(status)?;
-    /// #   Ok(())
-    /// # }
+    ///     .build()
+    ///     .unwrap();
+    /// client.new_status(status).unwrap();
     /// ```
     pub fn new() -> StatusBuilder {
         StatusBuilder::default()
@@ -61,14 +50,11 @@ impl StatusBuilder {
 
     /// Set the text for the post
     ///
-    /// # Example
+    /// // Example
     ///
     /// ```rust
-    /// # use elefren::prelude::*;
-    /// # fn main() -> Result<(), elefren::Error> {
-    /// let status = StatusBuilder::new().status("awoooooo").build()?;
-    /// #   Ok(())
-    /// # }
+    /// use elefren::prelude::*;
+    /// let status = StatusBuilder::new().status("awoooooo").build().unwrap();
     /// ```
     pub fn status<I: Into<String>>(&mut self, status: I) -> &mut Self {
         self.status = Some(status.into());
@@ -77,17 +63,15 @@ impl StatusBuilder {
 
     /// Set the in_reply_to_id for the post
     ///
-    /// # Example
+    /// // Example
     ///
     /// ```rust
-    /// # use elefren::prelude::*;
-    /// # fn main() -> Result<(), elefren::Error> {
+    /// use elefren::prelude::*;
     /// let status = StatusBuilder::new()
     ///     .status("awooooo")
     ///     .in_reply_to("12345")
-    ///     .build()?;
-    /// #   Ok(())
-    /// # }
+    ///     .build()
+    ///     .unwrap();
     /// ```
     pub fn in_reply_to<I: Into<String>>(&mut self, id: I) -> &mut Self {
         self.in_reply_to_id = Some(id.into());
@@ -96,14 +80,11 @@ impl StatusBuilder {
 
     /// Set the media_ids for the post
     ///
-    /// # Example
+    /// // Example
     ///
     /// ```rust
-    /// # use elefren::prelude::*;
-    /// # fn main() -> Result<(), elefren::Error> {
-    /// let status = StatusBuilder::new().media_ids(&["foo", "bar"]).build()?;
-    /// #   Ok(())
-    /// # }
+    /// use elefren::prelude::*;
+    /// let status = StatusBuilder::new().media_ids(&["foo", "bar"]).build().unwrap();
     /// ```
     pub fn media_ids<S: std::fmt::Display, I: IntoIterator<Item = S>>(
         &mut self,
@@ -115,36 +96,15 @@ impl StatusBuilder {
 
     /// Set the sensitive attribute for the post
     ///
-    /// # Example
+    /// // Example
     ///
     /// ```rust
-    /// # use elefren::prelude::*;
-    /// # fn main() -> Result<(), elefren::Error> {
+    /// use elefren::prelude::*;
     /// let status = StatusBuilder::new()
     ///     .media_ids(&["foo", "bar"])
     ///     .sensitive(true)
-    ///     .build()?;
-    /// #   Ok(())
-    /// # }
-    /// ```
-    pub fn sensitive(&mut self, sensitive: bool) -> &mut Self {
-        self.sensitive = Some(sensitive);
-        self
-    }
-
-    /// Set the spoiler text/CW for the post
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// # use elefren::prelude::*;
-    /// # fn main() -> Result<(), elefren::Error> {
-    /// let status = StatusBuilder::new()
-    ///     .status("awoooo!!")
-    ///     .spoiler_text("awoo inside")
-    ///     .build()?;
-    /// #   Ok(())
-    /// # }
+    ///     .build()
+    ///     .unwrap();
     /// ```
     pub fn spoiler_text<I: Into<String>>(&mut self, spoiler_text: I) -> &mut Self {
         self.spoiler_text = Some(spoiler_text.into());
@@ -155,7 +115,7 @@ impl StatusBuilder {
     ///
     /// This is a Pleroma and Glitch-soc extension of the API.
     ///
-    /// # Possible values
+    /// // Possible values
     /// - `text/plain`
     /// - `text/html`
     /// - `text/markdown`
@@ -163,17 +123,15 @@ impl StatusBuilder {
     ///
     /// The set of supported content types may vary by server.
     ///
-    /// # Example
+    /// // Example
     ///
     /// ```rust
-    /// # use elefren::prelude::*;
-    /// # fn main() -> Result<(), elefren::Error> {
+    /// use elefren::prelude::*;
     /// let status = StatusBuilder::new()
     ///     .status("<b>thicc</b>")
     ///     .content_type("text/html")
-    ///     .build()?;
-    /// #   Ok(())
-    /// # }
+    ///     .build()
+    ///     .unwrap();
     /// ```
     pub fn content_type<I: Into<String>>(&mut self, content_type: I) -> &mut Self {
         self.content_type = Some(content_type.into());
@@ -182,18 +140,15 @@ impl StatusBuilder {
 
     /// Set the visibility for the post
     ///
-    /// # Example
+    /// // Example
     ///
     /// ```rust
-    /// # use elefren::prelude::*;
-    /// # use elefren::status_builder::Visibility;
-    /// # fn main() -> Result<(), elefren::Error> {
+    /// use elefren::{prelude::*, status_builder::Visibility};
     /// let status = StatusBuilder::new()
     ///     .status("awooooooo")
     ///     .visibility(Visibility::Public)
-    ///     .build()?;
-    /// #   Ok(())
-    /// # }
+    ///     .build()
+    ///     .unwrap();
     /// ```
     pub fn visibility(&mut self, visibility: Visibility) -> &mut Self {
         self.visibility = Some(visibility);
@@ -202,34 +157,43 @@ impl StatusBuilder {
 
     /// Set the language for the post
     ///
-    /// # Example
+    /// // Example
     ///
     /// ```rust
-    /// # use elefren::prelude::*;
-    /// # use elefren::Language;
-    /// # fn main() -> Result<(), elefren::Error> {
+    /// use elefren::{Language, prelude::*};
     /// let status = StatusBuilder::new()
     ///     .status("awoo!!!!")
     ///     .language(Language::Eng)
-    ///     .build()?;
-    /// #   Ok(())
-    /// # }
+    ///     .build()
+    ///     .unwrap();
     /// ```
     pub fn language(&mut self, language: Language) -> &mut Self {
         self.language = Some(language);
         self
     }
 
+    /// Set the status as "sensitive".
+    /// ```
+    /// use elefren::StatusBuilder;
+    ///
+    /// let status = StatusBuilder::new()
+    ///     .status("a sensitive matter")
+    ///     .sensitive(true)
+    ///     .build()
+    ///     .unwrap();
+    /// ```
+    pub fn sensitive(&mut self, flag: bool) -> &mut Self {
+        self.sensitive = Some(flag);
+        self
+    }
+
     /// Constructs a NewStatus
     ///
-    /// # Example
+    /// // Example
     ///
     /// ```rust
-    /// # use elefren::prelude::*;
-    /// # fn main() -> Result<(), elefren::Error> {
-    /// let status = StatusBuilder::new().status("awoo!").build()?;
-    /// #   Ok(())
-    /// # }
+    /// use elefren::prelude::*;
+    /// let status = StatusBuilder::new().status("awoo!").build().unwrap();
     /// ```
     pub fn build(&self) -> Result<NewStatus, crate::Error> {
         if self.status.is_none() && self.media_ids.is_none() {

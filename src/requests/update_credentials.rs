@@ -3,35 +3,26 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use entities::account::{Credentials, MetadataField, UpdateSource};
-use errors::Result;
-use status_builder;
+use crate::{
+    entities::account::{Credentials, MetadataField, UpdateSource},
+    errors::Result,
+    status_builder,
+};
 
 /// Builder to pass to the Mastodon::update_credentials method
 ///
-/// # Example
+/// // Example
 ///
 /// ```no_run
-/// # extern crate elefren;
-/// # use elefren::Data;
-/// # fn main() -> Result<(), elefren::Error> {
-/// # let data = Data {
-/// #   base: "".into(),
-/// #   client_id: "".into(),
-/// #   client_secret: "".into(),
-/// #   redirect: "".into(),
-/// #   token: "".into(),
-/// # };
 /// use elefren::{prelude::*, status_builder::Visibility, UpdateCredsRequest};
 ///
+/// let data = Data::default();
 /// let client = Mastodon::from(data);
 /// let mut builder = UpdateCredsRequest::new();
 ///
 /// builder.privacy(Visibility::Unlisted);
 ///
-/// let result = client.update_credentials(&mut builder)?;
-/// #   Ok(())
-/// # }
+/// let result = client.update_credentials(&mut builder).unwrap();
 /// ```
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct UpdateCredsRequest {
@@ -49,10 +40,10 @@ pub struct UpdateCredsRequest {
 impl UpdateCredsRequest {
     /// Create a new UpdateCredsRequest
     ///
-    /// # Example
+    /// // Example
     ///
     /// ```
-    /// # extern crate elefren;
+    /// // extern crate elefren;
     /// use elefren::UpdateCredsRequest;
     ///
     /// let mut builder = UpdateCredsRequest::new();
@@ -63,10 +54,10 @@ impl UpdateCredsRequest {
 
     /// Set the new display_name value
     ///
-    /// # Example
+    /// // Example
     ///
     /// ```
-    /// # extern crate elefren;
+    /// // extern crate elefren;
     /// use elefren::UpdateCredsRequest;
     ///
     /// let mut builder = UpdateCredsRequest::new();
@@ -80,10 +71,10 @@ impl UpdateCredsRequest {
 
     /// Set the new note value
     ///
-    /// # Example
+    /// // Example
     ///
     /// ```
-    /// # extern crate elefren;
+    /// // extern crate elefren;
     /// use elefren::UpdateCredsRequest;
     ///
     /// let mut builder = UpdateCredsRequest::new();
@@ -97,10 +88,10 @@ impl UpdateCredsRequest {
 
     /// Set the new avatar value
     ///
-    /// # Example
+    /// // Example
     ///
     /// ```
-    /// # extern crate elefren;
+    /// // extern crate elefren;
     /// use elefren::UpdateCredsRequest;
     ///
     /// let mut builder = UpdateCredsRequest::new();
@@ -116,10 +107,10 @@ impl UpdateCredsRequest {
 
     /// Set the new header value
     ///
-    /// # Example
+    /// // Example
     ///
     /// ```
-    /// # extern crate elefren;
+    /// // extern crate elefren;
     /// use elefren::UpdateCredsRequest;
     ///
     /// let mut builder = UpdateCredsRequest::new();
@@ -135,10 +126,10 @@ impl UpdateCredsRequest {
 
     /// Set the new privacy value
     ///
-    /// # Example
+    /// // Example
     ///
     /// ```
-    /// # extern crate elefren;
+    /// // extern crate elefren;
     /// use elefren::{status_builder::Visibility, UpdateCredsRequest};
     ///
     /// let mut builder = UpdateCredsRequest::new();
@@ -152,10 +143,10 @@ impl UpdateCredsRequest {
 
     /// Set the new sensitive value
     ///
-    /// # Example
+    /// // Example
     ///
     /// ```
-    /// # extern crate elefren;
+    /// // extern crate elefren;
     /// use elefren::UpdateCredsRequest;
     ///
     /// let mut builder = UpdateCredsRequest::new();
@@ -169,10 +160,10 @@ impl UpdateCredsRequest {
 
     /// Add a metadata field
     ///
-    /// # Example
+    /// // Example
     ///
     /// ```
-    /// # extern crate elefren;
+    /// // extern crate elefren;
     /// use elefren::UpdateCredsRequest;
     ///
     /// let mut builder = UpdateCredsRequest::new();
@@ -202,7 +193,7 @@ impl UpdateCredsRequest {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use entities::account::{Credentials, MetadataField, UpdateSource};
+    use crate::entities::account::{Credentials, MetadataField, UpdateSource};
     use status_builder::Visibility;
 
     #[test]

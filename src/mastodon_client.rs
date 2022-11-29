@@ -1,17 +1,19 @@
 use std::borrow::Cow;
 
-use entities::prelude::*;
-use errors::Result;
-use http_send::{HttpSend, HttpSender};
-use page::Page;
-use requests::{
-    AddFilterRequest,
-    AddPushRequest,
-    StatusesRequest,
-    UpdateCredsRequest,
-    UpdatePushRequest,
+use crate::{
+    entities::prelude::*,
+    errors::Result,
+    http_send::{HttpSend, HttpSender},
+    page::Page,
+    requests::{
+        AddFilterRequest,
+        AddPushRequest,
+        StatusesRequest,
+        UpdateCredsRequest,
+        UpdatePushRequest,
+    },
+    status_builder::NewStatus,
 };
-use status_builder::NewStatus;
 
 /// Represents the set of methods that a Mastodon Client can do, so that
 /// implementations might be swapped out for testing
@@ -283,21 +285,11 @@ pub trait MastodonClient<H: HttpSend = HttpSender> {
     /// Shortcut for: `let me = client.verify_credentials(); client.followers()`
     ///
     /// ```no_run
-    /// # extern crate elefren;
-    /// # use std::error::Error;
-    /// # use elefren::prelude::*;
-    /// # fn main() -> Result<(), Box<Error>> {
-    /// # let data = Data {
-    /// #   base: "".into(),
-    /// #   client_id: "".into(),
-    /// #   client_secret: "".into(),
-    /// #   redirect: "".into(),
-    /// #   token: "".into(),
-    /// # };
-    /// # let client = Mastodon::from(data);
-    /// let follows_me = client.follows_me()?;
-    /// #   Ok(())
-    /// # }
+    /// use elefren::prelude::*;
+    /// let data = Data::default();
+    /// let client = Mastodon::from(data);
+    /// let follows_me = client.follows_me().unwrap();
+    /// ```
     fn follows_me(&self) -> Result<Page<Account, H>> {
         unimplemented!("This method was not implemented");
     }
@@ -305,21 +297,11 @@ pub trait MastodonClient<H: HttpSend = HttpSender> {
     /// `let me = client.verify_credentials(); client.following(&me.id)`
     ///
     /// ```no_run
-    /// # extern crate elefren;
-    /// # use std::error::Error;
-    /// # use elefren::prelude::*;
-    /// # fn main() -> Result<(), Box<Error>> {
-    /// # let data = Data {
-    /// #   base: "".into(),
-    /// #   client_id: "".into(),
-    /// #   client_secret: "".into(),
-    /// #   redirect: "".into(),
-    /// #   token: "".into(),
-    /// # };
-    /// # let client = Mastodon::from(data);
-    /// let follows_me = client.followed_by_me()?;
-    /// #   Ok(())
-    /// # }
+    /// use elefren::prelude::*;
+    /// let data = Data::default();
+    /// let client = Mastodon::from(data);
+    /// let follows_me = client.followed_by_me().unwrap();
+    /// ```
     fn followed_by_me(&self) -> Result<Page<Account, H>> {
         unimplemented!("This method was not implemented");
     }

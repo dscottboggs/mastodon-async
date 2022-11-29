@@ -1,51 +1,36 @@
-//! # Elefren: API Wrapper around the Mastodon API.
+//! // Elefren: API Wrapper around the Mastodon API.
 //!
 //! Most of the api is documented on [Mastodon's website](https://docs.joinmastodon.org/client/intro/)
 //!
 //! ```no_run
-//! # extern crate elefren;
-//! # fn main() {
-//! #    try().unwrap();
-//! # }
-//! # fn try() -> elefren::Result<()> {
 //! use elefren::{helpers::cli, prelude::*};
 //!
-//! let registration = Registration::new("https://mastodon.social")
+//! let registration = Registration::new("https://botsin.space")
 //!     .client_name("elefren_test")
-//!     .build()?;
-//! let mastodon = cli::authenticate(registration)?;
+//!     .build()
+//!     .unwrap();
+//! let mastodon = cli::authenticate(registration).unwrap();
 //!
 //! println!(
 //!     "{:?}",
 //!     mastodon
-//!         .get_home_timeline()?
+//!         .get_home_timeline()
+//!         .unwrap()
 //!         .items_iter()
 //!         .take(100)
 //!         .collect::<Vec<_>>()
 //! );
-//! # Ok(())
-//! # }
 //! ```
 //!
 //! Elefren also supports Mastodon's Streaming API:
 //!
-//! # Example
+//! // Example
 //!
 //! ```no_run
-//! # extern crate elefren;
-//! # use elefren::prelude::*;
-//! # use std::error::Error;
-//! use elefren::entities::event::Event;
-//! # fn main() -> Result<(), Box<Error>> {
-//! # let data = Data {
-//! #   base: "".into(),
-//! #   client_id: "".into(),
-//! #   client_secret: "".into(),
-//! #   redirect: "".into(),
-//! #   token: "".into(),
-//! # };
+//! use elefren::{prelude::*, entities::event::Event};
+//! let data = Data::default();
 //! let client = Mastodon::from(data);
-//! for event in client.streaming_user()? {
+//! for event in client.streaming_user().unwrap() {
 //!     match event {
 //!         Event::Update(ref status) => { /* .. */ },
 //!         Event::Notification(ref notification) => { /* .. */ },
@@ -53,8 +38,6 @@
 //!         Event::FiltersChanged => { /* .. */ },
 //!     }
 //! }
-//! # Ok(())
-//! # }
 //! ```
 
 #![deny(
@@ -73,8 +56,6 @@
 #[macro_use]
 extern crate log;
 #[macro_use]
-extern crate serde_derive;
-#[macro_use]
 extern crate doc_comment;
 extern crate hyper_old_types;
 extern crate isolang;
@@ -82,11 +63,11 @@ extern crate isolang;
 extern crate serde_json;
 extern crate chrono;
 extern crate reqwest;
+#[macro_use]
 extern crate serde;
 extern crate serde_qs;
 extern crate serde_urlencoded;
 extern crate tap_reader;
-extern crate try_from;
 extern crate tungstenite;
 extern crate url;
 
@@ -154,14 +135,16 @@ pub mod status_builder;
 mod macros;
 /// Automatically import the things you need
 pub mod prelude {
-    pub use scopes::Scopes;
-    pub use Data;
-    pub use Mastodon;
-    pub use MastodonClient;
-    pub use NewStatus;
-    pub use Registration;
-    pub use StatusBuilder;
-    pub use StatusesRequest;
+    pub use crate::{
+        scopes::Scopes,
+        Data,
+        Mastodon,
+        MastodonClient,
+        NewStatus,
+        Registration,
+        StatusBuilder,
+        StatusesRequest,
+    };
 }
 
 /// Your mastodon application client, handles all requests to and from Mastodon.
@@ -344,44 +327,22 @@ impl<H: HttpSend> MastodonClient<H> for Mastodon<H> {
     /// Get statuses of a single account by id. Optionally only with pictures
     /// and or excluding replies.
     ///
-    /// # Example
+    /// // Example
     ///
     /// ```no_run
-    /// # extern crate elefren;
-    /// # use elefren::prelude::*;
-    /// # use std::error::Error;
-    /// # fn main() -> Result<(), Box<Error>> {
-    /// # let data = Data {
-    /// #   base: "".into(),
-    /// #   client_id: "".into(),
-    /// #   client_secret: "".into(),
-    /// #   redirect: "".into(),
-    /// #   token: "".into(),
-    /// # };
+    /// use elefren::prelude::*;
+    /// let data = Data::default();
     /// let client = Mastodon::from(data);
-    /// let statuses = client.statuses("user-id", None)?;
-    /// # Ok(())
-    /// # }
+    /// let statuses = client.statuses("user-id", None).unwrap();
     /// ```
     ///
     /// ```no_run
-    /// # extern crate elefren;
-    /// # use elefren::prelude::*;
-    /// # use std::error::Error;
-    /// # fn main() -> Result<(), Box<Error>> {
-    /// # let data = Data {
-    /// #   base: "".into(),
-    /// #   client_id: "".into(),
-    /// #   client_secret: "".into(),
-    /// #   redirect: "".into(),
-    /// #   token: "".into(),
-    /// # };
+    /// use elefren::prelude::*;
+    /// let data = Data::default();
     /// let client = Mastodon::from(data);
     /// let mut request = StatusesRequest::new();
     /// request.only_media();
-    /// let statuses = client.statuses("user-id", request)?;
-    /// # Ok(())
-    /// # }
+    /// let statuses = client.statuses("user-id", request).unwrap();
     /// ```
     fn statuses<'a, 'b: 'a, S>(&'b self, id: &'b str, request: S) -> Result<Page<Status, H>>
     where
@@ -460,23 +421,14 @@ impl<H: HttpSend> MastodonClient<H> for Mastodon<H> {
     /// returns events that are relevant to the authorized user, i.e. home
     /// timeline & notifications
     ///
-    /// # Example
+    /// // Example
     ///
     /// ```no_run
-    /// # extern crate elefren;
-    /// # use elefren::prelude::*;
-    /// # use std::error::Error;
+    /// use elefren::prelude::*;
     /// use elefren::entities::event::Event;
-    /// # fn main() -> Result<(), Box<Error>> {
-    /// # let data = Data {
-    /// #   base: "".into(),
-    /// #   client_id: "".into(),
-    /// #   client_secret: "".into(),
-    /// #   redirect: "".into(),
-    /// #   token: "".into(),
-    /// # };
+    /// let data = Data::default();
     /// let client = Mastodon::from(data);
-    /// for event in client.streaming_user()? {
+    /// for event in client.streaming_user().unwrap() {
     ///     match event {
     ///         Event::Update(ref status) => { /* .. */ },
     ///         Event::Notification(ref notification) => { /* .. */ },
@@ -484,8 +436,6 @@ impl<H: HttpSend> MastodonClient<H> for Mastodon<H> {
     ///         Event::FiltersChanged => { /* .. */ },
     ///     }
     /// }
-    /// # Ok(())
-    /// # }
     /// ```
     fn streaming_user(&self) -> Result<Self::Stream> {
         let mut url: url::Url = self.route("/api/v1/streaming").parse()?;

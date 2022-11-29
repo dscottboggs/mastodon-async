@@ -1,11 +1,11 @@
 use super::{deserialise, Mastodon, Result};
-use entities::itemsiter::ItemsIter;
+use crate::entities::itemsiter::ItemsIter;
 use hyper_old_types::header::{parsing, Link, RelationType};
 use reqwest::{header::LINK, Response};
 use serde::Deserialize;
 use url::Url;
 
-use http_send::HttpSend;
+use crate::http_send::HttpSend;
 
 macro_rules! pages {
     ($($direction:ident: $fun:ident),*) => {
@@ -36,36 +36,28 @@ macro_rules! pages {
 /// Owned version of the `Page` struct in this module. Allows this to be more
 /// easily stored for later use
 ///
-/// # Example
+/// // Example
 ///
 /// ```no_run
-/// # extern crate elefren;
-/// # use elefren::Mastodon;
-/// # use elefren::page::OwnedPage;
-/// # use elefren::http_send::HttpSender;
-/// # use elefren::entities::status::Status;
-/// # use std::cell::RefCell;
-/// # use elefren::prelude::*;
-/// # fn main() -> Result<(), elefren::Error> {
-/// # let data = Data {
-/// #   base: "".into(),
-/// #   client_id: "".into(),
-/// #   client_secret: "".into(),
-/// #   redirect: "".into(),
-/// #   token: "".into(),
-/// # };
+/// use elefren::{
+///     prelude::*,
+///     page::OwnedPage,
+///     http_send::HttpSender,
+///     entities::status::Status
+/// };
+/// use std::cell::RefCell;
+///
+/// let data = Data::default();
 /// struct HomeTimeline {
 ///     client: Mastodon,
 ///     page: RefCell<Option<OwnedPage<Status, HttpSender>>>,
 /// }
 /// let client = Mastodon::from(data);
-/// let home = client.get_home_timeline()?.to_owned();
+/// let home = client.get_home_timeline().unwrap().to_owned();
 /// let tl = HomeTimeline {
 ///     client,
 ///     page: RefCell::new(Some(home)),
 /// };
-/// # Ok(())
-/// # }
 /// ```
 #[derive(Debug, Clone)]
 pub struct OwnedPage<T: for<'de> Deserialize<'de>, H: HttpSend> {
@@ -125,36 +117,22 @@ impl<'a, T: Clone + for<'de> Deserialize<'de>, H: HttpSend> Page<'a, T, H> {
     /// Returns an owned version of this struct that doesn't borrow the client
     /// that created it
     ///
-    /// # Example
+    /// // Example
     ///
     /// ```no_run
-    /// # extern crate elefren;
-    /// # use elefren::Mastodon;
-    /// # use elefren::page::OwnedPage;
-    /// # use elefren::http_send::HttpSender;
-    /// # use elefren::entities::status::Status;
-    /// # use std::cell::RefCell;
-    /// # use elefren::prelude::*;
-    /// # fn main() -> Result<(), elefren::Error> {
-    /// # let data = Data {
-    /// #   base: "".into(),
-    /// #   client_id: "".into(),
-    /// #   client_secret: "".into(),
-    /// #   redirect: "".into(),
-    /// #   token: "".into(),
-    /// # };
+    /// use elefren::{Mastodon, page::OwnedPage, http_send::HttpSender, entities::status::Status, prelude::*};
+    /// use std::cell::RefCell;
+    /// let data = Data::default();
     /// struct HomeTimeline {
     ///     client: Mastodon,
     ///     page: RefCell<Option<OwnedPage<Status, HttpSender>>>,
     /// }
     /// let client = Mastodon::from(data);
-    /// let home = client.get_home_timeline()?.to_owned();
+    /// let home = client.get_home_timeline().unwrap().to_owned();
     /// let tl = HomeTimeline {
     ///     client,
     ///     page: RefCell::new(Some(home)),
     /// };
-    /// # Ok(())
-    /// # }
     /// ```
     pub fn to_owned(self) -> OwnedPage<T, H> {
         OwnedPage::from(self)
@@ -170,28 +148,17 @@ impl<'a, T: Clone + for<'de> Deserialize<'de>, H: HttpSend> Page<'a, T, H> {
     /// more of them, until
     /// there are no more items.
     ///
-    /// # Example
+    /// // Example
     ///
     /// ```no_run
-    /// # extern crate elefren;
-    /// # use std::error::Error;
     /// use elefren::prelude::*;
-    /// # fn main() -> Result<(), Box<Error>> {
-    /// #   let data = Data {
-    /// #       base: "".into(),
-    /// #       client_id: "".into(),
-    /// #       client_secret: "".into(),
-    /// #       redirect: "".into(),
-    /// #       token: "".into(),
-    /// #   };
+    /// let data = Data::default();
     /// let mastodon = Mastodon::from(data);
     /// let req = StatusesRequest::new();
-    /// let resp = mastodon.statuses("some-id", req)?;
+    /// let resp = mastodon.statuses("some-id", req).unwrap();
     /// for status in resp.items_iter() {
     ///     // do something with status
     /// }
-    /// #   Ok(())
-    /// # }
     /// ```
     pub fn items_iter(self) -> impl Iterator<Item = T> + 'a
     where

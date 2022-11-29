@@ -1,12 +1,13 @@
-use entities::push::{add_subscription, update_data};
-use errors::Result;
+use crate::{
+    entities::push::{add_subscription, update_data},
+    errors::Result,
+};
 
 /// Container for the key & auth strings for an AddPushRequest
 ///
-/// # Example
+/// // Example
 ///
 /// ```
-/// # extern crate elefren;
 /// use elefren::requests::Keys;
 ///
 /// let keys = Keys::new("anetohias===", "oeatssah=");
@@ -20,10 +21,9 @@ pub struct Keys {
 impl Keys {
     /// Create the `Keys` container
     ///
-    /// # Example
+    /// // Example
     ///
     /// ```
-    /// # extern crate elefren;
     /// use elefren::requests::Keys;
     ///
     /// let keys = Keys::new("anetohias===", "oeatssah=");
@@ -38,30 +38,20 @@ impl Keys {
 
 /// Builder to pass to the Mastodon::add_push_subscription method
 ///
-/// # Example
+/// // Example
 ///
 /// ```no_run
-/// # extern crate elefren;
-/// # use elefren::{MastodonClient, Mastodon, Data};
-/// # fn main() -> Result<(), elefren::Error> {
-/// # let data = Data {
-/// #   base: "".into(),
-/// #   client_id: "".into(),
-/// #   client_secret: "".into(),
-/// #   redirect: "".into(),
-/// #   token: "".into(),
-/// # };
+/// use elefren::{MastodonClient, Mastodon, Data};
 /// use elefren::requests::{AddPushRequest, Keys};
 ///
+/// let data = Data::default();
 /// let client = Mastodon::from(data);
 ///
 /// let keys = Keys::new("stahesuahoei293ise===", "tasecoa,nmeozka==");
 /// let mut request = AddPushRequest::new("http://example.com/push/endpoint", &keys);
 /// request.follow().reblog();
 ///
-/// client.add_push_subscription(&request)?;
-/// #   Ok(())
-/// # }
+/// client.add_push_subscription(&request).unwrap();
 /// ```
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct AddPushRequest {
@@ -79,10 +69,9 @@ pub struct AddPushRequest {
 impl AddPushRequest {
     /// Construct a new AddPushRequest
     ///
-    /// # Example
+    /// // Example
     ///
     /// ```
-    /// # extern crate elefren;
     /// use elefren::requests::{AddPushRequest, Keys};
     /// let keys = Keys::new("abcdef===", "foobar==");
     /// let push_endpoint = "https://example.com/push/endpoint";
@@ -99,9 +88,8 @@ impl AddPushRequest {
 
     /// A flag that indicates if you want follow notifications pushed
     ///
-    /// # Example
+    /// // Example
     /// ```
-    /// # extern crate elefren;
     /// use elefren::requests::{AddPushRequest, Keys};
     /// let keys = Keys::new("abcdef===", "foobar==");
     /// let push_endpoint = "https://example.com/push/endpoint";
@@ -115,9 +103,8 @@ impl AddPushRequest {
 
     /// A flag that indicates if you want favourite notifications pushed
     ///
-    /// # Example
+    /// // Example
     /// ```
-    /// # extern crate elefren;
     /// use elefren::requests::{AddPushRequest, Keys};
     /// let keys = Keys::new("abcdef===", "foobar==");
     /// let push_endpoint = "https://example.com/push/endpoint";
@@ -131,9 +118,8 @@ impl AddPushRequest {
 
     /// A flag that indicates if you want reblog notifications pushed
     ///
-    /// # Example
+    /// // Example
     /// ```
-    /// # extern crate elefren;
     /// use elefren::requests::{AddPushRequest, Keys};
     /// let keys = Keys::new("abcdef===", "foobar==");
     /// let push_endpoint = "https://example.com/push/endpoint";
@@ -147,9 +133,8 @@ impl AddPushRequest {
 
     /// A flag that indicates if you want mention notifications pushed
     ///
-    /// # Example
+    /// // Example
     /// ```
-    /// # extern crate elefren;
     /// use elefren::requests::{AddPushRequest, Keys};
     /// let keys = Keys::new("abcdef===", "foobar==");
     /// let push_endpoint = "https://example.com/push/endpoint";
@@ -169,7 +154,7 @@ impl AddPushRequest {
     }
 
     pub(crate) fn build(&self) -> Result<add_subscription::Form> {
-        use entities::push::{
+        use crate::entities::push::{
             add_subscription::{Data, Form, Keys, Subscription},
             Alerts,
         };
@@ -212,29 +197,19 @@ impl AddPushRequest {
 
 /// Builder to pass to the Mastodon::update_push_data method
 ///
-/// # Example
+/// // Example
 ///
 /// ```no_run
-/// # extern crate elefren;
-/// # use elefren::{MastodonClient, Mastodon, Data};
-/// # fn main() -> Result<(), elefren::Error> {
-/// # let data = Data {
-/// #   base: "".into(),
-/// #   client_id: "".into(),
-/// #   client_secret: "".into(),
-/// #   redirect: "".into(),
-/// #   token: "".into(),
-/// # };
-/// use elefren::requests::UpdatePushRequest;
+/// use elefren::{MastodonClient, Mastodon, Data, requests::UpdatePushRequest};
+/// let data = Data::default();
 ///
 /// let client = Mastodon::from(data);
 ///
 /// let mut request = UpdatePushRequest::new("foobar");
-/// request.follow(true).reblog(true);
+/// request.follow(true)
+///     .reblog(true);
 ///
-/// client.update_push_data(&request)?;
-/// #   Ok(())
-/// # }
+/// client.update_push_data(&request).unwrap();
 /// ```
 #[derive(Debug, Default, Clone, PartialEq, Serialize)]
 pub struct UpdatePushRequest {
@@ -248,12 +223,10 @@ pub struct UpdatePushRequest {
 impl UpdatePushRequest {
     /// Construct a new UpdatePushRequest
     ///
-    /// # Example
+    /// // Example
     ///
     /// ```
-    /// # extern crate elefren;
-    /// use elefren::requests::UpdatePushRequest;
-    /// let request = UpdatePushRequest::new("some-id");
+    /// let request = elefren::requests::UpdatePushRequest::new("some-id");
     /// ```
     pub fn new(id: &str) -> UpdatePushRequest {
         UpdatePushRequest {
@@ -264,11 +237,9 @@ impl UpdatePushRequest {
 
     /// A flag that indicates if you want follow notifications pushed
     ///
-    /// # Example
+    /// // Example
     /// ```
-    /// # extern crate elefren;
-    /// use elefren::requests::UpdatePushRequest;
-    /// let mut request = UpdatePushRequest::new("foobar");
+    /// let mut request = elefren::requests::UpdatePushRequest::new("foobar");
     /// request.follow(true);
     /// ```
     pub fn follow(&mut self, follow: bool) -> &mut Self {
@@ -278,11 +249,9 @@ impl UpdatePushRequest {
 
     /// A flag that indicates if you want favourite notifications pushed
     ///
-    /// # Example
+    /// // Example
     /// ```
-    /// # extern crate elefren;
-    /// use elefren::requests::UpdatePushRequest;
-    /// let mut request = UpdatePushRequest::new("foobar");
+    /// let mut request = elefren::requests::UpdatePushRequest::new("foobar");
     /// request.favourite(true);
     /// ```
     pub fn favourite(&mut self, favourite: bool) -> &mut Self {
@@ -292,9 +261,8 @@ impl UpdatePushRequest {
 
     /// A flag that indicates if you want reblog notifications pushed
     ///
-    /// # Example
+    /// // Example
     /// ```
-    /// # extern crate elefren;
     /// use elefren::requests::UpdatePushRequest;
     /// let mut request = UpdatePushRequest::new("foobar");
     /// request.reblog(true);
@@ -306,9 +274,8 @@ impl UpdatePushRequest {
 
     /// A flag that indicates if you want mention notifications pushed
     ///
-    /// # Example
+    /// // Example
     /// ```
-    /// # extern crate elefren;
     /// use elefren::requests::UpdatePushRequest;
     /// let mut request = UpdatePushRequest::new("foobar");
     /// request.mention(true);
@@ -326,7 +293,7 @@ impl UpdatePushRequest {
     }
 
     pub(crate) fn build(&self) -> update_data::Form {
-        use entities::push::{
+        use crate::entities::push::{
             update_data::{Data, Form},
             Alerts,
         };
@@ -361,7 +328,7 @@ impl UpdatePushRequest {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use entities::push::{add_subscription, update_data, Alerts};
+    use crate::entities::push::{add_subscription, update_data, Alerts};
 
     #[test]
     fn test_keys_new() {

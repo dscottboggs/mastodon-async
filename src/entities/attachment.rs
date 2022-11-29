@@ -1,5 +1,7 @@
 //! Module containing everything related to media attachements.
 
+use serde::Deserialize;
+
 /// A struct representing a media attachment.
 #[derive(Debug, Clone, Deserialize, PartialEq)]
 pub struct Attachment {

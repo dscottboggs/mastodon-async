@@ -1,4 +1,5 @@
-use errors::Error;
+use crate::errors::Error;
+use serde::Serialize;
 use serde_qs;
 use std::{borrow::Cow, convert::Into};
 
@@ -20,14 +21,13 @@ mod bool_qs_serialize {
 
 /// Builder for making a client.statuses() call
 ///
-/// # Example
+/// // Example
 ///
 /// ```
-/// # extern crate elefren;
-/// # use elefren::StatusesRequest;
+/// use elefren::requests::StatusesRequest;
 /// let mut request = StatusesRequest::new();
 /// request.only_media().pinned().since_id("foo");
-/// # assert_eq!(&request.to_querystring().expect("Couldn't serialize qs")[..], "?only_media=1&pinned=1&since_id=foo");
+/// assert_eq!(&request.to_querystring().expect("Couldn't serialize qs")[..], "?only_media=1&pinned=1&since_id=foo");
 /// ```
 #[derive(Clone, Debug, Default, PartialEq, Serialize)]
 pub struct StatusesRequest<'a> {
@@ -66,27 +66,18 @@ impl<'a> Into<Option<StatusesRequest<'a>>> for &'a mut StatusesRequest<'a> {
 
 impl<'a> StatusesRequest<'a> {
     /// Construct a new `StatusesRequest` object
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// # extern crate elefren;
-    /// # use elefren::StatusesRequest;
-    /// let request = StatusesRequest::new();
-    /// ```
     pub fn new() -> Self {
         Self::default()
     }
 
     /// Set the `?only_media=1` flag for the .statuses() request
     ///
-    /// # Example
+    /// // Example
     ///
     /// ```
-    /// # extern crate elefren;
-    /// # use elefren::StatusesRequest;
-    /// let mut request = StatusesRequest::new();
+    /// let mut request = elefren::requests::StatusesRequest::new();
     /// assert_eq!(&request.only_media().to_querystring().expect("Couldn't serialize qs"), "?only_media=1");
+    /// ```
     pub fn only_media(&mut self) -> &mut Self {
         self.only_media = true;
         self
@@ -94,12 +85,10 @@ impl<'a> StatusesRequest<'a> {
 
     /// Set the `?exclude_replies=1` flag for the .statuses() request
     ///
-    /// # Example
+    /// // Example
     ///
     /// ```
-    /// # extern crate elefren;
-    /// # use elefren::StatusesRequest;
-    /// let mut request = StatusesRequest::new();
+    /// let mut request = elefren::requests::StatusesRequest::new();
     /// assert_eq!(
     ///     &request
     ///         .exclude_replies()
@@ -115,12 +104,10 @@ impl<'a> StatusesRequest<'a> {
 
     /// Set the `?pinned=1` flag for the .statuses() request
     ///
-    /// # Example
+    /// // Example
     ///
     /// ```
-    /// # extern crate elefren;
-    /// # use elefren::StatusesRequest;
-    /// let mut request = StatusesRequest::new();
+    /// let mut request = elefren::requests::StatusesRequest::new();
     /// assert_eq!(
     ///     &request
     ///         .pinned()
@@ -136,12 +123,10 @@ impl<'a> StatusesRequest<'a> {
 
     /// Set the `?max_id=:max_id` flag for the .statuses() request
     ///
-    /// # Example
+    /// // Example
     ///
     /// ```
-    /// # extern crate elefren;
-    /// # use elefren::StatusesRequest;
-    /// let mut request = StatusesRequest::new();
+    /// let mut request = elefren::requests::StatusesRequest::new();
     /// assert_eq!(
     ///     &request
     ///         .max_id("foo")
@@ -157,12 +142,10 @@ impl<'a> StatusesRequest<'a> {
 
     /// Set the `?since_id=:since_id` flag for the .statuses() request
     ///
-    /// # Example
+    /// // Example
     ///
     /// ```
-    /// # extern crate elefren;
-    /// # use elefren::StatusesRequest;
-    /// let mut request = StatusesRequest::new();
+    /// let mut request = elefren::requests::StatusesRequest::new();
     /// assert_eq!(
     ///     &request
     ///         .since_id("foo")
@@ -178,12 +161,10 @@ impl<'a> StatusesRequest<'a> {
 
     /// Set the `?limit=:limit` flag for the .statuses() request
     ///
-    /// # Example
+    /// // Example
     ///
     /// ```
-    /// # extern crate elefren;
-    /// # use elefren::StatusesRequest;
-    /// let mut request = StatusesRequest::new();
+    /// let mut request = elefren::requests::StatusesRequest::new();
     /// assert_eq!(
     ///     &request
     ///         .limit(10)
@@ -199,12 +180,10 @@ impl<'a> StatusesRequest<'a> {
 
     /// Set the `?min_id=:min_id` flag for the .statuses() request
     ///
-    /// # Example
+    /// // Example
     ///
     /// ```
-    /// # extern crate elefren;
-    /// # use elefren::StatusesRequest;
-    /// let mut request = StatusesRequest::new();
+    /// let mut request = elefren::requests::StatusesRequest::new();
     /// assert_eq!(
     ///     &request
     ///         .min_id("foobar")
@@ -220,12 +199,10 @@ impl<'a> StatusesRequest<'a> {
 
     /// Turns this builder into a querystring
     ///
-    /// # Example
+    /// // Example
     ///
     /// ```
-    /// # extern crate elefren;
-    /// # use elefren::StatusesRequest;
-    /// let mut request = StatusesRequest::new();
+    /// let mut request = elefren::requests::StatusesRequest::new();
     /// assert_eq!(
     ///     &request
     ///         .limit(10)

@@ -1,17 +1,18 @@
 use std::borrow::Cow;
 
 use reqwest::{Client, RequestBuilder, Response};
-use try_from::TryInto;
 use url::percent_encoding::{utf8_percent_encode, DEFAULT_ENCODE_SET};
 
-use apps::{App, AppBuilder};
-use http_send::{HttpSend, HttpSender};
-use scopes::Scopes;
-use Data;
-use Error;
-use Mastodon;
-use MastodonBuilder;
-use Result;
+use crate::{
+    apps::{App, AppBuilder},
+    http_send::{HttpSend, HttpSender},
+    scopes::Scopes,
+    Data,
+    Error,
+    Mastodon,
+    MastodonBuilder,
+    Result,
+};
 
 const DEFAULT_REDIRECT_URI: &'static str = "urn:ietf:wg:oauth:2.0:oob";
 
@@ -48,7 +49,7 @@ impl<'a> Registration<'a, HttpSender> {
     /// ```
     /// use elefren::prelude::*;
     ///
-    /// let registration = Registration::new("https://mastodon.social");
+    /// let registration = Registration::new("https://botsin.space");
     /// ```
     pub fn new<I: Into<String>>(base: I) -> Self {
         Registration {
@@ -116,27 +117,23 @@ impl<'a, H: HttpSend> Registration<'a, H> {
     /// Register the given application
     ///
     /// ```no_run
-    /// # extern crate elefren;
-    /// # fn main () -> elefren::Result<()> {
     /// use elefren::{apps::App, prelude::*};
     ///
     /// let mut app = App::builder();
     /// app.client_name("elefren_test");
     ///
-    /// let registration = Registration::new("https://mastodon.social").register(app)?;
-    /// let url = registration.authorize_url()?;
+    /// let registration = Registration::new("https://botsin.space").register(app).unwrap();
+    /// let url = registration.authorize_url().unwrap();
     /// // Here you now need to open the url in the browser
     /// // And handle a the redirect url coming back with the code.
     /// let code = String::from("RETURNED_FROM_BROWSER");
-    /// let mastodon = registration.complete(&code)?;
+    /// let mastodon = registration.complete(&code).unwrap();
     ///
-    /// println!("{:?}", mastodon.get_home_timeline()?.initial_items);
-    /// # Ok(())
-    /// # }
+    /// println!("{:?}", mastodon.get_home_timeline().unwrap().initial_items);
     /// ```
     pub fn register<I: TryInto<App>>(&mut self, app: I) -> Result<Registered<H>>
     where
-        Error: From<<I as TryInto<App>>::Err>,
+        Error: From<<I as TryInto<App>>::Error>,
     {
         let app = app.try_into()?;
         let oauth = self.send_app(&app)?;
@@ -156,22 +153,18 @@ impl<'a, H: HttpSend> Registration<'a, H> {
     /// Register the application with the server from the `base` url.
     ///
     /// ```no_run
-    /// # extern crate elefren;
-    /// # fn main () -> elefren::Result<()> {
     /// use elefren::prelude::*;
     ///
-    /// let registration = Registration::new("https://mastodon.social")
+    /// let registration = Registration::new("https://botsin.space")
     ///     .client_name("elefren_test")
-    ///     .build()?;
-    /// let url = registration.authorize_url()?;
+    ///     .build().unwrap();
+    /// let url = registration.authorize_url().unwrap();
     /// // Here you now need to open the url in the browser
     /// // And handle a the redirect url coming back with the code.
     /// let code = String::from("RETURNED_FROM_BROWSER");
-    /// let mastodon = registration.complete(&code)?;
+    /// let mastodon = registration.complete(&code).unwrap();
     ///
-    /// println!("{:?}", mastodon.get_home_timeline()?.initial_items);
-    /// # Ok(())
-    /// # }
+    /// println!("{:?}", mastodon.get_home_timeline().unwrap().initial_items);
     /// ```
     pub fn build(&mut self) -> Result<Registered<H>> {
         let app: App = self.app_builder.clone().build()?;
@@ -199,11 +192,9 @@ impl Registered<HttpSender> {
     /// Skip having to retrieve the client id and secret from the server by
     /// creating a `Registered` struct directly
     ///
-    /// # Example
+    /// // Example
     ///
     /// ```no_run
-    /// # extern crate elefren;
-    /// # fn main() -> elefren::Result<()> {
     /// use elefren::{prelude::*, registration::Registered};
     ///
     /// let registration = Registered::from_parts(
@@ -214,15 +205,13 @@ impl Registered<HttpSender> {
     ///     Scopes::read_all(),
     ///     false,
     /// );
-    /// let url = registration.authorize_url()?;
+    /// let url = registration.authorize_url().unwrap();
     /// // Here you now need to open the url in the browser
     /// // And handle a the redirect url coming back with the code.
     /// let code = String::from("RETURNED_FROM_BROWSER");
-    /// let mastodon = registration.complete(&code)?;
+    /// let mastodon = registration.complete(&code).unwrap();
     ///
-    /// println!("{:?}", mastodon.get_home_timeline()?.initial_items);
-    /// #   Ok(())
-    /// # }
+    /// println!("{:?}", mastodon.get_home_timeline().unwrap().initial_items);
     /// ```
     pub fn from_parts(
         base: &str,
@@ -253,39 +242,35 @@ impl<H: HttpSend> Registered<H> {
     /// Returns the parts of the `Registered` struct that can be used to
     /// recreate another `Registered` struct
     ///
-    /// # Example
+    /// // Example
     ///
     /// ```
-    /// # extern crate elefren;
     /// use elefren::{prelude::*, registration::Registered};
-    /// # fn main() -> Result<(), Box<std::error::Error>> {
     ///
-    /// let origbase = "https://example.social";
-    /// let origclient_id = "some-client_id";
-    /// let origclient_secret = "some-client-secret";
-    /// let origredirect = "https://example.social/redirect";
-    /// let origscopes = Scopes::all();
-    /// let origforce_login = false;
+    /// let orig_base = "https://example.social";
+    /// let orig_client_id = "some-client_id";
+    /// let orig_client_secret = "some-client-secret";
+    /// let orig_redirect = "https://example.social/redirect";
+    /// let orig_scopes = Scopes::all();
+    /// let orig_force_login = false;
     ///
     /// let registered = Registered::from_parts(
-    ///     origbase,
-    ///     origclient_id,
-    ///     origclient_secret,
-    ///     origredirect,
-    ///     origscopes.clone(),
-    ///     origforce_login,
+    ///     orig_base,
+    ///     orig_client_id,
+    ///     orig_client_secret,
+    ///     orig_redirect,
+    ///     orig_scopes.clone(),
+    ///     orig_force_login,
     /// );
     ///
     /// let (base, client_id, client_secret, redirect, scopes, force_login) = registered.into_parts();
     ///
-    /// assert_eq!(origbase, &base);
-    /// assert_eq!(origclient_id, &client_id);
-    /// assert_eq!(origclient_secret, &client_secret);
-    /// assert_eq!(origredirect, &redirect);
-    /// assert_eq!(origscopes, scopes);
-    /// assert_eq!(origforce_login, force_login);
-    /// #   Ok(())
-    /// # }
+    /// assert_eq!(orig_base, &base);
+    /// assert_eq!(orig_client_id, &client_id);
+    /// assert_eq!(orig_client_secret, &client_secret);
+    /// assert_eq!(orig_redirect, &redirect);
+    /// assert_eq!(orig_scopes, scopes);
+    /// assert_eq!(orig_force_login, force_login);
     /// ```
     pub fn into_parts(self) -> (String, String, String, String, Scopes, bool) {
         (
@@ -298,7 +283,7 @@ impl<H: HttpSend> Registered<H> {
         )
     }
 
-    /// Returns the full url needed for authorisation. This needs to be opened
+    /// Returns the full url needed for authorization. This needs to be opened
     /// in a browser.
     pub fn authorize_url(&self) -> Result<String> {
         let scopes = format!("{}", self.scopes);
@@ -320,7 +305,7 @@ impl<H: HttpSend> Registered<H> {
     }
 
     /// Create an access token from the client id, client secret, and code
-    /// provided by the authorisation url.
+    /// provided by the authorization url.
     pub fn complete(&self, code: &str) -> Result<Mastodon<H>> {
         let url = format!(
             "{}/oauth/token?client_id={}&client_secret={}&code={}&grant_type=authorization_code&\
