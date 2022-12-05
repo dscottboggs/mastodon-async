@@ -1,4 +1,4 @@
-use std::{error, fmt, io::Error as IoError};
+use std::{error, fmt, io::Error as IoError, num::TryFromIntError};
 
 #[cfg(feature = "env")]
 use envy::Error as EnvyError;
@@ -12,7 +12,7 @@ use serde_urlencoded::ser::Error as UrlEncodedError;
 use tomlcrate::de::Error as TomlDeError;
 #[cfg(feature = "toml")]
 use tomlcrate::ser::Error as TomlSerError;
-use tungstenite::error::Error as WebSocketError;
+use tungstenite::{error::Error as WebSocketError, Message as WebSocketMessage};
 use url::ParseError as UrlError;
 
 /// Convience type over `std::result::Result` with `Error` as the error type.
@@ -64,6 +64,14 @@ pub enum Error {
     SerdeQs(SerdeQsError),
     /// WebSocket error
     WebSocket(WebSocketError),
+    /// An integer conversion was attempted, but the value didn't fit into the
+    /// target type.
+    ///
+    /// At the time of writing, this can only be triggered when a file is
+    /// larger than the system's usize allows.
+    IntConversion(TryFromIntError),
+    /// A stream message was received that wasn't recognized
+    UnrecognizedStreamMessage(WebSocketMessage),
     /// Other errors
     Other(String),
 }
@@ -93,12 +101,13 @@ impl error::Error for Error {
             Error::Envy(ref e) => e,
             Error::SerdeQs(ref e) => e,
             Error::WebSocket(ref e) => e,
-
+            Error::IntConversion(ref e) => e,
             Error::Client(..) | Error::Server(..) => return None,
             Error::ClientIdRequired => return None,
             Error::ClientSecretRequired => return None,
             Error::AccessTokenRequired => return None,
             Error::MissingField(_) => return None,
+            Error::UnrecognizedStreamMessage(_) => return None,
             Error::Other(..) => return None,
         })
     }
@@ -122,7 +131,7 @@ impl fmt::Display for ApiError {
 impl error::Error for ApiError {}
 
 macro_rules! from {
-    ($($(#[$met:meta])* $typ:ident, $variant:ident,)*) => {
+    ($($(#[$met:meta])* $typ:ident => $variant:ident,)*) => {
         $(
             $(#[$met])*
             impl From<$typ> for Error {
@@ -136,20 +145,22 @@ macro_rules! from {
 }
 
 from! {
-    HttpError, Http,
-    IoError, Io,
-    SerdeError, Serde,
-    UrlEncodedError, UrlEncoded,
-    UrlError, Url,
-    ApiError, Api,
-    #[cfg(feature = "toml")] TomlSerError, TomlSer,
-    #[cfg(feature = "toml")] TomlDeError, TomlDe,
-    HeaderStrError, HeaderStrError,
-    HeaderParseError, HeaderParseError,
-    #[cfg(feature = "env")] EnvyError, Envy,
-    SerdeQsError, SerdeQs,
-    WebSocketError, WebSocket,
-    String, Other,
+    HttpError => Http,
+    IoError => Io,
+    SerdeError => Serde,
+    UrlEncodedError => UrlEncoded,
+    UrlError => Url,
+    ApiError => Api,
+    #[cfg(feature = "toml")] TomlSerError => TomlSer,
+    #[cfg(feature = "toml")] TomlDeError => TomlDe,
+    HeaderStrError => HeaderStrError,
+    HeaderParseError => HeaderParseError,
+    #[cfg(feature = "env")] EnvyError => Envy,
+    SerdeQsError => SerdeQs,
+    WebSocketError => WebSocket,
+    String => Other,
+    TryFromIntError => IntConversion,
+    WebSocketMessage => UnrecognizedStreamMessage,
 }
 
 #[macro_export]
@@ -157,8 +168,7 @@ from! {
 macro_rules! format_err {
     ( $( $arg:tt )* ) => {
         {
-            use elefren::Error;
-            Error::Other(format!($($arg)*))
+            crate::Error::Other(format!($($arg)*))
         }
     }
 }
@@ -177,9 +187,9 @@ mod tests {
         };
     }
 
-    #[test]
-    fn from_http_error() {
-        let err: HttpError = reqwest::get("not an actual URL").unwrap_err();
+    #[tokio::test]
+    async fn from_http_error() {
+        let err: HttpError = reqwest::get("not an actual URL").await.unwrap_err();
         let err: Error = Error::from(err);
         assert_is!(err, Error::Http(..));
     }

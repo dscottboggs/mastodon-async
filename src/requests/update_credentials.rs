@@ -22,7 +22,9 @@ use crate::{
 ///
 /// builder.privacy(Visibility::Unlisted);
 ///
-/// let result = client.update_credentials(&mut builder).unwrap();
+/// tokio_test::block_on(async {
+///     let result = client.update_credentials(&mut builder).await.unwrap();
+/// });
 /// ```
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct UpdateCredsRequest {

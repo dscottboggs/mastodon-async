@@ -1,14 +1,18 @@
 macro_rules! methods {
     ($($method:ident,)+) => {
         $(
-            fn $method<T: for<'de> serde::Deserialize<'de>>(&self, url: String)
-            -> Result<T>
+            async fn $method<T: for<'de> serde::Deserialize<'de>>(&self, url: impl AsRef<str>) -> Result<T>
             {
-                let response = self.send(
-                        self.client.$method(&url)
-                )?;
-
-                deserialise(response)
+                let url = url.as_ref();
+                Ok(
+                    self.client
+                        .$method(url)
+                        .send()
+                        .await?
+                        .error_for_status()?
+                        .json()
+                        .await?
+                )
             }
          )+
     };
@@ -30,13 +34,11 @@ macro_rules! paged_routes {
             "client.", stringify!($name), "();\n",
             "```"
             ),
-            fn $name(&self) -> Result<Page<$ret, H>> {
+            pub async fn $name(&self) -> Result<Page<$ret>> {
                 let url = self.route(concat!("/api/v1/", $url));
-                let response = self.send(
-                        self.client.$method(&url)
-                )?;
+                let response = self.client.$method(&url).send().await?;
 
-                Page::new(self, response)
+                Page::new(self.clone(), response).await
             }
 
         }
@@ -51,7 +53,7 @@ macro_rules! paged_routes {
                 $url,
                 "`\n# Errors\nIf `access_token` is not set."
             ),
-            fn $name<'a>(&self, $($param: $typ,)*) -> Result<Page<$ret, H>> {
+            pub async fn $name<'a>(&self, $($param: $typ,)*) -> Result<Page<$ret>> {
                 use serde_urlencoded;
 
                 #[derive(Serialize)]
@@ -77,11 +79,9 @@ macro_rules! paged_routes {
 
                 let url = format!(concat!("/api/v1/", $url, "?{}"), &qs);
 
-                let response = self.send(
-                        self.client.get(&url)
-                )?;
+                let response = self.client.get(&url).send().await?;
 
-                Page::new(self, response)
+                Page::new(self.clone(), response).await
             }
         }
 
@@ -99,7 +99,7 @@ macro_rules! route_v2 {
                 $url,
                 "`\n# Errors\nIf `access_token` is not set."
             ),
-            fn $name<'a>(&self, $($param: $typ,)*) -> Result<$ret> {
+            pub async fn $name<'a>(&self, $($param: $typ,)*) -> Result<$ret> {
                 use serde_urlencoded;
 
                 #[derive(Serialize)]
@@ -122,7 +122,7 @@ macro_rules! route_v2 {
 
                 let url = format!(concat!("/api/v2/", $url, "?{}"), &qs);
 
-                Ok(self.get(self.route(&url))?)
+                self.get(self.route(&url)).await
             }
         }
 
@@ -140,19 +140,29 @@ macro_rules! route {
                 "Equivalent to `post /api/v1/",
                 $url,
                 "`\n# Errors\nIf `access_token` is not set."),
-            fn $name(&self, $($param: $typ,)*) -> Result<$ret> {
-                use reqwest::multipart::Form;
+            pub async fn $name(&self, $($param: $typ,)*) -> Result<$ret> {
+                use reqwest::multipart::{Form, Part};
+                use std::io::Read;
 
                 let form_data = Form::new()
                     $(
-                        .file(stringify!($param), $param.as_ref())?
+                        .part(stringify!($param), {
+                            let mut file = std::fs::File::open($param.as_ref())?;
+                            let mut data = if let Ok(metadata) = file.metadata() {
+                                Vec::with_capacity(metadata.len().try_into()?)
+                            } else {
+                                vec![]
+                            };
+                            file.read_to_end(&mut data)?;
+                            Part::bytes(data)
+                        })
                      )*;
 
-                let response = self.send(
-                        self.client
-                            .post(&self.route(concat!("/api/v1/", $url)))
-                            .multipart(form_data)
-                )?;
+                let response = self.client
+                    .post(&self.route(concat!("/api/v1/", $url)))
+                    .multipart(form_data)
+                    .send()
+                    .await?;
 
                 let status = response.status().clone();
 
@@ -162,7 +172,7 @@ macro_rules! route {
                     return Err(Error::Server(status));
                 }
 
-                deserialise(response)
+                Ok(response.json().await?)
             }
         }
 
@@ -176,7 +186,7 @@ macro_rules! route {
                 $url,
                 "`\n# Errors\nIf `access_token` is not set."
             ),
-            fn $name<'a>(&self, $($param: $typ,)*) -> Result<$ret> {
+            pub async fn $name<'a>(&self, $($param: $typ,)*) -> Result<$ret> {
                 use serde_urlencoded;
 
                 #[derive(Serialize)]
@@ -199,7 +209,7 @@ macro_rules! route {
 
                 let url = format!(concat!("/api/v1/", $url, "?{}"), &qs);
 
-                Ok(self.get(self.route(&url))?)
+                self.get(self.route(&url)).await
             }
         }
 
@@ -213,7 +223,7 @@ macro_rules! route {
                 $url,
                 "`\n# Errors\nIf `access_token` is not set.",
             ),
-            fn $name(&self, $($param: $typ,)*) -> Result<$ret> {
+            pub async fn $name(&self, $($param: $typ,)*) -> Result<$ret> {
 
                 let form_data = json!({
                     $(
@@ -221,10 +231,11 @@ macro_rules! route {
                     )*
                 });
 
-                let response = self.send(
-                        self.client.$method(&self.route(concat!("/api/v1/", $url)))
-                            .json(&form_data)
-                )?;
+                let response = self.client
+                    .$method(&self.route(concat!("/api/v1/", $url)))
+                    .json(&form_data)
+                    .send()
+                    .await?;
 
                 let status = response.status().clone();
 
@@ -234,7 +245,7 @@ macro_rules! route {
                     return Err(Error::Server(status));
                 }
 
-                deserialise(response)
+                Ok(response.json().await?)
             }
         }
 
@@ -255,8 +266,8 @@ macro_rules! route {
                 "client.", stringify!($name), "();\n",
                 "```"
             ),
-            fn $name(&self) -> Result<$ret> {
-                self.$method(self.route(concat!("/api/v1/", $url)))
+            pub async fn $name(&self) -> Result<$ret> {
+                self.$method(self.route(concat!("/api/v1/", $url))).await
             }
         }
 
@@ -285,8 +296,8 @@ macro_rules! route_id {
                     "# }\n",
                     "```"
                 ),
-                fn $name(&self, id: &str) -> Result<$ret> {
-                    self.$method(self.route(&format!(concat!("/api/v1/", $url), id)))
+                pub async fn $name(&self, id: &str) -> Result<$ret> {
+                    self.$method(self.route(&format!(concat!("/api/v1/", $url), id))).await
                 }
             }
          )*
@@ -309,13 +320,11 @@ macro_rules! paged_routes_with_id {
                 "client.", stringify!($name), "(\"some-id\");\n",
                 "```"
             ),
-            fn $name(&self, id: &str) -> Result<Page<$ret, H>> {
+            pub async fn $name(&self, id: &str) -> Result<Page<$ret>> {
                 let url = self.route(&format!(concat!("/api/v1/", $url), id));
-                let response = self.send(
-                        self.client.$method(&url)
-                )?;
+                let response = self.client.$method(&url).send().await?;
 
-                Page::new(self, response)
+                Page::new(self.clone(), response).await
             }
         }
 

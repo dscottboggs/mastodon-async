@@ -1,11 +1,10 @@
-use super::{deserialise, Mastodon, Result};
-use crate::entities::itemsiter::ItemsIter;
+use super::{Mastodon, Result};
+use crate::{entities::itemsiter::ItemsIter, format_err};
+use futures::Stream;
 use hyper_old_types::header::{parsing, Link, RelationType};
-use reqwest::{header::LINK, Response};
+use reqwest::{header::LINK, Response, Url};
 use serde::Deserialize;
-use url::Url;
-
-use crate::http_send::HttpSend;
+// use url::Url;
 
 macro_rules! pages {
     ($($direction:ident: $fun:ident),*) => {
@@ -13,21 +12,19 @@ macro_rules! pages {
         $(
             doc_comment!(concat!(
                     "Method to retrieve the ", stringify!($direction), " page of results"),
-            pub fn $fun(&mut self) -> Result<Option<Vec<T>>> {
+            pub async fn $fun(&mut self) -> Result<Option<Vec<T>>> {
                 let url = match self.$direction.take() {
                     Some(s) => s,
                     None => return Ok(None),
                 };
 
-                let response = self.mastodon.send(
-                    self.mastodon.client.get(url)
-                )?;
+                let response = self.mastodon.client.get(url).send().await?;
 
                 let (prev, next) = get_links(&response)?;
                 self.next = next;
                 self.prev = prev;
 
-                deserialise(response)
+                Ok(Some(response.json().await?))
             });
          )*
     }
@@ -41,71 +38,47 @@ macro_rules! pages {
 /// ```no_run
 /// use elefren::{
 ///     prelude::*,
-///     page::OwnedPage,
-///     http_send::HttpSender,
+///     page::Page,
 ///     entities::status::Status
 /// };
 /// use std::cell::RefCell;
 ///
-/// let data = Data::default();
-/// struct HomeTimeline {
-///     client: Mastodon,
-///     page: RefCell<Option<OwnedPage<Status, HttpSender>>>,
-/// }
-/// let client = Mastodon::from(data);
-/// let home = client.get_home_timeline().unwrap().to_owned();
-/// let tl = HomeTimeline {
-///     client,
-///     page: RefCell::new(Some(home)),
-/// };
+/// tokio_test::block_on(async {
+///     let data = Data::default();
+///     struct HomeTimeline {
+///         client: Mastodon,
+///         page: RefCell<Option<Page<Status>>>,
+///     }
+///     let client = Mastodon::from(data);
+///     let home = client.get_home_timeline().await.unwrap();
+///     let tl = HomeTimeline {
+///         client,
+///         page: RefCell::new(Some(home)),
+///     };
+/// });
 /// ```
-#[derive(Debug, Clone)]
-pub struct OwnedPage<T: for<'de> Deserialize<'de>, H: HttpSend> {
-    mastodon: Mastodon<H>,
-    next: Option<Url>,
-    prev: Option<Url>,
-    /// Initial set of items
-    pub initial_items: Vec<T>,
-}
-
-impl<T: for<'de> Deserialize<'de>, H: HttpSend> OwnedPage<T, H> {
-    pages! {
-        next: next_page,
-        prev: prev_page
-    }
-}
-
-impl<'a, T: for<'de> Deserialize<'de>, H: HttpSend> From<Page<'a, T, H>> for OwnedPage<T, H> {
-    fn from(page: Page<'a, T, H>) -> OwnedPage<T, H> {
-        OwnedPage {
-            mastodon: page.mastodon.clone(),
-            next: page.next,
-            prev: page.prev,
-            initial_items: page.initial_items,
-        }
-    }
-}
 
 /// Represents a single page of API results
 #[derive(Debug, Clone)]
-pub struct Page<'a, T: for<'de> Deserialize<'de>, H: 'a + HttpSend> {
-    mastodon: &'a Mastodon<H>,
+pub struct Page<T: for<'de> Deserialize<'de>> {
+    mastodon: Mastodon,
     next: Option<Url>,
     prev: Option<Url>,
     /// Initial set of items
     pub initial_items: Vec<T>,
 }
 
-impl<'a, T: for<'de> Deserialize<'de>, H: HttpSend> Page<'a, T, H> {
+impl<'a, T: for<'de> Deserialize<'de>> Page<T> {
     pages! {
         next: next_page,
         prev: prev_page
     }
 
-    pub(crate) fn new(mastodon: &'a Mastodon<H>, response: Response) -> Result<Self> {
+    /// Create a new Page.
+    pub(crate) async fn new(mastodon: Mastodon, response: Response) -> Result<Self> {
         let (prev, next) = get_links(&response)?;
         Ok(Page {
-            initial_items: deserialise(response)?,
+            initial_items: response.json().await?,
             next,
             prev,
             mastodon,
@@ -113,31 +86,7 @@ impl<'a, T: for<'de> Deserialize<'de>, H: HttpSend> Page<'a, T, H> {
     }
 }
 
-impl<'a, T: Clone + for<'de> Deserialize<'de>, H: HttpSend> Page<'a, T, H> {
-    /// Returns an owned version of this struct that doesn't borrow the client
-    /// that created it
-    ///
-    /// // Example
-    ///
-    /// ```no_run
-    /// use elefren::{Mastodon, page::OwnedPage, http_send::HttpSender, entities::status::Status, prelude::*};
-    /// use std::cell::RefCell;
-    /// let data = Data::default();
-    /// struct HomeTimeline {
-    ///     client: Mastodon,
-    ///     page: RefCell<Option<OwnedPage<Status, HttpSender>>>,
-    /// }
-    /// let client = Mastodon::from(data);
-    /// let home = client.get_home_timeline().unwrap().to_owned();
-    /// let tl = HomeTimeline {
-    ///     client,
-    ///     page: RefCell::new(Some(home)),
-    /// };
-    /// ```
-    pub fn to_owned(self) -> OwnedPage<T, H> {
-        OwnedPage::from(self)
-    }
-
+impl<T: Clone + for<'de> Deserialize<'de>> Page<T> {
     /// Returns an iterator that provides a stream of `T`s
     ///
     /// This abstracts away the process of iterating over each item in a page,
@@ -152,19 +101,21 @@ impl<'a, T: Clone + for<'de> Deserialize<'de>, H: HttpSend> Page<'a, T, H> {
     ///
     /// ```no_run
     /// use elefren::prelude::*;
+    /// use futures_util::StreamExt;
+    ///
     /// let data = Data::default();
     /// let mastodon = Mastodon::from(data);
     /// let req = StatusesRequest::new();
-    /// let resp = mastodon.statuses("some-id", req).unwrap();
-    /// for status in resp.items_iter() {
-    ///     // do something with status
-    /// }
+    ///
+    /// tokio_test::block_on(async {
+    ///     let resp = mastodon.statuses("some-id", req).await.unwrap();
+    ///     resp.items_iter().for_each(|status| async move {
+    ///         // do something with status
+    ///     }).await;
+    /// });
     /// ```
-    pub fn items_iter(self) -> impl Iterator<Item = T> + 'a
-    where
-        T: 'a,
-    {
-        ItemsIter::new(self)
+    pub fn items_iter(self) -> impl Stream<Item = T> {
+        ItemsIter::new(self).stream()
     }
 }
 
@@ -179,11 +130,22 @@ fn get_links(response: &Response) -> Result<(Option<Url>, Option<Url>)> {
         for value in link_header.values() {
             if let Some(relations) = value.rel() {
                 if relations.contains(&RelationType::Next) {
-                    next = Some(Url::parse(value.link())?);
+                    // next = Some(Url::parse(value.link())?);
+                    next = if let Ok(url) = Url::parse(value.link()) {
+                        Some(url)
+                    } else {
+                        // HACK: url::ParseError::into isn't working for some reason.
+                        return Err(format_err!("error parsing url {:?}", value.link()));
+                    };
                 }
 
                 if relations.contains(&RelationType::Prev) {
-                    prev = Some(Url::parse(value.link())?);
+                    prev = if let Ok(url) = Url::parse(value.link()) {
+                        Some(url)
+                    } else {
+                        // HACK: url::ParseError::into isn't working for some reason.
+                        return Err(format_err!("error parsing url {:?}", value.link()));
+                    };
                 }
             }
         }

@@ -4,7 +4,7 @@
 extern crate pretty_env_logger;
 mod register;
 
-use register::MastodonClient;
+use register::Mastodon;
 use std::error;
 
 #[cfg(feature = "toml")]

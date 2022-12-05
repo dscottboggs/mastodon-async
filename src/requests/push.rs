@@ -41,17 +41,19 @@ impl Keys {
 /// // Example
 ///
 /// ```no_run
-/// use elefren::{MastodonClient, Mastodon, Data};
+/// use elefren::{Mastodon, Data};
 /// use elefren::requests::{AddPushRequest, Keys};
 ///
-/// let data = Data::default();
-/// let client = Mastodon::from(data);
+/// tokio_test::block_on(async {
+///     let data = Data::default();
+///     let client = Mastodon::from(data);
 ///
-/// let keys = Keys::new("stahesuahoei293ise===", "tasecoa,nmeozka==");
-/// let mut request = AddPushRequest::new("http://example.com/push/endpoint", &keys);
-/// request.follow().reblog();
+///     let keys = Keys::new("stahesuahoei293ise===", "tasecoa,nmeozka==");
+///     let mut request = AddPushRequest::new("http://example.com/push/endpoint", &keys);
+///     request.follow().reblog();
 ///
-/// client.add_push_subscription(&request).unwrap();
+///     client.add_push_subscription(&request).await.unwrap();
+/// });
 /// ```
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct AddPushRequest {
@@ -200,16 +202,18 @@ impl AddPushRequest {
 /// // Example
 ///
 /// ```no_run
-/// use elefren::{MastodonClient, Mastodon, Data, requests::UpdatePushRequest};
-/// let data = Data::default();
+/// use elefren::{Mastodon, Data, requests::UpdatePushRequest};
 ///
+/// let data = Data::default();
 /// let client = Mastodon::from(data);
 ///
 /// let mut request = UpdatePushRequest::new("foobar");
 /// request.follow(true)
 ///     .reblog(true);
 ///
-/// client.update_push_data(&request).unwrap();
+/// tokio_test::block_on(async {
+///     client.update_push_data(&request).await.unwrap();
+/// });
 /// ```
 #[derive(Debug, Default, Clone, PartialEq, Serialize)]
 pub struct UpdatePushRequest {

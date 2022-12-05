@@ -1,10 +1,10 @@
 use std::io::{self, BufRead, Write};
 
-use crate::{errors::Result, http_send::HttpSend, registration::Registered, Mastodon};
+use crate::{errors::Result, registration::Registered, Mastodon};
 
 /// Finishes the authentication process for the given `Registered` object,
 /// using the command-line
-pub fn authenticate<H: HttpSend>(registration: Registered<H>) -> Result<Mastodon<H>> {
+pub async fn authenticate(registration: Registered) -> Result<Mastodon> {
     let url = registration.authorize_url()?;
 
     let stdout = io::stdout();
@@ -20,5 +20,5 @@ pub fn authenticate<H: HttpSend>(registration: Registered<H>) -> Result<Mastodon
     let mut input = String::new();
     stdin.read_line(&mut input)?;
     let code = input.trim();
-    Ok(registration.complete(code)?)
+    registration.complete(code).await
 }

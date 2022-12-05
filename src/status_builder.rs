@@ -42,7 +42,10 @@ impl StatusBuilder {
     ///     .visibility(Visibility::Public)
     ///     .build()
     ///     .unwrap();
-    /// client.new_status(status).unwrap();
+    ///
+    /// tokio_test::block_on(async {
+    ///     client.new_status(status).await.unwrap();
+    /// });
     /// ```
     pub fn new() -> StatusBuilder {
         StatusBuilder::default()

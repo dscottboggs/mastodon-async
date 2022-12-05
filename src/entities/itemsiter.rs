@@ -1,27 +1,36 @@
-use crate::{http_send::HttpSend, page::Page};
+use futures::{stream::unfold, Stream};
+
+use crate::page::Page;
 use serde::Deserialize;
 
 /// Abstracts away the `next_page` logic into a single stream of items
 ///
-/// ```no_run
+/// ```no_run,async
 /// use elefren::prelude::*;
-/// let data = Data::default();
-/// let client = Mastodon::from(data);
-/// let statuses = client.statuses("user-id", None).unwrap();
-/// for status in statuses.items_iter() {
-///     // do something with `status`
-/// }
+/// use futures::stream::StreamExt;
+/// use futures_util::pin_mut;
+///
+/// tokio_test::block_on(async {
+///     let data = Data::default();
+///     let client = Mastodon::from(data);
+///     let statuses = client.statuses("user-id", None).await.unwrap().items_iter();
+///     statuses.for_each(|status| async move {
+///         // Do something with the status
+///     }).await;
+/// })
 /// ```
+///
+/// See documentation for `futures::Stream::StreamExt` for available methods.
 #[derive(Debug, Clone)]
-pub(crate) struct ItemsIter<'a, T: Clone + for<'de> Deserialize<'de>, H: 'a + HttpSend> {
-    page: Page<'a, T, H>,
+pub(crate) struct ItemsIter<T: Clone + for<'de> Deserialize<'de>> {
+    page: Page<T>,
     buffer: Vec<T>,
     cur_idx: usize,
     use_initial: bool,
 }
 
-impl<'a, T: Clone + for<'de> Deserialize<'de>, H: HttpSend> ItemsIter<'a, T, H> {
-    pub(crate) fn new(page: Page<'a, T, H>) -> ItemsIter<'a, T, H> {
+impl<'a, T: Clone + for<'de> Deserialize<'de>> ItemsIter<T> {
+    pub(crate) fn new(page: Page<T>) -> ItemsIter<T> {
         ItemsIter {
             page,
             buffer: vec![],
@@ -34,8 +43,8 @@ impl<'a, T: Clone + for<'de> Deserialize<'de>, H: HttpSend> ItemsIter<'a, T, H> 
         self.buffer.is_empty() || self.cur_idx == self.buffer.len()
     }
 
-    fn fill_next_page(&mut self) -> Option<()> {
-        let items = if let Ok(items) = self.page.next_page() {
+    async fn fill_next_page(&mut self) -> Option<()> {
+        let items = if let Ok(items) = self.page.next_page().await {
             items
         } else {
             return None;
@@ -51,33 +60,39 @@ impl<'a, T: Clone + for<'de> Deserialize<'de>, H: HttpSend> ItemsIter<'a, T, H> 
             None
         }
     }
-}
 
-impl<'a, T: Clone + for<'de> Deserialize<'de>, H: HttpSend> Iterator for ItemsIter<'a, T, H> {
-    type Item = T;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.use_initial {
-            if self.page.initial_items.is_empty() || self.cur_idx == self.page.initial_items.len() {
-                return None;
-            }
-            let idx = self.cur_idx;
-            if self.cur_idx == self.page.initial_items.len() - 1 {
-                self.cur_idx = 0;
-                self.use_initial = false;
-            } else {
-                self.cur_idx += 1;
-            }
-            Some(self.page.initial_items[idx].clone())
-        } else {
-            if self.need_next_page() {
-                if self.fill_next_page().is_none() {
+    pub(crate) fn stream(self) -> impl Stream<Item = T> {
+        unfold(self, |mut this| async move {
+            if this.use_initial {
+                if this.page.initial_items.is_empty()
+                    || this.cur_idx == this.page.initial_items.len()
+                {
                     return None;
                 }
+                let idx = this.cur_idx;
+                if this.cur_idx == this.page.initial_items.len() - 1 {
+                    this.cur_idx = 0;
+                    this.use_initial = false;
+                } else {
+                    this.cur_idx += 1;
+                }
+                let item = this.page.initial_items[idx].clone();
+                // let item = Box::pin(item);
+                // pin_mut!(item);
+                Some((item, this))
+            } else {
+                if this.need_next_page() {
+                    if this.fill_next_page().await.is_none() {
+                        return None;
+                    }
+                }
+                let idx = this.cur_idx;
+                this.cur_idx += 1;
+                let item = this.buffer[idx].clone();
+                // let item = Box::pin(item);
+                // pin_mut!(item);
+                Some((item, this))
             }
-            let idx = self.cur_idx;
-            self.cur_idx += 1;
-            Some(self.buffer[idx].clone())
-        }
+        })
     }
 }
