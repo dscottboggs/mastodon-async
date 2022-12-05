@@ -19,8 +19,14 @@ To add `elefren` to your project, add the following to the
 `[dependencies]` section of your `Cargo.toml`
 
 ```toml
-elefren = "0.22"
+elefren = "0.23"
 ```
+
+Alternatively, run the following command:
+
+~~~console
+$ cargo add elefren
+~~~
 
 ## Example
 
