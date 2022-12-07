@@ -2,10 +2,10 @@
 
 use super::{account::Account, status::Status};
 use chrono::prelude::*;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 /// A struct containing info about a notification.
-#[derive(Debug, Clone, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 pub struct Notification {
     /// The notification ID.
     pub id: String,
@@ -21,7 +21,7 @@ pub struct Notification {
 }
 
 /// The type of notification.
-#[derive(Debug, Clone, Copy, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum NotificationType {
     /// Someone mentioned the application client in another status.

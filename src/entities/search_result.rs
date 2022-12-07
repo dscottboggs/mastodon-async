@@ -1,6 +1,6 @@
 //! A module containing info relating to a search result.
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use super::{
     prelude::{Account, Status},
@@ -8,7 +8,7 @@ use super::{
 };
 
 /// A struct containing results of a search.
-#[derive(Debug, Clone, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct SearchResult {
     /// An array of matched Accounts.
     pub accounts: Vec<Account>,
@@ -20,7 +20,7 @@ pub struct SearchResult {
 
 /// A struct containing results of a search, with `Tag` objects in the
 /// `hashtags` field
-#[derive(Debug, Clone, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct SearchResultV2 {
     /// An array of matched Accounts.
     pub accounts: Vec<Account>,

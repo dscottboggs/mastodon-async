@@ -3,10 +3,10 @@
 use super::prelude::*;
 use crate::{entities::card::Card, status_builder::Visibility};
 use chrono::prelude::*;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 /// A status from the instance.
-#[derive(Debug, Clone, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Status {
     /// The ID of the status.
     pub id: String,
@@ -65,7 +65,7 @@ pub struct Status {
 }
 
 /// A mention of another user.
-#[derive(Debug, Clone, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Mention {
     /// URL of user's profile (can be remote).
     pub url: String,
@@ -78,7 +78,7 @@ pub struct Mention {
 }
 
 /// Struct representing an emoji within text.
-#[derive(Clone, Debug, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Emoji {
     /// The shortcode of the emoji
     pub shortcode: String,
@@ -89,7 +89,7 @@ pub struct Emoji {
 }
 
 /// Hashtags in the status.
-#[derive(Debug, Clone, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Tag {
     /// The hashtag, not including the preceding `#`.
     pub name: String,
@@ -98,7 +98,7 @@ pub struct Tag {
 }
 
 /// Application details.
-#[derive(Debug, Clone, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Application {
     /// Name of the application.
     pub name: String,

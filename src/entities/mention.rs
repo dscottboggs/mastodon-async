@@ -1,5 +1,7 @@
+use serde::{Deserialize, Serialize};
+
 /// Represents a `mention` used in a status
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 pub struct Mention {
     /// URL of user's profile (can be remote)
     pub url: String,

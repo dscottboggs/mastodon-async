@@ -20,8 +20,10 @@ use crate::{
     UpdatePushRequest,
 };
 use futures::TryStream;
+use log::{as_debug, as_serde, debug, error, info, trace};
 use reqwest::Client;
 use url::Url;
+use uuid::Uuid;
 
 /// The Mastodon client is a smart pointer to this struct
 #[derive(Clone, Debug)]
@@ -54,7 +56,7 @@ impl From<Data> for Mastodon {
     }
 }
 impl Mastodon {
-    methods![get, post, delete,];
+    methods![get and get_with_call_id, post and post_with_call_id, delete and delete_with_call_id,];
 
     paged_routes! {
         (get) favourites: "favourites" => Status,
@@ -235,20 +237,29 @@ impl Mastodon {
     where
         S: Into<Option<StatusesRequest<'a>>>,
     {
+        let call_id = Uuid::new_v4();
         let mut url = format!("{}/api/v1/accounts/{}/statuses", self.data.base, id);
 
         if let Some(request) = request.into() {
             url = format!("{}{}", url, request.to_querystring()?);
         }
 
+        debug!(url = url, method = stringify!($method), call_id = as_debug!(call_id); "making API request");
         let response = self.client.get(&url).send().await?;
 
-        Page::new(self.clone(), response).await
+        match response.error_for_status() {
+            Ok(response) => Page::new(self.clone(), response, call_id).await,
+            Err(err) => {
+                error!(err = as_debug!(err), url = url, method = stringify!($method), call_id = as_debug!(call_id); "error making API request");
+                Err(err.into())
+            },
+        }
     }
 
     /// Returns the client account's relationship to a list of other accounts.
     /// Such as whether they follow them or vice versa.
     pub async fn relationships(&self, ids: &[&str]) -> Result<Page<Relationship>> {
+        let call_id = Uuid::new_v4();
         let mut url = self.route("/api/v1/accounts/relationships?");
 
         if ids.len() == 1 {
@@ -263,36 +274,78 @@ impl Mastodon {
             url.pop();
         }
 
+        debug!(
+            url = url, method = stringify!($method),
+            call_id = as_debug!(call_id), account_ids = as_serde!(ids);
+            "making API request"
+        );
         let response = self.client.get(&url).send().await?;
 
-        Page::new(self.clone(), response).await
+        match response.error_for_status() {
+            Ok(response) => Page::new(self.clone(), response, call_id).await,
+            Err(err) => {
+                error!(
+                    err = as_debug!(err), url = url,
+                    method = stringify!($method), call_id = as_debug!(call_id),
+                    account_ids = as_serde!(ids);
+                    "error making API request"
+                );
+                Err(err.into())
+            },
+        }
     }
 
     /// Add a push notifications subscription
     pub async fn add_push_subscription(&self, request: &AddPushRequest) -> Result<Subscription> {
+        let call_id = Uuid::new_v4();
         let request = request.build()?;
-        Ok(self
-            .client
-            .post(&self.route("/api/v1/push/subscription"))
-            .json(&request)
-            .send()
-            .await?
-            .json()
-            .await?)
+        let url = &self.route("/api/v1/push/subscription");
+        debug!(
+            url = url, method = stringify!($method),
+            call_id = as_debug!(call_id), post_body = as_serde!(request);
+            "making API request"
+        );
+        let response = self.client.post(url).json(&request).send().await?;
+
+        match response.error_for_status() {
+            Ok(response) => {
+                let status = response.status();
+                let response = response.json().await?;
+                debug!(status = as_debug!(status), response = as_serde!(response); "received API response");
+                Ok(response)
+            },
+            Err(err) => {
+                error!(err = as_debug!(err), url = url, method = stringify!($method), call_id = as_debug!(call_id); "error making API request");
+                Err(err.into())
+            },
+        }
     }
 
     /// Update the `data` portion of the push subscription associated with this
     /// access token
     pub async fn update_push_data(&self, request: &UpdatePushRequest) -> Result<Subscription> {
+        let call_id = Uuid::new_v4();
         let request = request.build();
-        Ok(self
-            .client
-            .put(&self.route("/api/v1/push/subscription"))
-            .json(&request)
-            .send()
-            .await?
-            .json()
-            .await?)
+        let url = &self.route("/api/v1/push/subscription");
+        debug!(
+            url = url, method = stringify!($method),
+            call_id = as_debug!(call_id), post_body = as_serde!(request);
+            "making API request"
+        );
+        let response = self.client.post(url).json(&request).send().await?;
+
+        match response.error_for_status() {
+            Ok(response) => {
+                let status = response.status();
+                let response = response.json().await?;
+                debug!(status = as_debug!(status), response = as_serde!(response); "received API response");
+                Ok(response)
+            },
+            Err(err) => {
+                error!(err = as_debug!(err), url = url, method = stringify!($method), call_id = as_debug!(call_id); "error making API request");
+                Err(err.into())
+            },
+        }
     }
 
     /// Get all accounts that follow the authenticated user
@@ -333,11 +386,22 @@ impl Mastodon {
     /// });
     /// ```
     pub async fn streaming_user(&self) -> Result<impl TryStream<Ok = Event, Error = Error>> {
+        let call_id = Uuid::new_v4();
         let mut url: Url = self.route("/api/v1/streaming").parse()?;
         url.query_pairs_mut()
             .append_pair("access_token", &self.data.token)
             .append_pair("stream", "user");
-        let mut url: Url = reqwest::get(url.as_str()).await?.url().as_str().parse()?;
+        debug!(
+            url = as_debug!(url), call_id = as_debug!(call_id);
+            "making user streaming API request"
+        );
+        let response = reqwest::get(url.as_str()).await?;
+        let mut url: Url = response.url().as_str().parse()?;
+        info!(
+            url = as_debug!(url), call_id = as_debug!(call_id),
+            status = response.status().as_str();
+            "received url from streaming API request"
+        );
         let new_scheme = match url.scheme() {
             "http" => "ws",
             "https" => "wss",
@@ -346,12 +410,12 @@ impl Mastodon {
         url.set_scheme(new_scheme)
             .map_err(|_| Error::Other("Bad URL scheme!".to_string()))?;
 
-        event_stream(url)
+        event_stream(url.to_string())
     }
 }
 
 impl MastodonUnauthenticated {
-    methods![get,];
+    methods![get and get_with_call_id,];
 
     /// Create a new client for unauthenticated requests to a given Mastodon
     /// instance.
@@ -362,6 +426,7 @@ impl MastodonUnauthenticated {
         } else {
             format!("https://{}", base.trim_start_matches("http://"))
         };
+        trace!(base = base; "creating new mastodon client");
         Ok(MastodonUnauthenticated {
             client: Client::new(),
             base: Url::parse(&base)?,

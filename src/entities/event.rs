@@ -1,6 +1,7 @@
 use crate::entities::{notification::Notification, status::Status};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 /// Events that come from the /streaming/user API call
 pub enum Event {
     /// Update event

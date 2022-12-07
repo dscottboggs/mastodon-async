@@ -36,3 +36,8 @@ pub mod env;
 
 /// Helpers for working with the command line
 pub mod cli;
+/// Helpers for serializing data for logging
+pub mod log;
+/// Adapter for reading JSON data from a response with better logging and a
+/// fail-safe timeout.
+pub mod read_response;

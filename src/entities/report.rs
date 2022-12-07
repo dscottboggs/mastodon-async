@@ -1,9 +1,9 @@
 //! module containing information about a finished report of a user.
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 /// A struct containing info about a report.
-#[derive(Debug, Clone, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Report {
     /// The ID of the report.
     pub id: String,

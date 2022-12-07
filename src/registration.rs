@@ -1,10 +1,13 @@
 use std::borrow::Cow;
 
+use log::{as_debug, as_serde, debug, error, trace};
 use reqwest::Client;
 use url::percent_encoding::{utf8_percent_encode, DEFAULT_ENCODE_SET};
+use uuid::Uuid;
 
 use crate::{
     apps::{App, AppBuilder},
+    log_serde,
     scopes::Scopes,
     Data,
     Error,
@@ -24,7 +27,7 @@ pub struct Registration<'a> {
     force_login: bool,
 }
 
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 struct OAuth {
     client_id: String,
     client_secret: String,
@@ -36,7 +39,7 @@ fn default_redirect_uri() -> String {
     DEFAULT_REDIRECT_URI.to_string()
 }
 
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 struct AccessToken {
     access_token: String,
 }
@@ -182,8 +185,30 @@ impl<'a> Registration<'a> {
 
     async fn send_app(&self, app: &App) -> Result<OAuth> {
         let url = format!("{}/api/v1/apps", self.base);
+        let call_id = Uuid::new_v4();
+        debug!(url = url, app = as_serde!(app), call_id = as_debug!(call_id); "registering app");
         let response = self.client.post(&url).json(&app).send().await?;
-        Ok(response.json().await?)
+
+        match response.error_for_status() {
+            Ok(response) => {
+                let response = response.json().await?;
+                debug!(
+                    response = as_serde!(response), app = as_serde!(app),
+                    url = url, method = stringify!($method),
+                    call_id = as_debug!(call_id);
+                    "received API response"
+                );
+                Ok(response)
+            },
+            Err(err) => {
+                error!(
+                    err = as_debug!(err), url = url, method = stringify!($method),
+                    call_id = as_debug!(call_id);
+                    "error making API request"
+                );
+                Err(err.into())
+            },
+        }
     }
 }
 
@@ -319,17 +344,17 @@ impl Registered {
              redirect_uri={}",
             self.base, self.client_id, self.client_secret, code, self.redirect
         );
-
-        let token: AccessToken = self
-            .client
-            .post(&url)
-            .send()
-            .await?
-            .error_for_status()?
-            .json()
-            .await?;
-
+        debug!(url = url; "completing registration");
+        let response = self.client.post(&url).send().await?;
+        debug!(
+            status = log_serde!(response Status), url = url,
+            headers = log_serde!(response Headers);
+            "received API response"
+        );
+        let token: AccessToken = response.json().await?;
+        debug!(url = url, body = as_serde!(token); "parsed response body");
         let data = self.registered(token.access_token);
+        trace!(auth_data = as_serde!(data); "registered");
 
         Ok(Mastodon::new(self.client.clone(), data))
     }

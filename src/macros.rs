@@ -1,18 +1,45 @@
 macro_rules! methods {
-    ($($method:ident,)+) => {
+    ($($method:ident and $method_with_call_id:ident,)+) => {
         $(
-            async fn $method<T: for<'de> serde::Deserialize<'de>>(&self, url: impl AsRef<str>) -> Result<T>
-            {
-                let url = url.as_ref();
-                Ok(
-                    self.client
+            doc_comment! {
+                concat!("Make a ", stringify!($method), " API request, and deserialize the result into T"),
+                async fn $method<T: for<'de> serde::Deserialize<'de> + serde::Serialize>(&self, url: impl AsRef<str>) -> Result<T>
+                {
+                    let call_id = uuid::Uuid::new_v4();
+                    self.$method_with_call_id(url, call_id).await
+                }
+            }
+
+            doc_comment! {
+                concat!(
+                    "Make a ", stringify!($method), " API request, and deserialize the result into T.\n\n",
+                    "Logging will use the provided UUID, rather than generating one before making the request.",
+                ),
+                async fn $method_with_call_id<T: for<'de> serde::Deserialize<'de> + serde::Serialize>(&self, url: impl AsRef<str>, call_id: Uuid) -> Result<T>
+                {
+
+                    use log::{debug, error, as_debug, as_serde};
+
+                    let url = url.as_ref();
+                    debug!(url = url, method = stringify!($method), call_id = as_debug!(call_id); "making API request");
+                    let response = self.client
                         .$method(url)
                         .send()
-                        .await?
-                        .error_for_status()?
-                        .json()
-                        .await?
-                )
+                        .await?;
+                    match response.error_for_status() {
+                        Ok(response) => {
+                            let response = response
+                                .json()
+                                .await?;
+                            debug!(response = as_serde!(response), url = url, method = stringify!($method), call_id = as_debug!(call_id); "received API response");
+                            Ok(response)
+                        }
+                        Err(err) => {
+                            error!(err = as_debug!(err), url = url, method = stringify!($method), call_id = as_debug!(call_id); "error making API request");
+                            Err(err.into())
+                        }
+                    }
+                }
             }
          )+
     };
@@ -35,10 +62,21 @@ macro_rules! paged_routes {
             "```"
             ),
             pub async fn $name(&self) -> Result<Page<$ret>> {
+                use log::{debug, as_debug, error};
                 let url = self.route(concat!("/api/v1/", $url));
+                let call_id = uuid::Uuid::new_v4();
+                debug!(url = url, method = stringify!($method), call_id = as_debug!(call_id); "making API request");
                 let response = self.client.$method(&url).send().await?;
 
-                Page::new(self.clone(), response).await
+                match response.error_for_status() {
+                    Ok(response) => {
+                        Page::new(self.clone(), response, call_id).await
+                    }
+                    Err(err) => {
+                        error!(err = as_debug!(err), url = url, method = stringify!($method), call_id = as_debug!(call_id); "error making API request");
+                        Err(err.into())
+                    }
+                }
             }
 
         }
@@ -55,6 +93,9 @@ macro_rules! paged_routes {
             ),
             pub async fn $name<'a>(&self, $($param: $typ,)*) -> Result<Page<$ret>> {
                 use serde_urlencoded;
+                use log::{debug, as_debug, error};
+
+                let call_id = uuid::Uuid::new_v4();
 
                 #[derive(Serialize)]
                 struct Data<'a> {
@@ -79,9 +120,19 @@ macro_rules! paged_routes {
 
                 let url = format!(concat!("/api/v1/", $url, "?{}"), &qs);
 
+                debug!(url = url, method = "get", call_id = as_debug!(call_id); "making API request");
+
                 let response = self.client.get(&url).send().await?;
 
-                Page::new(self.clone(), response).await
+                match response.error_for_status() {
+                    Ok(response) => {
+                        Page::new(self.clone(), response, call_id).await
+                    }
+                    Err(err) => {
+                        error!(err = as_debug!(err), url = url, method = stringify!($method), call_id = as_debug!(call_id); "error making API request");
+                        Err(err.into())
+                    }
+                }
             }
         }
 
@@ -101,6 +152,10 @@ macro_rules! route_v2 {
             ),
             pub async fn $name<'a>(&self, $($param: $typ,)*) -> Result<$ret> {
                 use serde_urlencoded;
+                use log::{debug, as_serde};
+                use uuid::Uuid;
+
+                let call_id = Uuid::new_v4();
 
                 #[derive(Serialize)]
                 struct Data<'a> {
@@ -120,9 +175,11 @@ macro_rules! route_v2 {
 
                 let qs = serde_urlencoded::to_string(&qs_data)?;
 
+                debug!(query_string_data = as_serde!(qs_data); "URL-encoded data to be sent in API request");
+
                 let url = format!(concat!("/api/v2/", $url, "?{}"), &qs);
 
-                self.get(self.route(&url)).await
+                self.get_with_call_id(self.route(&url), call_id).await
             }
         }
 
@@ -143,36 +200,57 @@ macro_rules! route {
             pub async fn $name(&self, $($param: $typ,)*) -> Result<$ret> {
                 use reqwest::multipart::{Form, Part};
                 use std::io::Read;
+                use log::{debug, error, as_debug, as_serde};
+                use uuid::Uuid;
+
+                let call_id = Uuid::new_v4();
 
                 let form_data = Form::new()
                     $(
                         .part(stringify!($param), {
-                            let mut file = std::fs::File::open($param.as_ref())?;
-                            let mut data = if let Ok(metadata) = file.metadata() {
-                                Vec::with_capacity(metadata.len().try_into()?)
-                            } else {
-                                vec![]
-                            };
-                            file.read_to_end(&mut data)?;
-                            Part::bytes(data)
+                            match std::fs::File::open($param.as_ref()) {
+                                Ok(mut file) => {
+                                    let mut data = if let Ok(metadata) = file.metadata() {
+                                        Vec::with_capacity(metadata.len().try_into()?)
+                                    } else {
+                                        vec![]
+                                    };
+                                    file.read_to_end(&mut data)?;
+                                    Part::bytes(data)
+                                }
+                                Err(err) => {
+                                    error!(path = $param.as_ref(), error = as_debug!(err); "error reading file contents for multipart form");
+                                    return Err(err.into());
+                                }
+                            }
                         })
                      )*;
 
+                let url = &self.route(concat!("/api/v1/", $url));
+
+                debug!(
+                    url = url, method = stringify!($method),
+                    multipart_form_data = as_debug!(form_data), call_id = as_debug!(call_id);
+                    "making API request"
+                );
+
                 let response = self.client
-                    .post(&self.route(concat!("/api/v1/", $url)))
+                    .post(url)
                     .multipart(form_data)
                     .send()
                     .await?;
 
-                let status = response.status().clone();
-
-                if status.is_client_error() {
-                    return Err(Error::Client(status));
-                } else if status.is_server_error() {
-                    return Err(Error::Server(status));
+                match response.error_for_status() {
+                    Ok(response) => {
+                        let response = response.json().await?;
+                        debug!(response = as_serde!(response), url = url, method = stringify!($method), call_id = as_debug!(call_id); "received API response");
+                        Ok(response)
+                    }
+                    Err(err) => {
+                        error!(err = as_debug!(err), url = url, method = stringify!($method), call_id = as_debug!(call_id); "error making API request");
+                        Err(err.into())
+                    }
                 }
-
-                Ok(response.json().await?)
             }
         }
 
@@ -188,6 +266,10 @@ macro_rules! route {
             ),
             pub async fn $name<'a>(&self, $($param: $typ,)*) -> Result<$ret> {
                 use serde_urlencoded;
+                use log::{debug, as_serde};
+                use uuid::Uuid;
+
+                let call_id = Uuid::new_v4();
 
                 #[derive(Serialize)]
                 struct Data<'a> {
@@ -205,11 +287,14 @@ macro_rules! route {
                     _marker: ::std::marker::PhantomData,
                 };
 
+
                 let qs = serde_urlencoded::to_string(&qs_data)?;
+
+                debug!(query_string_data = as_serde!(qs_data); "URL-encoded data to be sent in API request");
 
                 let url = format!(concat!("/api/v1/", $url, "?{}"), &qs);
 
-                self.get(self.route(&url)).await
+                self.get_with_call_id(self.route(&url), call_id).await
             }
         }
 
@@ -224,12 +309,22 @@ macro_rules! route {
                 "`\n# Errors\nIf `access_token` is not set.",
             ),
             pub async fn $name(&self, $($param: $typ,)*) -> Result<$ret> {
+                use log::{debug, error, as_debug, as_serde};
+                use uuid::Uuid;
+
+                let call_id = Uuid::new_v4();
 
                 let form_data = json!({
                     $(
                         stringify!($param): $param,
                     )*
                 });
+                debug!(
+                    url = $url, method = stringify!($method),
+                    call_id = as_debug!(call_id),
+                    form_data = as_serde!(&form_data);
+                    "making API request"
+                );
 
                 let response = self.client
                     .$method(&self.route(concat!("/api/v1/", $url)))
@@ -237,15 +332,17 @@ macro_rules! route {
                     .send()
                     .await?;
 
-                let status = response.status().clone();
-
-                if status.is_client_error() {
-                    return Err(Error::Client(status));
-                } else if status.is_server_error() {
-                    return Err(Error::Server(status));
+                match response.error_for_status() {
+                    Ok(response) => {
+                        let response = response.json().await?;
+                        debug!(response = as_serde!(response), url = $url, method = stringify!($method), call_id = as_debug!(call_id); "received API response");
+                        Ok(response)
+                    }
+                    Err(err) => {
+                        error!(err = as_debug!(err), url = $url, method = stringify!($method), call_id = as_debug!(call_id); "error making API request");
+                        Err(err.into())
+                    }
                 }
-
-                Ok(response.json().await?)
             }
         }
 
@@ -321,10 +418,23 @@ macro_rules! paged_routes_with_id {
                 "```"
             ),
             pub async fn $name(&self, id: &str) -> Result<Page<$ret>> {
-                let url = self.route(&format!(concat!("/api/v1/", $url), id));
-                let response = self.client.$method(&url).send().await?;
+                use log::{debug, error, as_debug};
+                use uuid::Uuid;
 
-                Page::new(self.clone(), response).await
+                let call_id = Uuid::new_v4();
+                let url = self.route(&format!(concat!("/api/v1/", $url), id));
+
+                debug!(url = url, method = stringify!($method), call_id = as_debug!(call_id); "making API request");
+                let response = self.client.$method(&url).send().await?;
+                match response.error_for_status() {
+                    Ok(response) => {
+                        Page::new(self.clone(), response, call_id).await
+                    }
+                    Err(err) => {
+                        error!(err = as_debug!(err), url = url, method = stringify!($method), call_id = as_debug!(call_id); "error making API request");
+                        Err(err.into())
+                    }
+                }
             }
         }
 

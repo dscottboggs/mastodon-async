@@ -1,10 +1,10 @@
 //! module containing everything relating to a relationship with
 //! another account.
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 /// A struct containing information about a relationship with another account.
-#[derive(Debug, Clone, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Relationship {
     /// Target account id
     pub id: String,

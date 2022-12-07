@@ -10,7 +10,7 @@ use serde::{
 use std::path::PathBuf;
 
 /// A struct representing an Account.
-#[derive(Debug, Clone, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 pub struct Account {
     /// Equals `username` for local users, includes `@domain` for remote ones.
     pub acct: String,
@@ -74,7 +74,7 @@ impl MetadataField {
 }
 
 /// An extra object given from `verify_credentials` giving defaults about a user
-#[derive(Debug, Clone, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 pub struct Source {
     privacy: Option<status_builder::Visibility>,
     #[serde(deserialize_with = "string_or_bool")]

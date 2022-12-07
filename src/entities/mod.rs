@@ -33,7 +33,7 @@ pub mod search_result;
 pub mod status;
 
 /// An empty JSON object.
-#[derive(Deserialize, Debug, Copy, Clone, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, Copy, Clone, PartialEq)]
 pub struct Empty {}
 
 /// The purpose of this module is to alleviate imports of many common
