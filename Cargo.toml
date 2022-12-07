@@ -1,6 +1,6 @@
 [package]
 name = "elefren"
-version = "0.24.0"
+version = "1.0.0"
 authors = ["Aaron Power <theaaronepower@gmail.com>", "Paul Woolcock <paul@woolcock.us>", "D. Scott Boggs <scott@tams.tech>"]
 description = "A wrapper around the Mastodon API."
 readme = "README.md"

@@ -7,6 +7,7 @@ use uuid::Uuid;
 
 use crate::{
     apps::{App, AppBuilder},
+    helpers::read_response::read_response,
     log_serde,
     scopes::Scopes,
     Data,
@@ -191,7 +192,7 @@ impl<'a> Registration<'a> {
 
         match response.error_for_status() {
             Ok(response) => {
-                let response = response.json().await?;
+                let response = read_response(response).await?;
                 debug!(
                     response = as_serde!(response), app = as_serde!(app),
                     url = url, method = stringify!($method),
@@ -351,7 +352,7 @@ impl Registered {
             headers = log_serde!(response Headers);
             "received API response"
         );
-        let token: AccessToken = response.json().await?;
+        let token: AccessToken = read_response(response).await?;
         debug!(url = url, body = as_serde!(token); "parsed response body");
         let data = self.registered(token.access_token);
         trace!(auth_data = as_serde!(data); "registered");

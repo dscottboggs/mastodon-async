@@ -1,5 +1,5 @@
 use super::{Mastodon, Result};
-use crate::{entities::itemsiter::ItemsIter, format_err};
+use crate::{entities::itemsiter::ItemsIter, format_err, helpers::read_response::read_response};
 use futures::Stream;
 use hyper_old_types::header::{parsing, Link, RelationType};
 use log::{as_debug, as_serde, debug, error, trace};
@@ -21,7 +21,7 @@ macro_rules! pages {
                 };
 
                 debug!(
-                    url = as_debug!(url), method = "get",
+                    url = url.as_str(), method = "get",
                     call_id = as_debug!(self.call_id),
                     direction = stringify!($direction);
                     "making API request"
@@ -31,7 +31,7 @@ macro_rules! pages {
                 match response.error_for_status() {
                     Ok(response) => {
                         let (prev, next) = get_links(&response, self.call_id)?;
-                        let response = response.json().await?;
+                        let response = read_response(response).await?;
                         debug!(
                             url = url, method = "get", next = as_debug!(next),
                             prev = as_debug!(prev), call_id = as_debug!(self.call_id),
@@ -108,7 +108,7 @@ impl<'a, T: for<'de> Deserialize<'de> + Serialize> Page<T> {
     /// Create a new Page.
     pub(crate) async fn new(mastodon: Mastodon, response: Response, call_id: Uuid) -> Result<Self> {
         let (prev, next) = get_links(&response, call_id)?;
-        let initial_items = response.json().await?;
+        let initial_items = read_response(response).await?;
         debug!(
             initial_items = as_serde!(initial_items), prev = as_debug!(prev),
             next = as_debug!(next), call_id = as_debug!(call_id);
@@ -171,7 +171,7 @@ fn get_links(response: &Response, call_id: Uuid) -> Result<(Option<Url>, Option<
                 if relations.contains(&RelationType::Next) {
                     // next = Some(Url::parse(value.link())?);
                     next = if let Ok(url) = Url::parse(value.link()) {
-                        trace!(next = as_debug!(url), call_id = as_debug!(call_id); "parsed link header");
+                        trace!(next = url.as_str(), call_id = as_debug!(call_id); "parsed link header");
                         Some(url)
                     } else {
                         // HACK: url::ParseError::into isn't working for some reason.
@@ -181,7 +181,7 @@ fn get_links(response: &Response, call_id: Uuid) -> Result<(Option<Url>, Option<
 
                 if relations.contains(&RelationType::Prev) {
                     prev = if let Ok(url) = Url::parse(value.link()) {
-                        trace!(prev = as_debug!(url), call_id = as_debug!(call_id); "parsed link header");
+                        trace!(prev = url.as_str(), call_id = as_debug!(call_id); "parsed link header");
                         Some(url)
                     } else {
                         // HACK: url::ParseError::into isn't working for some reason.

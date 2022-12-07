@@ -242,7 +242,7 @@ macro_rules! route {
 
                 match response.error_for_status() {
                     Ok(response) => {
-                        let response = response.json().await?;
+                        let response = read_response(response).await?;
                         debug!(response = as_serde!(response), url = url, method = stringify!($method), call_id = as_debug!(call_id); "received API response");
                         Ok(response)
                     }
@@ -334,7 +334,7 @@ macro_rules! route {
 
                 match response.error_for_status() {
                     Ok(response) => {
-                        let response = response.json().await?;
+                        let response = read_response(response).await?;
                         debug!(response = as_serde!(response), url = $url, method = stringify!($method), call_id = as_debug!(call_id); "received API response");
                         Ok(response)
                     }

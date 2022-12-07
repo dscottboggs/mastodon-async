@@ -10,6 +10,7 @@ use crate::{
     },
     errors::{Error, Result},
     event_stream::event_stream,
+    helpers::read_response::read_response,
     AddFilterRequest,
     AddPushRequest,
     Data,
@@ -164,7 +165,7 @@ impl Mastodon {
             return Err(Error::Server(status.clone()));
         }
 
-        Ok(response.json().await?)
+        Ok(read_response(response).await?)
     }
 
     /// Update the user credentials
@@ -181,7 +182,7 @@ impl Mastodon {
             return Err(Error::Server(status.clone()));
         }
 
-        Ok(response.json().await?)
+        Ok(read_response(response).await?)
     }
 
     /// Post a new status to the account.
@@ -310,7 +311,7 @@ impl Mastodon {
         match response.error_for_status() {
             Ok(response) => {
                 let status = response.status();
-                let response = response.json().await?;
+                let response = read_response(response).await?;
                 debug!(status = as_debug!(status), response = as_serde!(response); "received API response");
                 Ok(response)
             },
@@ -337,7 +338,7 @@ impl Mastodon {
         match response.error_for_status() {
             Ok(response) => {
                 let status = response.status();
-                let response = response.json().await?;
+                let response = read_response(response).await?;
                 debug!(status = as_debug!(status), response = as_serde!(response); "received API response");
                 Ok(response)
             },
@@ -392,13 +393,13 @@ impl Mastodon {
             .append_pair("access_token", &self.data.token)
             .append_pair("stream", "user");
         debug!(
-            url = as_debug!(url), call_id = as_debug!(call_id);
+            url = url.as_str(), call_id = as_debug!(call_id);
             "making user streaming API request"
         );
         let response = reqwest::get(url.as_str()).await?;
         let mut url: Url = response.url().as_str().parse()?;
         info!(
-            url = as_debug!(url), call_id = as_debug!(call_id),
+            url = url.as_str(), call_id = as_debug!(call_id),
             status = response.status().as_str();
             "received url from streaming API request"
         );
