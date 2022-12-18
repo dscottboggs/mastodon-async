@@ -1,4 +1,4 @@
-use std::{borrow::Cow, ops::Deref, sync::Arc};
+use std::{borrow::Cow, ops::Deref, path::Path, sync::Arc};
 
 use crate::{
     entities::{
@@ -11,6 +11,7 @@ use crate::{
     errors::{Error, Result},
     event_stream::event_stream,
     helpers::read_response::read_response,
+    log_serde,
     AddFilterRequest,
     AddPushRequest,
     Data,
@@ -22,7 +23,7 @@ use crate::{
 };
 use futures::TryStream;
 use log::{as_debug, as_serde, debug, error, info, trace};
-use reqwest::Client;
+use reqwest::{Client, RequestBuilder};
 use url::Url;
 use uuid::Uuid;
 
@@ -91,7 +92,7 @@ impl Mastodon {
         (get  (q: &'a str, resolve: bool,)) search: "search" => SearchResult,
         (get  (local: bool,)) get_public_timeline: "timelines/public" => Vec<Status>,
         (post (uri: Cow<'static, str>,)) follows: "follows" => Account,
-        (post multipart (file: Cow<'static, str>,)) media: "media" => Attachment,
+        (post multipart (file: impl AsRef<Path>,)) media: "media" => Attachment,
         (post) clear_notifications: "notifications/clear" => Empty,
         (post (id: &str,)) dismiss_notification: "notifications/dismiss" => Empty,
         (get) get_push_subscription: "push/subscription" => Subscription,
@@ -187,14 +188,18 @@ impl Mastodon {
 
     /// Post a new status to the account.
     pub async fn new_status(&self, status: NewStatus) -> Result<Status> {
-        Ok(self
-            .client
-            .post(&self.route("/api/v1/statuses"))
+        let url = self.route("/api/v1/statuses");
+        let response = self
+            .authenticated(self.client.post(&url))
             .json(&status)
             .send()
-            .await?
-            .json()
-            .await?)
+            .await?;
+        debug!(
+            status = log_serde!(response Status), url = url,
+            headers = log_serde!(response Headers);
+            "received API response"
+        );
+        Ok(read_response(response).await?)
     }
 
     /// Get timeline filtered by a hashtag(eg. `#coffee`) either locally or
@@ -252,6 +257,8 @@ impl Mastodon {
             Ok(response) => Page::new(self.clone(), response, call_id).await,
             Err(err) => {
                 error!(err = as_debug!(err), url = url, method = stringify!($method), call_id = as_debug!(call_id); "error making API request");
+                // Cannot retrieve request body as it's been moved into the
+                // other match arm.
                 Err(err.into())
             },
         }
@@ -411,7 +418,9 @@ impl Mastodon {
         url.set_scheme(new_scheme)
             .map_err(|_| Error::Other("Bad URL scheme!".to_string()))?;
 
-        event_stream(url.to_string())
+    /// Set the bearer authentication token
+    fn authenticated(&self, request: RequestBuilder) -> RequestBuilder {
+        request.bearer_auth(&self.data.token)
     }
 }
 
@@ -459,6 +468,12 @@ impl MastodonUnauthenticated {
         let route = route.join(id)?;
         let route = route.join("card")?;
         self.get(route.as_str()).await
+    }
+
+    /// Since this client needs no authentication, this returns the
+    /// `RequestBuilder` unmodified.
+    fn authenticated(&self, request: RequestBuilder) -> RequestBuilder {
+        request
     }
 }
 impl Deref for Mastodon {

@@ -22,15 +22,10 @@ macro_rules! methods {
 
                     let url = url.as_ref();
                     debug!(url = url, method = stringify!($method), call_id = as_debug!(call_id); "making API request");
-                    let response = self.client
-                        .$method(url)
-                        .send()
-                        .await?;
+                    let response = self.authenticated(self.client.$method(url)).send().await?;
                     match response.error_for_status() {
                         Ok(response) => {
-                            let response = response
-                                .json()
-                                .await?;
+                            let response = read_response(response).await?;
                             debug!(response = as_serde!(response), url = url, method = stringify!($method), call_id = as_debug!(call_id); "received API response");
                             Ok(response)
                         }
@@ -66,7 +61,7 @@ macro_rules! paged_routes {
                 let url = self.route(concat!("/api/v1/", $url));
                 let call_id = uuid::Uuid::new_v4();
                 debug!(url = url, method = stringify!($method), call_id = as_debug!(call_id); "making API request");
-                let response = self.client.$method(&url).send().await?;
+                let response = self.authenticated(self.client.$method(&url)).send().await?;
 
                 match response.error_for_status() {
                     Ok(response) => {
@@ -122,7 +117,7 @@ macro_rules! paged_routes {
 
                 debug!(url = url, method = "get", call_id = as_debug!(call_id); "making API request");
 
-                let response = self.client.get(&url).send().await?;
+                let response = self.authenticated(self.client.get(&url)).send().await?;
 
                 match response.error_for_status() {
                     Ok(response) => {
@@ -208,7 +203,8 @@ macro_rules! route {
                 let form_data = Form::new()
                     $(
                         .part(stringify!($param), {
-                            match std::fs::File::open($param.as_ref()) {
+                            let path = $param.as_ref();
+                            match std::fs::File::open(path) {
                                 Ok(mut file) => {
                                     let mut data = if let Ok(metadata) = file.metadata() {
                                         Vec::with_capacity(metadata.len().try_into()?)
@@ -219,7 +215,7 @@ macro_rules! route {
                                     Part::bytes(data)
                                 }
                                 Err(err) => {
-                                    error!(path = $param.as_ref(), error = as_debug!(err); "error reading file contents for multipart form");
+                                    error!(path = as_debug!(path), error = as_debug!(err); "error reading file contents for multipart form");
                                     return Err(err.into());
                                 }
                             }
@@ -234,8 +230,7 @@ macro_rules! route {
                     "making API request"
                 );
 
-                let response = self.client
-                    .post(url)
+                let response = self.authenticated(self.client.post(url))
                     .multipart(form_data)
                     .send()
                     .await?;
@@ -319,15 +314,15 @@ macro_rules! route {
                         stringify!($param): $param,
                     )*
                 });
+                let url = &self.route(concat!("/api/v1/", $url));
                 debug!(
-                    url = $url, method = stringify!($method),
+                    url = url.as_str(), method = stringify!($method),
                     call_id = as_debug!(call_id),
                     form_data = as_serde!(&form_data);
                     "making API request"
                 );
 
-                let response = self.client
-                    .$method(&self.route(concat!("/api/v1/", $url)))
+                let response = self.authenticated(self.client.$method(url))
                     .json(&form_data)
                     .send()
                     .await?;
@@ -425,7 +420,7 @@ macro_rules! paged_routes_with_id {
                 let url = self.route(&format!(concat!("/api/v1/", $url), id));
 
                 debug!(url = url, method = stringify!($method), call_id = as_debug!(call_id); "making API request");
-                let response = self.client.$method(&url).send().await?;
+                let response = self.authenticated(self.client.$method(&url)).send().await?;
                 match response.error_for_status() {
                     Ok(response) => {
                         Page::new(self.clone(), response, call_id).await
