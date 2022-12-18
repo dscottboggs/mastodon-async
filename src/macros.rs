@@ -438,3 +438,47 @@ macro_rules! paged_routes_with_id {
 
     () => {}
 }
+
+macro_rules! streaming {
+    {$($stream:ident@$fn_name:ident ($desc:tt),)*} => {
+        $(
+            doc_comment! {
+                concat!(
+                    $desc,
+                    "\n\nExample:\n\n",
+                    "
+use elefren::prelude::*;
+use elefren::entities::event::Event;
+use futures_util::{pin_mut, StreamExt, TryStreamExt};
+
+tokio_test::block_on(async {
+    let data = Data::default();
+    let client = Mastodon::from(data);
+    let stream = client.",
+                    stringify!($fn_name),
+                    "().await.unwrap();
+    stream.try_for_each(|event| async move {
+        match event {
+            Event::Update(ref status) => { /* .. */ },
+            Event::Notification(ref notification) => { /* .. */ },
+            Event::Delete(ref id) => { /* .. */ },
+            Event::FiltersChanged => { /* .. */ },
+        }
+        Ok(())
+    }).await.unwrap();
+});"
+                ),
+                pub async fn $fn_name(&self) -> Result<impl TryStream<Ok=Event, Error=Error>> {
+                    let url = self.route(concat!("/api/v1/streaming/", stringify!($stream)));
+                    let response = self.authenticated(self.client.get(&url)).send().await?;
+                    debug!(
+                        status = log_serde!(response Status), url = &url,
+                        headers = log_serde!(response Headers);
+                        "received API response"
+                    );
+                    Ok(event_stream(response.error_for_status()?, url))
+                }
+            }
+        )*
+    };
+}
