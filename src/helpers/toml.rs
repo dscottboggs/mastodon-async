@@ -6,8 +6,7 @@ use std::{
 
 use tomlcrate;
 
-use crate::Result;
-use data::Data;
+use crate::{Data, Result};
 
 /// Attempts to deserialize a Data struct from a string
 pub fn from_str(s: &str) -> Result<Data> {
@@ -61,8 +60,7 @@ pub fn to_writer<W: Write>(data: &Data, writer: W) -> Result<()> {
 pub fn to_file<P: AsRef<Path>>(data: &Data, path: P) -> Result<()> {
     let mut options = OpenOptions::new();
     options.create(true).write(true).truncate(true);
-    to_file_with_options(data, path, options)?;
-    Ok(())
+    to_file_with_options(data, path, options)
 }
 
 /// Attempts to serialize a Data struct to a file

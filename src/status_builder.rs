@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use isolang::Language;
 use serde::{Deserialize, Serialize};
 
@@ -255,6 +257,20 @@ pub enum Visibility {
 impl Default for Visibility {
     fn default() -> Self {
         Visibility::Public
+    }
+}
+
+impl FromStr for Visibility {
+    type Err = crate::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_ascii_lowercase().as_str() {
+            "direct" => Ok(Visibility::Direct),
+            "private" => Ok(Visibility::Private),
+            "unlisted" => Ok(Visibility::Unlisted),
+            "public" => Ok(Visibility::Public),
+            invalid => Err(format!("unrecognized visibility '{invalid}'").into()),
+        }
     }
 }
 

@@ -65,23 +65,12 @@
     unused_qualifications
 )]
 
-// #[macro_use]
-extern crate log;
 #[macro_use]
 extern crate doc_comment;
-extern crate hyper_old_types;
-extern crate isolang;
 #[macro_use]
 extern crate serde_json;
-extern crate chrono;
-extern crate reqwest;
 #[macro_use]
 extern crate serde;
-extern crate serde_qs;
-extern crate serde_urlencoded;
-extern crate tap_reader;
-extern crate tungstenite;
-extern crate url;
 
 #[cfg(feature = "env")]
 extern crate envy;
@@ -111,7 +100,7 @@ pub use requests::{
     UpdateCredsRequest,
     UpdatePushRequest,
 };
-pub use status_builder::{NewStatus, StatusBuilder};
+pub use status_builder::{NewStatus, StatusBuilder, Visibility};
 
 /// Registering your App
 pub mod apps;
@@ -141,6 +130,7 @@ mod macros;
 pub mod prelude {
     pub use crate::{
         scopes::Scopes,
+        status_builder::Visibility,
         Data,
         Mastodon,
         // MastodonClient,
