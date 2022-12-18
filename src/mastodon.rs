@@ -9,7 +9,8 @@ use crate::{
         Empty,
     },
     errors::{Error, Result},
-    event_stream::event_stream,
+    event_stream::connect_to_event_stream,
+    format_err,
     helpers::read_response::read_response,
     log_serde,
     AddFilterRequest,
@@ -22,7 +23,7 @@ use crate::{
     UpdatePushRequest,
 };
 use futures::TryStream;
-use log::{as_debug, as_serde, debug, error, info, trace};
+use log::{as_debug, as_serde, debug, error, trace};
 use reqwest::{Client, RequestBuilder};
 use url::Url;
 use uuid::Uuid;
@@ -394,29 +395,13 @@ impl Mastodon {
     /// });
     /// ```
     pub async fn streaming_user(&self) -> Result<impl TryStream<Ok = Event, Error = Error>> {
-        let call_id = Uuid::new_v4();
-        let mut url: Url = self.route("/api/v1/streaming").parse()?;
+        let mut url: Url = self.route("/api/v1/streaming/user").parse()?;
+        url.set_scheme("wss")
+            .map_err(|_| format_err!("error setting URL scheme"))?;
         url.query_pairs_mut()
-            .append_pair("access_token", &self.data.token)
-            .append_pair("stream", "user");
-        debug!(
-            url = url.as_str(), call_id = as_debug!(call_id);
-            "making user streaming API request"
-        );
-        let response = reqwest::get(url.as_str()).await?;
-        let mut url: Url = response.url().as_str().parse()?;
-        info!(
-            url = url.as_str(), call_id = as_debug!(call_id),
-            status = response.status().as_str();
-            "received url from streaming API request"
-        );
-        let new_scheme = match url.scheme() {
-            "http" => "ws",
-            "https" => "wss",
-            x => return Err(Error::Other(format!("Bad URL scheme: {}", x))),
-        };
-        url.set_scheme(new_scheme)
-            .map_err(|_| Error::Other("Bad URL scheme!".to_string()))?;
+            .append_pair("access_token", &self.data.token);
+        connect_to_event_stream(url.into_string()).await
+    }
 
     /// Set the bearer authentication token
     fn authenticated(&self, request: RequestBuilder) -> RequestBuilder {

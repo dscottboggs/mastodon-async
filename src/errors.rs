@@ -8,11 +8,11 @@ use serde::Deserialize;
 use serde_json::Error as SerdeError;
 use serde_qs::Error as SerdeQsError;
 use serde_urlencoded::ser::Error as UrlEncodedError;
+use tokio_tungstenite::tungstenite::{error::Error as WebSocketError, Message as WebSocketMessage};
 #[cfg(feature = "toml")]
 use tomlcrate::de::Error as TomlDeError;
 #[cfg(feature = "toml")]
 use tomlcrate::ser::Error as TomlSerError;
-use tungstenite::{error::Error as WebSocketError, Message as WebSocketMessage};
 use url::ParseError as UrlError;
 
 /// Convience type over `std::result::Result` with `Error` as the error type.
