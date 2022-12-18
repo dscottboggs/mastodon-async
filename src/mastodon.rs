@@ -21,7 +21,7 @@ use crate::{
     UpdateCredsRequest,
     UpdatePushRequest,
 };
-use futures::TryStream;
+use futures::{stream::try_unfold, TryStream};
 use log::{as_debug, as_serde, debug, error, info, trace};
 use reqwest::{Client, RequestBuilder};
 use url::Url;
@@ -394,29 +394,41 @@ impl Mastodon {
     /// });
     /// ```
     pub async fn streaming_user(&self) -> Result<impl TryStream<Ok = Event, Error = Error>> {
-        let call_id = Uuid::new_v4();
-        let mut url: Url = self.route("/api/v1/streaming").parse()?;
-        url.query_pairs_mut()
-            .append_pair("access_token", &self.data.token)
-            .append_pair("stream", "user");
+        let url = self.route("/api/v1/streaming/user");
+        let response = self.authenticated(self.client.get(&url)).send().await?;
         debug!(
-            url = url.as_str(), call_id = as_debug!(call_id);
-            "making user streaming API request"
+            status = log_serde!(response Status), url = &url,
+            headers = log_serde!(response Headers);
+            "received API response"
         );
-        let response = reqwest::get(url.as_str()).await?;
-        let mut url: Url = response.url().as_str().parse()?;
-        info!(
-            url = url.as_str(), call_id = as_debug!(call_id),
-            status = response.status().as_str();
-            "received url from streaming API request"
-        );
-        let new_scheme = match url.scheme() {
-            "http" => "ws",
-            "https" => "wss",
-            x => return Err(Error::Other(format!("Bad URL scheme: {}", x))),
-        };
-        url.set_scheme(new_scheme)
-            .map_err(|_| Error::Other("Bad URL scheme!".to_string()))?;
+        Ok(event_stream(response.error_for_status()?, url))
+    }
+
+    // pub async fn streaming_user(&self) -> Result<impl TryStream<Ok = Event, Error
+    // = Error>> {     let call_id = Uuid::new_v4();
+    //     let mut url: Url = self.route("/api/v1/streaming").parse()?;
+    //     url.query_pairs_mut()
+    //         .append_pair("access_token", &self.data.token)
+    //         .append_pair("stream", "user");
+    //     debug!(
+    //         url = url.as_str(), call_id = as_debug!(call_id);
+    //         "making user streaming API request"
+    //     );
+    //     let response = reqwest::get(url.as_str()).await?;
+    //     let mut url: Url = response.url().as_str().parse()?;
+    //     info!(
+    //         url = url.as_str(), call_id = as_debug!(call_id),
+    //         status = response.status().as_str();
+    //         "received url from streaming API request"
+    //     );
+    //     let new_scheme = match url.scheme() {
+    //         "http" => "ws",
+    //         "https" => "wss",
+    //         x => return Err(Error::Other(format!("Bad URL scheme: {}", x))),
+    //     };
+    //     url.set_scheme(new_scheme)
+    //         .map_err(|_| Error::Other("Bad URL scheme!".to_string()))?;
+    // }
 
     /// Set the bearer authentication token
     fn authenticated(&self, request: RequestBuilder) -> RequestBuilder {

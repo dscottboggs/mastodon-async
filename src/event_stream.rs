@@ -1,61 +1,49 @@
+use std::io;
+
 use crate::{
     entities::{event::Event, prelude::Notification, status::Status},
     errors::Result,
     Error,
 };
-use futures::{stream::try_unfold, TryStream};
+use futures::{stream::try_unfold, TryStream, TryStreamExt};
 use log::{as_debug, as_serde, debug, error, info, trace};
-use tungstenite::Message;
+use reqwest::Response;
+use tokio::io::AsyncBufReadExt;
+use tokio_util::io::StreamReader;
 
-/// Returns a stream of events at the given url location.
+/// Return a stream of events from the given response by parsing Server-Sent
+/// Events as they come in.
+///
+/// See https://docs.joinmastodon.org/methods/streaming/ for more info
 pub fn event_stream(
+    response: Response,
     location: String,
-) -> Result<impl TryStream<Ok = Event, Error = Error, Item = Result<Event>>> {
-    trace!(location = location; "connecting to websocket for events");
-    let (client, response) = tungstenite::connect(&location)?;
-    let status = response.status();
-    if !status.is_success() {
-        error!(
-            status = as_debug!(status),
-            body = response.body().as_ref().map(|it| String::from_utf8_lossy(it.as_slice())).unwrap_or("(empty body)".into()),
-            location = &location;
-            "error connecting to websocket"
-        );
-        return Err(Error::Api(crate::ApiError {
-            error: status.canonical_reason().map(String::from),
-            error_description: None,
-        }));
-    }
-    debug!(location = &location, status = as_debug!(status); "successfully connected to websocket");
-    Ok(try_unfold((client, location), |mut this| async move {
-        let (ref mut client, ref location) = this;
+) -> impl TryStream<Ok = Event, Error = Error> {
+    let stream = StreamReader::new(response.bytes_stream().map_err(|err| {
+        error!(err = as_debug!(err); "error reading stream");
+        io::Error::new(io::ErrorKind::BrokenPipe, format!("{err:?}"))
+    }));
+    let lines_iter = stream.lines();
+    try_unfold((lines_iter, location), |mut this| async move {
+        let (ref mut lines_iter, ref location) = this;
         let mut lines = vec![];
-        loop {
-            match client.read_message() {
-                Ok(Message::Text(line)) => {
-                    debug!(message = line, location = &location; "received websocket message");
-                    let line = line.trim().to_string();
-                    if line.starts_with(":") || line.is_empty() {
-                        continue;
-                    }
-                    lines.push(line);
-                    if let Ok(event) = make_event(&lines) {
-                        info!(event = as_serde!(event), location = location; "received websocket event");
-                        lines.clear();
-                        return Ok(Some((event, this)));
-                    } else {
-                        continue;
-                    }
-                },
-                Ok(Message::Ping(data)) => {
-                    debug!(metadata = as_serde!(data); "received ping, ponging");
-                    client.write_message(Message::Pong(data))?;
-                },
-                Ok(message) => return Err(message.into()),
-                Err(err) => return Err(err.into()),
+        while let Some(line) = lines_iter.next_line().await? {
+            debug!(message = line, location = &location; "received websocket message");
+            let line = line.trim().to_string();
+            if line.starts_with(":") || line.is_empty() {
+                continue;
+            }
+            lines.push(line);
+            if let Ok(event) = make_event(&lines) {
+                info!(event = as_serde!(event), location = location; "received websocket event");
+                lines.clear();
+                return Ok(Some((event, this)));
+            } else {
+                continue;
             }
         }
-    }))
+        Ok(None)
+    })
 }
 
 fn make_event(lines: &[String]) -> Result<Event> {
