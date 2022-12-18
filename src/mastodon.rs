@@ -130,7 +130,18 @@ impl Mastodon {
     }
 
     streaming! {
-        user@stream_user ("returns events that are relevant to the authorized user, i.e. home timeline & notifications"),
+        "user"@stream_user ("returns events that are relevant to the authorized user, i.e. home timeline & notifications"),
+        "public"@stream_public ("All public posts known to the server. Analogous to the federated timeline."),
+        "public:media"@stream_public_media ("All public posts known to the server, filtered for media attachments. Analogous to the federated timeline with 'only media' enabled."),
+        "public:local"@stream_local ("All public posts originating from this server."),
+        "public:local:media"@stream_local_media ("All public posts originating from this server, filtered for media attachments. Analogous to the local timeline with 'only media' enabled."),
+        "public:remote"@stream_remote ("All public posts originating from other servers."),
+        "public:remote:media"@stream_remote_media ("All public posts originating from other servers, filtered for media attachments."),
+        "hashtag"(tag: impl AsRef<str>, like "#bots")@stream_hashtag ("All public posts using a certain hashtag."),
+        "hashtag:local"(tag: impl AsRef<str>, like "#bots")@stream_local_hashtag ("All public posts using a certain hashtag, originating from this server."),
+        "user:notification"@stream_notifications ("Notifications for the current user."),
+        "list"(list: impl AsRef<str>, like "12345")@stream_list ("Updates to a specific list."),
+        "direct"@stream_direct ("Updates to direct conversations."),
     }
 
     /// Create a new Mastodon Client
