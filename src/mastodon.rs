@@ -89,7 +89,6 @@ impl Mastodon {
         (post (domain: String,)) block_domain: "domain_blocks" => Empty,
         (post (id: &str,)) authorize_follow_request: "accounts/follow_requests/authorize" => Empty,
         (post (id: &str,)) reject_follow_request: "accounts/follow_requests/reject" => Empty,
-        (get  (q: &'a str, resolve: bool,)) search: "search" => SearchResult,
         (get  (local: bool,)) get_public_timeline: "timelines/public" => Vec<Status>,
         (post (uri: Cow<'static, str>,)) follows: "follows" => Account,
         (post multipart (file: impl AsRef<Path>,)) media: "media" => Attachment,
@@ -102,7 +101,7 @@ impl Mastodon {
     }
 
     route_v2! {
-        (get (q: &'a str, resolve: bool,)) search_v2: "search" => SearchResultV2,
+        (get (q: &'a str, resolve: bool,)) search: "search" => SearchResult,
     }
 
     route_id! {
