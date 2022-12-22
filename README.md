@@ -7,7 +7,8 @@
 
 [Documentation](https://docs.rs/mastodon-async/)
 
-A wrapper around the [API](https://github.com/tootsuite/documentation/blob/master/docs/Using-the-API/API.md#tag) for [Mastodon](https://botsin.space/)
+A type-safe, async wrapper around the client [API](https://github.com/tootsuite/documentation/blob/master/docs/Using-the-API/API.md#tag)
+for [Mastodon](https://botsin.space/)
 
 ## Installation
 
@@ -29,8 +30,9 @@ $ cargo add mastodon-async
 In your `Cargo.toml`, make sure you enable the `toml` feature:
 
 ```toml
-[dependencies]
-mastodon-async = { version = "0.22", features = ["toml"] }
+[dependencies.mastodon-async]
+version = "0.22"
+features = ["toml"]
 ```
 
 ```rust,no_run
