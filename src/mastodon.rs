@@ -22,7 +22,7 @@ use crate::{
     UpdatePushRequest,
 };
 use futures::TryStream;
-use log::{as_debug, as_serde, debug, error, info, trace};
+use log::{as_debug, as_serde, debug, error, trace};
 use reqwest::{Client, RequestBuilder};
 use url::Url;
 use uuid::Uuid;
@@ -127,6 +127,33 @@ impl Mastodon {
         (delete) delete_from_suggestions: "suggestions/{}" => Empty,
         (post) endorse_user: "accounts/{}/pin" => Relationship,
         (post) unendorse_user: "accounts/{}/unpin" => Relationship,
+    }
+
+    streaming! {
+        "returns events that are relevant to the authorized user, i.e. home timeline & notifications"
+        stream_user@"user",
+        "All public posts known to the server. Analogous to the federated timeline."
+        stream_public@"public",
+        "All public posts known to the server, filtered for media attachments. Analogous to the federated timeline with 'only media' enabled."
+        stream_public_media@"public:media",
+        "All public posts originating from this server."
+        stream_local@"public:local",
+        "All public posts originating from this server, filtered for media attachments. Analogous to the local timeline with 'only media' enabled."
+        stream_local_media@"public:local:media",
+        "All public posts originating from other servers."
+        stream_remote@"public:remote",
+        "All public posts originating from other servers, filtered for media attachments."
+        stream_remote_media@"public:remote:media",
+        "All public posts using a certain hashtag."
+        stream_hashtag(tag: impl AsRef<str>, like "#bots")@"hashtag",
+        "All public posts using a certain hashtag, originating from this server."
+        stream_local_hashtag(tag: impl AsRef<str>, like "#bots")@"hashtag:local",
+        "Notifications for the current user."
+        stream_notifications@"user:notification",
+        "Updates to a specific list."
+        stream_list(list: impl AsRef<str>, like "12345")@"list",
+        "Updates to direct conversations."
+        stream_direct@"direct",
     }
 
     /// Create a new Mastodon Client
@@ -367,56 +394,6 @@ impl Mastodon {
         let me = self.verify_credentials().await?;
         self.following(&me.id).await
     }
-
-    /// returns events that are relevant to the authorized user, i.e. home
-    /// timeline & notifications
-    ///
-    /// // Example
-    ///
-    /// ```no_run
-    /// use elefren::prelude::*;
-    /// use elefren::entities::event::Event;
-    /// use futures_util::{pin_mut, StreamExt, TryStreamExt};
-    ///
-    /// tokio_test::block_on(async {
-    ///     let data = Data::default();
-    ///     let client = Mastodon::from(data);
-    ///     let stream = client.streaming_user().await.unwrap();
-    ///     stream.try_for_each(|event| async move {
-    ///         match event {
-    ///             Event::Update(ref status) => { /* .. */ },
-    ///             Event::Notification(ref notification) => { /* .. */ },
-    ///             Event::Delete(ref id) => { /* .. */ },
-    ///             Event::FiltersChanged => { /* .. */ },
-    ///         }
-    ///         Ok(())
-    ///     }).await.unwrap();
-    /// });
-    /// ```
-    pub async fn streaming_user(&self) -> Result<impl TryStream<Ok = Event, Error = Error>> {
-        let call_id = Uuid::new_v4();
-        let mut url: Url = self.route("/api/v1/streaming").parse()?;
-        url.query_pairs_mut()
-            .append_pair("access_token", &self.data.token)
-            .append_pair("stream", "user");
-        debug!(
-            url = url.as_str(), call_id = as_debug!(call_id);
-            "making user streaming API request"
-        );
-        let response = reqwest::get(url.as_str()).await?;
-        let mut url: Url = response.url().as_str().parse()?;
-        info!(
-            url = url.as_str(), call_id = as_debug!(call_id),
-            status = response.status().as_str();
-            "received url from streaming API request"
-        );
-        let new_scheme = match url.scheme() {
-            "http" => "ws",
-            "https" => "wss",
-            x => return Err(Error::Other(format!("Bad URL scheme: {}", x))),
-        };
-        url.set_scheme(new_scheme)
-            .map_err(|_| Error::Other("Bad URL scheme!".to_string()))?;
 
     /// Set the bearer authentication token
     fn authenticated(&self, request: RequestBuilder) -> RequestBuilder {

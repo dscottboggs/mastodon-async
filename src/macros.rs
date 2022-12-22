@@ -438,3 +438,91 @@ macro_rules! paged_routes_with_id {
 
     () => {}
 }
+
+macro_rules! streaming {
+    ($desc:tt $fn_name:ident@$stream:literal, $($rest:tt)*) => {
+        doc_comment! {
+            concat!(
+                $desc,
+                "\n\nExample:\n\n",
+                "
+use elefren::prelude::*;
+use elefren::entities::event::Event;
+use futures_util::{pin_mut, StreamExt, TryStreamExt};
+
+tokio_test::block_on(async {
+    let data = Data::default();
+    let client = Mastodon::from(data);
+    let stream = client.",
+                    stringify!($fn_name),
+                    "().await.unwrap();
+    stream.try_for_each(|event| async move {
+        match event {
+            Event::Update(ref status) => { /* .. */ },
+            Event::Notification(ref notification) => { /* .. */ },
+            Event::Delete(ref id) => { /* .. */ },
+            Event::FiltersChanged => { /* .. */ },
+        }
+        Ok(())
+    }).await.unwrap();
+});"
+            ),
+            pub async fn $fn_name(&self) -> Result<impl TryStream<Ok=Event, Error=Error>> {
+                let url = self.route(&format!("/api/v1/streaming/{}", $stream));
+                let response = self.authenticated(self.client.get(&url)).send().await?;
+                debug!(
+                    status = log_serde!(response Status), url = &url,
+                    headers = log_serde!(response Headers);
+                    "received API response"
+                );
+                Ok(event_stream(response.error_for_status()?, url))
+            }
+        }
+        streaming! { $($rest)* }
+    };
+    ($desc:tt $fn_name:ident($param:ident: $param_type:ty, like $param_doc_val:literal)@$stream:literal, $($rest:tt)*) => {
+        doc_comment! {
+            concat!(
+                $desc,
+                "\n\nExample:\n\n",
+                "
+use elefren::prelude::*;
+use elefren::entities::event::Event;
+use futures_util::{pin_mut, StreamExt, TryStreamExt};
+
+tokio_test::block_on(async {
+    let data = Data::default();
+    let client = Mastodon::from(data);
+    let stream = client.",
+                    stringify!($fn_name),
+                    "(",
+                    $param_doc_val,
+                    ").await.unwrap();
+    stream.try_for_each(|event| async move {
+        match event {
+            Event::Update(ref status) => { /* .. */ },
+            Event::Notification(ref notification) => { /* .. */ },
+            Event::Delete(ref id) => { /* .. */ },
+            Event::FiltersChanged => { /* .. */ },
+        }
+        Ok(())
+    }).await.unwrap();
+});"
+            ),
+            pub async fn $fn_name(&self, $param: $param_type) -> Result<impl TryStream<Ok=Event, Error=Error>> {
+                let mut url: Url = self.route(concat!("/api/v1/streaming/", stringify!($stream))).parse()?;
+                url.query_pairs_mut().append_pair(stringify!($param), $param.as_ref());
+                let url = url.to_string();
+                let response = self.authenticated(self.client.get(url.as_str())).send().await?;
+                debug!(
+                    status = log_serde!(response Status), url = as_debug!(url),
+                    headers = log_serde!(response Headers);
+                    "received API response"
+                );
+                Ok(event_stream(response.error_for_status()?, url))
+            }
+        }
+        streaming! { $($rest)* }
+    };
+    () => {}
+}

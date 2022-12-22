@@ -2,12 +2,11 @@
 
 ## A Wrapper for the Mastodon API.
 
-[![Build Status](https://travis-ci.org/pwoolcoc/elefren.svg?branch=master)](https://travis-ci.org/pwoolcoc/elefren)
-[![Build Status](https://ci.appveyor.com/api/projects/status/qeigk3nmmps52wxv?svg=true)](https://ci.appveyor.com/project/pwoolcoc/elefren)
-[![Coverage Status](https://coveralls.io/repos/github/pwoolcoc/elefren/badge.svg?branch=master&service=github)](https://coveralls.io/github/pwoolcoc/elefren?branch=master)
-[![crates.io](https://img.shields.io/crates/v/elefren.svg)](https://crates.io/crates/elefren)
-[![Docs](https://docs.rs/elefren/badge.svg)](https://docs.rs/elefren)
-[![MIT/APACHE-2.0](https://img.shields.io/crates/l/elefren.svg)](https://crates.io/crates/elefren)
+[![Build Status](https://github.com/dscottboggs/elefren/actions/workflows/rust.yml/badge.svg)](https://travis-ci.org/pwoolcoc/elefren)
+<!-- [![Coverage Status](https://coveralls.io/repos/github/pwoolcoc/elefren/badge.svg?branch=master&service=github)](https://coveralls.io/github/pwoolcoc/elefren?branch=master) -->
+<!-- [![crates.io](https://img.shields.io/crates/v/elefren.svg)](https://crates.io/crates/elefren) -->
+<!-- [![Docs](https://docs.rs/elefren/badge.svg)](https://docs.rs/elefren) -->
+<!-- [![MIT/APACHE-2.0](https://img.shields.io/crates/l/elefren.svg)](https://crates.io/crates/elefren) -->
 
 [Documentation](https://docs.rs/elefren/)
 
@@ -46,14 +45,15 @@ use elefren::prelude::*;
 use elefren::helpers::toml; // requires `features = ["toml"]`
 use elefren::helpers::cli;
 
-fn main() -> Result<(), Box<dyn Error>> {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn Error>> {
     let mastodon = if let Ok(data) = toml::from_file("mastodon-data.toml") {
         Mastodon::from(data)
     } else {
         register()?
     };
 
-    let you = mastodon.verify_credentials()?;
+    let you = mastodon.verify_credentials().await?;
 
     println!("{:#?}", you);
 
@@ -81,25 +81,21 @@ use elefren::entities::event::Event;
 
 use std::error::Error;
 
-fn main() -> Result<(), Box<Error>> {
-    let data = Data {
-      base: "".into(),
-      client_id: "".into(),
-      client_secret: "".into(),
-      redirect: "".into(),
-      token: "".into(),
-    };
+#[tokio::main]
+async fn main() -> Result<(), Box<Error>> {
+    let client = Mastodon::from(Data::default());
 
-    let client = Mastodon::from(data);
-
-    for event in client.streaming_user()? {
-        match event {
-            Event::Update(ref status) => { /* .. */ },
-            Event::Notification(ref notification) => { /* .. */ },
-            Event::Delete(ref id) => { /* .. */ },
-            Event::FiltersChanged => { /* .. */ },
-        }
-    }
+    client.stream_user()
+        .await?
+        .try_for_each(|event| {
+            match event {
+                Event::Update(ref status) => { /* .. */ },
+                Event::Notification(ref notification) => { /* .. */ },
+                Event::Delete(ref id) => { /* .. */ },
+                Event::FiltersChanged => { /* .. */ },
+            }
+        })
+        .await?;
     Ok(())
 }
 ```
