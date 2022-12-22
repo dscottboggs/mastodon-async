@@ -24,7 +24,7 @@ mod bool_qs_serialize {
 /// // Example
 ///
 /// ```
-/// use elefren::requests::StatusesRequest;
+/// use mastodon_async::requests::StatusesRequest;
 /// let mut request = StatusesRequest::new();
 /// request.only_media().pinned().since_id("foo");
 /// assert_eq!(&request.to_querystring().expect("Couldn't serialize qs")[..], "?only_media=1&pinned=1&since_id=foo");
@@ -75,7 +75,7 @@ impl<'a> StatusesRequest<'a> {
     /// // Example
     ///
     /// ```
-    /// let mut request = elefren::requests::StatusesRequest::new();
+    /// let mut request = mastodon_async::requests::StatusesRequest::new();
     /// assert_eq!(&request.only_media().to_querystring().expect("Couldn't serialize qs"), "?only_media=1");
     /// ```
     pub fn only_media(&mut self) -> &mut Self {
@@ -88,7 +88,7 @@ impl<'a> StatusesRequest<'a> {
     /// // Example
     ///
     /// ```
-    /// let mut request = elefren::requests::StatusesRequest::new();
+    /// let mut request = mastodon_async::requests::StatusesRequest::new();
     /// assert_eq!(
     ///     &request
     ///         .exclude_replies()
@@ -107,7 +107,7 @@ impl<'a> StatusesRequest<'a> {
     /// // Example
     ///
     /// ```
-    /// let mut request = elefren::requests::StatusesRequest::new();
+    /// let mut request = mastodon_async::requests::StatusesRequest::new();
     /// assert_eq!(
     ///     &request
     ///         .pinned()
@@ -126,7 +126,7 @@ impl<'a> StatusesRequest<'a> {
     /// // Example
     ///
     /// ```
-    /// let mut request = elefren::requests::StatusesRequest::new();
+    /// let mut request = mastodon_async::requests::StatusesRequest::new();
     /// assert_eq!(
     ///     &request
     ///         .max_id("foo")
@@ -145,7 +145,7 @@ impl<'a> StatusesRequest<'a> {
     /// // Example
     ///
     /// ```
-    /// let mut request = elefren::requests::StatusesRequest::new();
+    /// let mut request = mastodon_async::requests::StatusesRequest::new();
     /// assert_eq!(
     ///     &request
     ///         .since_id("foo")
@@ -164,7 +164,7 @@ impl<'a> StatusesRequest<'a> {
     /// // Example
     ///
     /// ```
-    /// let mut request = elefren::requests::StatusesRequest::new();
+    /// let mut request = mastodon_async::requests::StatusesRequest::new();
     /// assert_eq!(
     ///     &request
     ///         .limit(10)
@@ -183,7 +183,7 @@ impl<'a> StatusesRequest<'a> {
     /// // Example
     ///
     /// ```
-    /// let mut request = elefren::requests::StatusesRequest::new();
+    /// let mut request = mastodon_async::requests::StatusesRequest::new();
     /// assert_eq!(
     ///     &request
     ///         .min_id("foobar")
@@ -202,7 +202,7 @@ impl<'a> StatusesRequest<'a> {
     /// // Example
     ///
     /// ```
-    /// let mut request = elefren::requests::StatusesRequest::new();
+    /// let mut request = mastodon_async::requests::StatusesRequest::new();
     /// assert_eq!(
     ///     &request
     ///         .limit(10)

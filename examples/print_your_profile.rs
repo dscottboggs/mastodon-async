@@ -2,7 +2,7 @@
 #![cfg_attr(not(feature = "toml"), allow(unused_imports))]
 mod register;
 
-use elefren::Result;
+use mastodon_async::Result;
 
 #[cfg(feature = "toml")]
 #[tokio::main]

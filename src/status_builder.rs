@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 /// // Example
 ///
 /// ```
-/// use elefren::{Language, StatusBuilder};
+/// use mastodon_async::{Language, StatusBuilder};
 ///
 /// let status = StatusBuilder::new()
 ///     .status("a status")
@@ -35,7 +35,7 @@ impl StatusBuilder {
     /// // Example
     ///
     /// ```rust,no_run
-    /// use elefren::{status_builder::Visibility, prelude::*};
+    /// use mastodon_async::{status_builder::Visibility, prelude::*};
     ///
     /// let data = Data::default();
     /// let client = Mastodon::from(data);
@@ -58,7 +58,7 @@ impl StatusBuilder {
     /// // Example
     ///
     /// ```rust
-    /// use elefren::prelude::*;
+    /// use mastodon_async::prelude::*;
     /// let status = StatusBuilder::new().status("awoooooo").build().unwrap();
     /// ```
     pub fn status<I: Into<String>>(&mut self, status: I) -> &mut Self {
@@ -71,7 +71,7 @@ impl StatusBuilder {
     /// // Example
     ///
     /// ```rust
-    /// use elefren::prelude::*;
+    /// use mastodon_async::prelude::*;
     /// let status = StatusBuilder::new()
     ///     .status("awooooo")
     ///     .in_reply_to("12345")
@@ -88,7 +88,7 @@ impl StatusBuilder {
     /// // Example
     ///
     /// ```rust
-    /// use elefren::prelude::*;
+    /// use mastodon_async::prelude::*;
     /// let status = StatusBuilder::new().media_ids(&["foo", "bar"]).build().unwrap();
     /// ```
     pub fn media_ids<S: std::fmt::Display, I: IntoIterator<Item = S>>(
@@ -104,7 +104,7 @@ impl StatusBuilder {
     /// // Example
     ///
     /// ```rust
-    /// use elefren::prelude::*;
+    /// use mastodon_async::prelude::*;
     /// let status = StatusBuilder::new()
     ///     .media_ids(&["foo", "bar"])
     ///     .sensitive(true)
@@ -131,7 +131,7 @@ impl StatusBuilder {
     /// // Example
     ///
     /// ```rust
-    /// use elefren::prelude::*;
+    /// use mastodon_async::prelude::*;
     /// let status = StatusBuilder::new()
     ///     .status("<b>thicc</b>")
     ///     .content_type("text/html")
@@ -148,7 +148,7 @@ impl StatusBuilder {
     /// // Example
     ///
     /// ```rust
-    /// use elefren::{prelude::*, status_builder::Visibility};
+    /// use mastodon_async::{prelude::*, status_builder::Visibility};
     /// let status = StatusBuilder::new()
     ///     .status("awooooooo")
     ///     .visibility(Visibility::Public)
@@ -165,7 +165,7 @@ impl StatusBuilder {
     /// // Example
     ///
     /// ```rust
-    /// use elefren::{Language, prelude::*};
+    /// use mastodon_async::{Language, prelude::*};
     /// let status = StatusBuilder::new()
     ///     .status("awoo!!!!")
     ///     .language(Language::Eng)
@@ -179,7 +179,7 @@ impl StatusBuilder {
 
     /// Set the status as "sensitive".
     /// ```
-    /// use elefren::StatusBuilder;
+    /// use mastodon_async::StatusBuilder;
     ///
     /// let status = StatusBuilder::new()
     ///     .status("a sensitive matter")
@@ -197,7 +197,7 @@ impl StatusBuilder {
     /// // Example
     ///
     /// ```rust
-    /// use elefren::prelude::*;
+    /// use mastodon_async::prelude::*;
     /// let status = StatusBuilder::new().status("awoo!").build().unwrap();
     /// ```
     pub fn build(&self) -> Result<NewStatus, crate::Error> {

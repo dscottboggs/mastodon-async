@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 /// Abstracts away the `next_page` logic into a single stream of items
 ///
 /// ```no_run,async
-/// use elefren::prelude::*;
+/// use mastodon_async::prelude::*;
 /// use futures::stream::StreamExt;
 /// use futures_util::pin_mut;
 ///

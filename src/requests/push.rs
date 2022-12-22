@@ -8,7 +8,7 @@ use crate::{
 /// // Example
 ///
 /// ```
-/// use elefren::requests::Keys;
+/// use mastodon_async::requests::Keys;
 ///
 /// let keys = Keys::new("anetohias===", "oeatssah=");
 /// ```
@@ -24,7 +24,7 @@ impl Keys {
     /// // Example
     ///
     /// ```
-    /// use elefren::requests::Keys;
+    /// use mastodon_async::requests::Keys;
     ///
     /// let keys = Keys::new("anetohias===", "oeatssah=");
     /// ```
@@ -41,8 +41,8 @@ impl Keys {
 /// // Example
 ///
 /// ```no_run
-/// use elefren::{Mastodon, Data};
-/// use elefren::requests::{AddPushRequest, Keys};
+/// use mastodon_async::{Mastodon, Data};
+/// use mastodon_async::requests::{AddPushRequest, Keys};
 ///
 /// tokio_test::block_on(async {
 ///     let data = Data::default();
@@ -74,7 +74,7 @@ impl AddPushRequest {
     /// // Example
     ///
     /// ```
-    /// use elefren::requests::{AddPushRequest, Keys};
+    /// use mastodon_async::requests::{AddPushRequest, Keys};
     /// let keys = Keys::new("abcdef===", "foobar==");
     /// let push_endpoint = "https://example.com/push/endpoint";
     /// let request = AddPushRequest::new(push_endpoint, &keys);
@@ -92,7 +92,7 @@ impl AddPushRequest {
     ///
     /// // Example
     /// ```
-    /// use elefren::requests::{AddPushRequest, Keys};
+    /// use mastodon_async::requests::{AddPushRequest, Keys};
     /// let keys = Keys::new("abcdef===", "foobar==");
     /// let push_endpoint = "https://example.com/push/endpoint";
     /// let mut request = AddPushRequest::new(push_endpoint, &keys);
@@ -107,7 +107,7 @@ impl AddPushRequest {
     ///
     /// // Example
     /// ```
-    /// use elefren::requests::{AddPushRequest, Keys};
+    /// use mastodon_async::requests::{AddPushRequest, Keys};
     /// let keys = Keys::new("abcdef===", "foobar==");
     /// let push_endpoint = "https://example.com/push/endpoint";
     /// let mut request = AddPushRequest::new(push_endpoint, &keys);
@@ -122,7 +122,7 @@ impl AddPushRequest {
     ///
     /// // Example
     /// ```
-    /// use elefren::requests::{AddPushRequest, Keys};
+    /// use mastodon_async::requests::{AddPushRequest, Keys};
     /// let keys = Keys::new("abcdef===", "foobar==");
     /// let push_endpoint = "https://example.com/push/endpoint";
     /// let mut request = AddPushRequest::new(push_endpoint, &keys);
@@ -137,7 +137,7 @@ impl AddPushRequest {
     ///
     /// // Example
     /// ```
-    /// use elefren::requests::{AddPushRequest, Keys};
+    /// use mastodon_async::requests::{AddPushRequest, Keys};
     /// let keys = Keys::new("abcdef===", "foobar==");
     /// let push_endpoint = "https://example.com/push/endpoint";
     /// let mut request = AddPushRequest::new(push_endpoint, &keys);
@@ -202,7 +202,7 @@ impl AddPushRequest {
 /// // Example
 ///
 /// ```no_run
-/// use elefren::{Mastodon, Data, requests::UpdatePushRequest};
+/// use mastodon_async::{Mastodon, Data, requests::UpdatePushRequest};
 ///
 /// let data = Data::default();
 /// let client = Mastodon::from(data);
@@ -230,7 +230,7 @@ impl UpdatePushRequest {
     /// // Example
     ///
     /// ```
-    /// let request = elefren::requests::UpdatePushRequest::new("some-id");
+    /// let request = mastodon_async::requests::UpdatePushRequest::new("some-id");
     /// ```
     pub fn new(id: &str) -> UpdatePushRequest {
         UpdatePushRequest {
@@ -243,7 +243,7 @@ impl UpdatePushRequest {
     ///
     /// // Example
     /// ```
-    /// let mut request = elefren::requests::UpdatePushRequest::new("foobar");
+    /// let mut request = mastodon_async::requests::UpdatePushRequest::new("foobar");
     /// request.follow(true);
     /// ```
     pub fn follow(&mut self, follow: bool) -> &mut Self {
@@ -255,7 +255,7 @@ impl UpdatePushRequest {
     ///
     /// // Example
     /// ```
-    /// let mut request = elefren::requests::UpdatePushRequest::new("foobar");
+    /// let mut request = mastodon_async::requests::UpdatePushRequest::new("foobar");
     /// request.favourite(true);
     /// ```
     pub fn favourite(&mut self, favourite: bool) -> &mut Self {
@@ -267,7 +267,7 @@ impl UpdatePushRequest {
     ///
     /// // Example
     /// ```
-    /// use elefren::requests::UpdatePushRequest;
+    /// use mastodon_async::requests::UpdatePushRequest;
     /// let mut request = UpdatePushRequest::new("foobar");
     /// request.reblog(true);
     /// ```
@@ -280,7 +280,7 @@ impl UpdatePushRequest {
     ///
     /// // Example
     /// ```
-    /// use elefren::requests::UpdatePushRequest;
+    /// use mastodon_async::requests::UpdatePushRequest;
     /// let mut request = UpdatePushRequest::new("foobar");
     /// request.mention(true);
     /// ```

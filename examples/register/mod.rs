@@ -1,13 +1,13 @@
 #![cfg_attr(not(feature = "toml"), allow(dead_code))]
 #![cfg_attr(not(feature = "toml"), allow(unused_imports))]
 
-pub use elefren::prelude::*;
+pub use mastodon_async::prelude::*;
 
 use std::io;
 
 #[cfg(feature = "toml")]
-use elefren::helpers::toml;
-use elefren::{helpers::cli, Result};
+use mastodon_async::helpers::toml;
+use mastodon_async::{helpers::cli, Result};
 
 #[allow(dead_code)]
 #[cfg(feature = "toml")]

@@ -1,30 +1,27 @@
-# Elefren
+# Async Mastodon client library 
 
-## A Wrapper for the Mastodon API.
+[![Build Status](https://github.com/dscottboggs/mastodon-async/actions/workflows/rust.yml/badge.svg)]
+[![crates.io](https://img.shields.io/crates/v/mastodon-async.svg)](https://crates.io/crates/mastodon-async)
+[![Docs](https://docs.rs/mastodon-async/badge.svg)](https://docs.rs/mastodon-async)
+[![MIT/APACHE-2.0](https://img.shields.io/crates/l/mastodon-async.svg)](https://crates.io/crates/mastodon-async)
 
-[![Build Status](https://github.com/dscottboggs/elefren/actions/workflows/rust.yml/badge.svg)](https://travis-ci.org/pwoolcoc/elefren)
-<!-- [![Coverage Status](https://coveralls.io/repos/github/pwoolcoc/elefren/badge.svg?branch=master&service=github)](https://coveralls.io/github/pwoolcoc/elefren?branch=master) -->
-<!-- [![crates.io](https://img.shields.io/crates/v/elefren.svg)](https://crates.io/crates/elefren) -->
-<!-- [![Docs](https://docs.rs/elefren/badge.svg)](https://docs.rs/elefren) -->
-<!-- [![MIT/APACHE-2.0](https://img.shields.io/crates/l/elefren.svg)](https://crates.io/crates/elefren) -->
-
-[Documentation](https://docs.rs/elefren/)
+[Documentation](https://docs.rs/mastodon-async/)
 
 A wrapper around the [API](https://github.com/tootsuite/documentation/blob/master/docs/Using-the-API/API.md#tag) for [Mastodon](https://botsin.space/)
 
 ## Installation
 
-To add `elefren` to your project, add the following to the
+To add `mastodon-async` to your project, add the following to the
 `[dependencies]` section of your `Cargo.toml`
 
 ```toml
-elefren = "0.23"
+mastodon-async = "1.0"
 ```
 
 Alternatively, run the following command:
 
 ~~~console
-$ cargo add elefren
+$ cargo add mastodon-async
 ~~~
 
 ## Example
@@ -33,7 +30,7 @@ In your `Cargo.toml`, make sure you enable the `toml` feature:
 
 ```toml
 [dependencies]
-elefren = { version = "0.22", features = ["toml"] }
+mastodon-async = { version = "0.22", features = ["toml"] }
 ```
 
 ```rust,no_run
@@ -41,9 +38,9 @@ elefren = { version = "0.22", features = ["toml"] }
 
 use std::error::Error;
 
-use elefren::prelude::*;
-use elefren::helpers::toml; // requires `features = ["toml"]`
-use elefren::helpers::cli;
+use mastodon_async::prelude::*;
+use mastodon_async::helpers::toml; // requires `features = ["toml"]`
+use mastodon_async::helpers::cli;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -62,7 +59,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
 fn register() -> Result<Mastodon, Box<dyn Error>> {
     let registration = Registration::new("https://botsin.space")
-                                    .client_name("elefren-examples")
+                                    .client_name("mastodon-async-examples")
                                     .build()?;
     let mastodon = cli::authenticate(registration)?;
 
@@ -76,8 +73,8 @@ fn register() -> Result<Mastodon, Box<dyn Error>> {
 It also supports the [Streaming API](https://docs.joinmastodon.org/api/streaming):
 
 ```rust,no_run
-use elefren::prelude::*;
-use elefren::entities::event::Event;
+use mastodon_async::prelude::*;
+use mastodon_async::entities::event::Event;
 
 use std::error::Error;
 

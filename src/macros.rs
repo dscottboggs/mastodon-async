@@ -50,7 +50,7 @@ macro_rules! paged_routes {
             "`\n# Errors\nIf `access_token` is not set.",
             "\n",
             "```no_run",
-            "use elefren::prelude::*;\n",
+            "use mastodon_async::prelude::*;\n",
             "let data = Data::default();\n",
             "let client = Mastodon::from(data);\n",
             "client.", stringify!($name), "();\n",
@@ -352,7 +352,7 @@ macro_rules! route {
                 "`\n# Errors\nIf `access_token` is not set.",
                 "\n",
                 "```no_run",
-                "use elefren::prelude::*;\n",
+                "use mastodon_async::prelude::*;\n",
                 "let data = Data::default();\n",
                 "let client = Mastodon::from(data);\n",
                 "client.", stringify!($name), "();\n",
@@ -380,7 +380,7 @@ macro_rules! route_id {
                     "`\n# Errors\nIf `access_token` is not set.",
                     "\n",
                     "```no_run",
-                    "use elefren::prelude::*;\n",
+                    "use mastodon_async::prelude::*;\n",
                     "let data = Data::default();\n",
                     "let client = Mastodon::from(data);\n",
                     "client.", stringify!($name), "(\"42\");\n",
@@ -406,7 +406,7 @@ macro_rules! paged_routes_with_id {
                 "`\n# Errors\nIf `access_token` is not set.",
                 "\n",
                 "```no_run",
-                "use elefren::prelude::*;\n",
+                "use mastodon_async::prelude::*;\n",
                 "let data = Data::default();",
                 "let client = Mastodon::from(data);\n",
                 "client.", stringify!($name), "(\"some-id\");\n",
@@ -446,8 +446,8 @@ macro_rules! streaming {
                 $desc,
                 "\n\nExample:\n\n",
                 "
-use elefren::prelude::*;
-use elefren::entities::event::Event;
+use mastodon_async::prelude::*;
+use mastodon_async::entities::event::Event;
 use futures_util::{pin_mut, StreamExt, TryStreamExt};
 
 tokio_test::block_on(async {
@@ -486,8 +486,8 @@ tokio_test::block_on(async {
                 $desc,
                 "\n\nExample:\n\n",
                 "
-use elefren::prelude::*;
-use elefren::entities::event::Event;
+use mastodon_async::prelude::*;
+use mastodon_async::entities::event::Event;
 use futures_util::{pin_mut, StreamExt, TryStreamExt};
 
 tokio_test::block_on(async {

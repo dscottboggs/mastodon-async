@@ -48,7 +48,7 @@ struct AccessToken {
 impl<'a> Registration<'a> {
     /// Construct a new registration process to the instance of the `base` url.
     /// ```
-    /// use elefren::prelude::*;
+    /// use mastodon_async::prelude::*;
     ///
     /// let registration = Registration::new("https://botsin.space");
     /// ```
@@ -112,11 +112,11 @@ impl<'a> Registration<'a> {
     /// Register the given application
     ///
     /// ```no_run
-    /// use elefren::{apps::App, prelude::*};
+    /// use mastodon_async::{apps::App, prelude::*};
     ///
     /// tokio_test::block_on(async {
     ///     let mut app = App::builder();
-    ///     app.client_name("elefren_test");
+    ///     app.client_name("mastodon-async_test");
     ///
     ///     let registration = Registration::new("https://botsin.space")
     ///         .register(app)
@@ -152,11 +152,11 @@ impl<'a> Registration<'a> {
     /// Register the application with the server from the `base` url.
     ///
     /// ```no_run
-    /// use elefren::prelude::*;
+    /// use mastodon_async::prelude::*;
     ///
     /// tokio_test::block_on(async {
     ///     let registration = Registration::new("https://botsin.space")
-    ///         .client_name("elefren_test")
+    ///         .client_name("mastodon-async_test")
     ///         .build()
     ///         .await
     ///         .unwrap();
@@ -220,7 +220,7 @@ impl Registered {
     /// // Example
     ///
     /// ```no_run
-    /// use elefren::{prelude::*, registration::Registered};
+    /// use mastodon_async::{prelude::*, registration::Registered};
     ///
     /// tokio_test::block_on(async {
     ///     let registration = Registered::from_parts(
@@ -267,7 +267,7 @@ impl Registered {
     /// // Example
     ///
     /// ```
-    /// use elefren::{prelude::*, registration::Registered};
+    /// use mastodon_async::{prelude::*, registration::Registered};
     ///
     /// let orig_base = "https://example.social";
     /// let orig_client_id = "some-client_id";
