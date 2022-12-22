@@ -95,6 +95,10 @@ pub struct Tag {
     pub name: String,
     /// The URL of the hashtag.
     pub url: String,
+    /// Usage statistics for given days (typically the past week).
+    pub history: Vec<TagHistory>,
+    /// Whether the current token’s authorized user is following this tag.
+    pub following: Option<bool>,
 }
 
 /// Application details.
@@ -104,4 +108,15 @@ pub struct Application {
     pub name: String,
     /// Homepage URL of the application.
     pub website: Option<String>,
+}
+
+/// Usage statistics for given days (typically the past week).
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct TagHistory {
+    /// UNIX timestamp on midnight of the given day.
+    pub day: String,
+    /// The counted usage of the tag within that day.
+    pub uses: String,
+    /// The total of accounts using the tag within that day.
+    pub accounts: String,
 }

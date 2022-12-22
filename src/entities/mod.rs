@@ -54,7 +54,7 @@ pub mod prelude {
         push::Subscription,
         relationship::Relationship,
         report::Report,
-        search_result::{SearchResult, SearchResultV2},
+        search_result::SearchResult,
         status::{Application, Emoji, Status},
         Empty,
     };
