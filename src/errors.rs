@@ -12,7 +12,6 @@ use serde_urlencoded::ser::Error as UrlEncodedError;
 use tomlcrate::de::Error as TomlDeError;
 #[cfg(feature = "toml")]
 use tomlcrate::ser::Error as TomlSerError;
-use tungstenite::{error::Error as WebSocketError, Message as WebSocketMessage};
 use url::ParseError as UrlError;
 
 /// Convience type over `std::result::Result` with `Error` as the error type.
@@ -62,16 +61,12 @@ pub enum Error {
     Envy(EnvyError),
     /// Error serializing to a query string
     SerdeQs(SerdeQsError),
-    /// WebSocket error
-    WebSocket(WebSocketError),
     /// An integer conversion was attempted, but the value didn't fit into the
     /// target type.
     ///
     /// At the time of writing, this can only be triggered when a file is
     /// larger than the system's usize allows.
     IntConversion(TryFromIntError),
-    /// A stream message was received that wasn't recognized
-    UnrecognizedStreamMessage(WebSocketMessage),
     /// Other errors
     Other(String),
 }
@@ -100,14 +95,12 @@ impl error::Error for Error {
             #[cfg(feature = "env")]
             Error::Envy(ref e) => e,
             Error::SerdeQs(ref e) => e,
-            Error::WebSocket(ref e) => e,
             Error::IntConversion(ref e) => e,
             Error::Client(..) | Error::Server(..) => return None,
             Error::ClientIdRequired => return None,
             Error::ClientSecretRequired => return None,
             Error::AccessTokenRequired => return None,
             Error::MissingField(_) => return None,
-            Error::UnrecognizedStreamMessage(_) => return None,
             Error::Other(..) => return None,
         })
     }
@@ -157,10 +150,8 @@ from! {
     HeaderParseError => HeaderParseError,
     #[cfg(feature = "env")] EnvyError => Envy,
     SerdeQsError => SerdeQs,
-    WebSocketError => WebSocket,
     String => Other,
     TryFromIntError => IntConversion,
-    WebSocketMessage => UnrecognizedStreamMessage,
 }
 
 #[macro_export]

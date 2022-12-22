@@ -14,7 +14,7 @@ use tokio_util::io::StreamReader;
 /// Return a stream of events from the given response by parsing Server-Sent
 /// Events as they come in.
 ///
-/// See https://docs.joinmastodon.org/methods/streaming/ for more info
+/// See <https://docs.joinmastodon.org/methods/streaming/> for more info
 pub fn event_stream(
     response: Response,
     location: String,
@@ -28,14 +28,14 @@ pub fn event_stream(
         let (ref mut lines_iter, ref location) = this;
         let mut lines = vec![];
         while let Some(line) = lines_iter.next_line().await? {
-            debug!(message = line, location = &location; "received websocket message");
+            debug!(message = line, location = &location; "received message");
             let line = line.trim().to_string();
             if line.starts_with(":") || line.is_empty() {
                 continue;
             }
             lines.push(line);
             if let Ok(event) = make_event(&lines) {
-                info!(event = as_serde!(event), location = location; "received websocket event");
+                info!(event = as_serde!(event), location = location; "received event");
                 lines.clear();
                 return Ok(Some((event, this)));
             } else {
@@ -66,7 +66,7 @@ fn make_event(lines: &[String]) -> Result<Event> {
         data = message.payload;
     }
     let event: &str = &event;
-    trace!(event = event, payload = data; "websocket message parsed");
+    trace!(event = event, payload = data; "SSE message parsed");
     Ok(match event {
         "notification" => {
             let data = data

@@ -39,7 +39,7 @@
 //! let data = Data::default();
 //! let client = Mastodon::from(data);
 //! tokio_test::block_on(async {
-//!     let stream = client.streaming_user().await.unwrap();
+//!     let stream = client.stream_user().await.unwrap();
 //!     stream.try_for_each(|event| async move {
 //!         match event {
 //!             Event::Update(ref status) => { /* .. */ },
