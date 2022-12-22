@@ -14,7 +14,7 @@ use crate::{
 /// // Example
 ///
 /// ```no_run
-/// use elefren::{prelude::*, status_builder::Visibility, UpdateCredsRequest};
+/// use mastodon_async::{prelude::*, status_builder::Visibility, UpdateCredsRequest};
 ///
 /// let data = Data::default();
 /// let client = Mastodon::from(data);
@@ -45,8 +45,7 @@ impl UpdateCredsRequest {
     /// // Example
     ///
     /// ```
-    /// // extern crate elefren;
-    /// use elefren::UpdateCredsRequest;
+    /// use mastodon_async::UpdateCredsRequest;
     ///
     /// let mut builder = UpdateCredsRequest::new();
     /// ```
@@ -59,8 +58,7 @@ impl UpdateCredsRequest {
     /// // Example
     ///
     /// ```
-    /// // extern crate elefren;
-    /// use elefren::UpdateCredsRequest;
+    /// use mastodon_async::UpdateCredsRequest;
     ///
     /// let mut builder = UpdateCredsRequest::new();
     ///
@@ -76,8 +74,7 @@ impl UpdateCredsRequest {
     /// // Example
     ///
     /// ```
-    /// // extern crate elefren;
-    /// use elefren::UpdateCredsRequest;
+    /// use mastodon_async::UpdateCredsRequest;
     ///
     /// let mut builder = UpdateCredsRequest::new();
     ///
@@ -93,8 +90,7 @@ impl UpdateCredsRequest {
     /// // Example
     ///
     /// ```
-    /// // extern crate elefren;
-    /// use elefren::UpdateCredsRequest;
+    /// use mastodon_async::UpdateCredsRequest;
     ///
     /// let mut builder = UpdateCredsRequest::new();
     ///
@@ -112,8 +108,7 @@ impl UpdateCredsRequest {
     /// // Example
     ///
     /// ```
-    /// // extern crate elefren;
-    /// use elefren::UpdateCredsRequest;
+    /// use mastodon_async::UpdateCredsRequest;
     ///
     /// let mut builder = UpdateCredsRequest::new();
     ///
@@ -131,8 +126,7 @@ impl UpdateCredsRequest {
     /// // Example
     ///
     /// ```
-    /// // extern crate elefren;
-    /// use elefren::{status_builder::Visibility, UpdateCredsRequest};
+    /// use mastodon_async::{status_builder::Visibility, UpdateCredsRequest};
     ///
     /// let mut builder = UpdateCredsRequest::new();
     ///
@@ -148,8 +142,7 @@ impl UpdateCredsRequest {
     /// // Example
     ///
     /// ```
-    /// // extern crate elefren;
-    /// use elefren::UpdateCredsRequest;
+    /// use mastodon_async::UpdateCredsRequest;
     ///
     /// let mut builder = UpdateCredsRequest::new();
     ///
@@ -165,8 +158,7 @@ impl UpdateCredsRequest {
     /// // Example
     ///
     /// ```
-    /// // extern crate elefren;
-    /// use elefren::UpdateCredsRequest;
+    /// use mastodon_async::UpdateCredsRequest;
     ///
     /// let mut builder = UpdateCredsRequest::new();
     ///

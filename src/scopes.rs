@@ -20,7 +20,7 @@ use serde::{
 /// // Example
 ///
 /// ```rust
-/// use elefren::prelude::*;
+/// use mastodon_async::prelude::*;
 ///
 /// let read = Scopes::read_all();
 /// let write = Scopes::write_all();
@@ -87,7 +87,7 @@ impl Scopes {
     /// Represents all available oauth scopes: "read write follow push"
     ///
     /// ```
-    /// use elefren::scopes::Scopes;
+    /// use mastodon_async::scopes::Scopes;
     ///
     /// let scope = Scopes::all();
     /// assert_eq!(&format!("{}", scope), "read write follow push");
@@ -99,7 +99,7 @@ impl Scopes {
     /// Represents the full "read" scope
     ///
     /// ```
-    /// use elefren::scopes::Scopes;
+    /// use mastodon_async::scopes::Scopes;
     ///
     /// let scope = Scopes::read_all();
     /// assert_eq!(&format!("{}", scope), "read");
@@ -111,7 +111,7 @@ impl Scopes {
     /// Represents a specific "read:___" scope
     ///
     /// ```
-    /// use elefren::scopes::{Read, Scopes};
+    /// use mastodon_async::scopes::{Read, Scopes};
     ///
     /// let scope = Scopes::read(Read::Accounts);
     /// assert_eq!(&format!("{}", scope), "read:accounts");
@@ -123,7 +123,7 @@ impl Scopes {
     /// Represents the full "write" scope
     ///
     /// ```
-    /// use elefren::scopes::Scopes;
+    /// use mastodon_async::scopes::Scopes;
     ///
     /// let scope = Scopes::write_all();
     /// assert_eq!(&format!("{}", scope), "write");
@@ -135,7 +135,7 @@ impl Scopes {
     /// Represents a specific "write:___" scope
     ///
     /// ```
-    /// use elefren::scopes::{Scopes, Write};
+    /// use mastodon_async::scopes::{Scopes, Write};
     ///
     /// let scope = Scopes::write(Write::Accounts);
     /// assert_eq!(&format!("{}", scope), "write:accounts");
@@ -147,7 +147,7 @@ impl Scopes {
     /// Represents the "follow" scope
     ///
     /// ```
-    /// use elefren::scopes::Scopes;
+    /// use mastodon_async::scopes::Scopes;
     ///
     /// let scope = Scopes::follow();
     /// assert_eq!(&format!("{}", scope), "follow");
@@ -159,7 +159,7 @@ impl Scopes {
     /// Represents the full "push" scope
     ///
     /// ```
-    /// use elefren::scopes::Scopes;
+    /// use mastodon_async::scopes::Scopes;
     ///
     /// let scope = Scopes::push();
     /// assert_eq!(&format!("{}", scope), "push");
@@ -173,7 +173,7 @@ impl Scopes {
     /// // Example
     ///
     /// ```rust
-    /// use elefren::prelude::*;
+    /// use mastodon_async::prelude::*;
     ///
     /// let read = Scopes::read_all();
     /// let write = Scopes::write_all();

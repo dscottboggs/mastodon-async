@@ -247,7 +247,7 @@ impl Mastodon {
     /// // Example
     ///
     /// ```no_run
-    /// use elefren::prelude::*;
+    /// use mastodon_async::prelude::*;
     /// tokio_test::block_on(async {
     ///     let data = Data::default();
     ///     let client = Mastodon::from(data);
@@ -256,7 +256,7 @@ impl Mastodon {
     /// ```
     ///
     /// ```no_run
-    /// use elefren::prelude::*;
+    /// use mastodon_async::prelude::*;
     /// tokio_test::block_on(async {
     ///     let data = Data::default();
     ///     let client = Mastodon::from(data);

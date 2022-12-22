@@ -6,7 +6,7 @@ use std::time::Duration;
 /// // Example
 ///
 /// ```
-/// use elefren::{entities::filter::FilterContext, requests::AddFilterRequest};
+/// use mastodon_async::{entities::filter::FilterContext, requests::AddFilterRequest};
 /// let request = AddFilterRequest::new("foo", FilterContext::Home);
 /// ```
 #[derive(Debug, Clone, PartialEq, Serialize)]

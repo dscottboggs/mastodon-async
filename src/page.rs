@@ -66,7 +66,7 @@ macro_rules! pages {
 /// // Example
 ///
 /// ```no_run
-/// use elefren::{
+/// use mastodon_async::{
 ///     prelude::*,
 ///     page::Page,
 ///     entities::status::Status
@@ -138,7 +138,7 @@ impl<T: Clone + for<'de> Deserialize<'de> + Serialize> Page<T> {
     /// // Example
     ///
     /// ```no_run
-    /// use elefren::prelude::*;
+    /// use mastodon_async::prelude::*;
     /// use futures_util::StreamExt;
     ///
     /// let data = Data::default();

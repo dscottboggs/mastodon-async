@@ -1,5 +1,5 @@
 [package]
-name = "elefren"
+name = "mastodon-async"
 version = "1.0.0"
 authors = ["Aaron Power <theaaronepower@gmail.com>", "Paul Woolcock <paul@woolcock.us>", "D. Scott Boggs <scott@tams.tech>"]
 description = "A wrapper around the Mastodon API."
@@ -8,7 +8,7 @@ keywords = ["api", "web", "social", "mastodon", "wrapper"]
 categories = ["web-programming", "web-programming::http-client", "api-bindings"]
 license = "MIT/Apache-2.0"
 edition = "2021"
-repository = "https://github.com/dscottboggs/elefren.git"
+repository = "https://github.com/dscottboggs/mastodon-async.git"
 
 [package.metadata.docs.rs]
 features = ["all"]

@@ -1,3 +1,19 @@
+<a name="v1.0.0"></a>
+## v1.0.0
+
+#### Breaking Changes
+
+* All functions which interact with the API are now async. As a part of this
+  change, the streaming API now returns a `Stream` instead of an `Iterator`.
+* The crate has been renamed to `mastodon-async`.
+* Search API v1 has been removed.
+
+#### Features
+* Structured logging
+
+#### Bug fixes
+* Streaming API was incomplete, it now works
+
 <a name="v0.18.0"></a>
 ## v0.18.0 (2019-01-05)
 

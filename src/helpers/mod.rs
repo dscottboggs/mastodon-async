@@ -4,7 +4,7 @@
 /// In order to use this module, set the "toml" feature in your Cargo.toml:
 ///
 /// ```toml,ignore
-/// [dependencies.elefren]
+/// [dependencies.mastodon-async]
 /// version = "0.22"
 /// features = ["toml"]
 /// ```
@@ -28,7 +28,7 @@ pub mod json;
 /// In order to use this module, set the "env" feature in your Cargo.toml:
 ///
 /// ```toml,ignore
-/// [dependencies.elefren]
+/// [dependencies.mastodon-async]
 /// version = "0.22"
 /// features = ["env"]
 /// ```

@@ -2,15 +2,15 @@
 #![cfg_attr(not(feature = "toml"), allow(unused_imports))]
 mod register;
 
-use elefren::Result;
 use futures_util::TryStreamExt;
 use log::{as_serde, info};
+use mastodon_async::Result;
 
 #[cfg(feature = "toml")]
 #[tokio::main]
 async fn main() -> Result<()> {
-    use elefren::entities::prelude::Event;
     use log::warn;
+    use mastodon_async::entities::prelude::Event;
 
     femme::with_level(log::LevelFilter::Info);
     let mastodon = register::get_mastodon_data().await?;

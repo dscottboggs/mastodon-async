@@ -2,11 +2,7 @@
 #![cfg_attr(not(feature = "toml"), allow(unused_imports))]
 #[macro_use]
 extern crate pretty_env_logger;
-extern crate elefren;
 mod register;
-
-use register::Mastodon;
-use std::error;
 
 #[cfg(feature = "toml")]
 fn main() -> Result<(), Box<error::Error>> {
