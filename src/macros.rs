@@ -440,7 +440,7 @@ macro_rules! paged_routes_with_id {
 }
 
 macro_rules! streaming {
-    ($stream:literal@$fn_name:ident ($desc:tt), $($rest:tt)*) => {
+    ($desc:tt $fn_name:ident@$stream:literal, $($rest:tt)*) => {
         doc_comment! {
             concat!(
                 $desc,
@@ -468,7 +468,7 @@ tokio_test::block_on(async {
 });"
             ),
             pub async fn $fn_name(&self) -> Result<impl TryStream<Ok=Event, Error=Error>> {
-                let url = self.route(concat!("/api/v1/streaming/", stringify!($stream)));
+                let url = self.route(&format!("/api/v1/streaming/{}", $stream));
                 let response = self.authenticated(self.client.get(&url)).send().await?;
                 debug!(
                     status = log_serde!(response Status), url = &url,
@@ -480,7 +480,7 @@ tokio_test::block_on(async {
         }
         streaming! { $($rest)* }
     };
-    ($stream:literal($param:ident: $param_type:ty, like $param_doc_val:literal)@$fn_name:ident ($desc:tt), $($rest:tt)*) => {
+    ($desc:tt $fn_name:ident($param:ident: $param_type:ty, like $param_doc_val:literal)@$stream:literal, $($rest:tt)*) => {
         doc_comment! {
             concat!(
                 $desc,
