@@ -70,10 +70,11 @@ features = ["io"]
 tokio-test = "0.4.2"
 futures-util = "0.3.25"
 indoc = "1.0"
-pretty_env_logger = "0.3.0"
 skeptic = "0.13"
 tempfile = "3"
+# for examples:
 femme = "2.2.1"
+html2text = "0.4.4"
 
 [build-dependencies.skeptic]
 version = "0.13"

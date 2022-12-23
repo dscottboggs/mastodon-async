@@ -45,8 +45,8 @@ pub async fn register() -> Result<Mastodon> {
 }
 
 #[cfg(feature = "toml")]
-pub fn read_line(message: &str) -> Result<String> {
-    println!("{}", message);
+pub fn read_line(message: impl AsRef<str>) -> Result<String> {
+    println!("{}", message.as_ref());
 
     let mut input = String::new();
     io::stdin().read_line(&mut input)?;

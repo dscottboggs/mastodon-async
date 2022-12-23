@@ -1,5 +1,10 @@
 use super::{Mastodon, Result};
-use crate::{entities::itemsiter::ItemsIter, format_err, helpers::read_response::read_response};
+use crate::{
+    entities::itemsiter::ItemsIter,
+    format_err,
+    helpers::read_response::read_response,
+    Error,
+};
 use futures::Stream;
 use hyper_old_types::header::{parsing, Link, RelationType};
 use log::{as_debug, as_serde, debug, error, trace};
@@ -107,20 +112,29 @@ impl<'a, T: for<'de> Deserialize<'de> + Serialize> Page<T> {
 
     /// Create a new Page.
     pub(crate) async fn new(mastodon: Mastodon, response: Response, call_id: Uuid) -> Result<Self> {
-        let (prev, next) = get_links(&response, call_id)?;
-        let initial_items = read_response(response).await?;
-        debug!(
-            initial_items = as_serde!(initial_items), prev = as_debug!(prev),
-            next = as_debug!(next), call_id = as_debug!(call_id);
-            "received first page from API call"
-        );
-        Ok(Page {
-            initial_items,
-            next,
-            prev,
-            mastodon,
-            call_id,
-        })
+        let status = response.status();
+        if status.is_success() {
+            let (prev, next) = get_links(&response, call_id)?;
+            let initial_items = read_response(response).await?;
+            debug!(
+                initial_items = as_serde!(initial_items), prev = as_debug!(prev),
+                next = as_debug!(next), call_id = as_debug!(call_id);
+                "received first page from API call"
+            );
+            Ok(Page {
+                initial_items,
+                next,
+                prev,
+                mastodon,
+                call_id,
+            })
+        } else {
+            let response = response.json().await?;
+            Err(Error::Api {
+                status,
+                response,
+            })
+        }
     }
 }
 
