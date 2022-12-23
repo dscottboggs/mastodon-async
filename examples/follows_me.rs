@@ -1,18 +1,22 @@
 #![cfg_attr(not(feature = "toml"), allow(dead_code))]
 #![cfg_attr(not(feature = "toml"), allow(unused_imports))]
-#[macro_use]
-extern crate pretty_env_logger;
 mod register;
-
-use register::Mastodon;
-use std::error;
+use mastodon_async::Result;
 
 #[cfg(feature = "toml")]
-fn main() -> Result<(), Box<error::Error>> {
-    let mastodon = register::get_mastodon_data()?;
-    for account in mastodon.follows_me()?.items_iter() {
-        println!("{}", account.acct);
-    }
+#[tokio::main]
+async fn main() -> Result<()> {
+    use futures::StreamExt;
+
+    let mastodon = register::get_mastodon_data().await?;
+    mastodon
+        .follows_me()
+        .await?
+        .items_iter()
+        .for_each(|account| async move {
+            println!("{}", account.acct);
+        })
+        .await;
 
     Ok(())
 }

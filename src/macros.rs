@@ -18,22 +18,12 @@ macro_rules! methods {
                 async fn $method_with_call_id<T: for<'de> serde::Deserialize<'de> + serde::Serialize>(&self, url: impl AsRef<str>, call_id: Uuid) -> Result<T>
                 {
 
-                    use log::{debug, error, as_debug, as_serde};
+                    use log::{debug, as_debug};
 
                     let url = url.as_ref();
                     debug!(url = url, method = stringify!($method), call_id = as_debug!(call_id); "making API request");
-                    let response = self.authenticated(self.client.$method(url)).send().await?;
-                    match response.error_for_status() {
-                        Ok(response) => {
-                            let response = read_response(response).await?;
-                            debug!(response = as_serde!(response), url = url, method = stringify!($method), call_id = as_debug!(call_id); "received API response");
-                            Ok(response)
-                        }
-                        Err(err) => {
-                            error!(err = as_debug!(err), url = url, method = stringify!($method), call_id = as_debug!(call_id); "error making API request");
-                            Err(err.into())
-                        }
-                    }
+                    let response = self.authenticated(self.client.$method(url)).header("Accept", "application/json").send().await?;
+                    read_response(response).await
                 }
             }
          )+
@@ -50,28 +40,20 @@ macro_rules! paged_routes {
             "`\n# Errors\nIf `access_token` is not set.",
             "\n",
             "```no_run",
-            "use elefren::prelude::*;\n",
+            "use mastodon_async::prelude::*;\n",
             "let data = Data::default();\n",
             "let client = Mastodon::from(data);\n",
             "client.", stringify!($name), "();\n",
             "```"
             ),
             pub async fn $name(&self) -> Result<Page<$ret>> {
-                use log::{debug, as_debug, error};
+                use log::{debug, as_debug};
                 let url = self.route(concat!("/api/v1/", $url));
                 let call_id = uuid::Uuid::new_v4();
                 debug!(url = url, method = stringify!($method), call_id = as_debug!(call_id); "making API request");
-                let response = self.authenticated(self.client.$method(&url)).send().await?;
+                let response = self.authenticated(self.client.$method(&url)).header("Accept", "application/json").send().await?;
 
-                match response.error_for_status() {
-                    Ok(response) => {
-                        Page::new(self.clone(), response, call_id).await
-                    }
-                    Err(err) => {
-                        error!(err = as_debug!(err), url = url, method = stringify!($method), call_id = as_debug!(call_id); "error making API request");
-                        Err(err.into())
-                    }
-                }
+                Page::new(self.clone(), response, call_id).await
             }
 
         }
@@ -88,7 +70,7 @@ macro_rules! paged_routes {
             ),
             pub async fn $name<'a>(&self, $($param: $typ,)*) -> Result<Page<$ret>> {
                 use serde_urlencoded;
-                use log::{debug, as_debug, error};
+                use log::{debug, as_debug};
 
                 let call_id = uuid::Uuid::new_v4();
 
@@ -117,17 +99,9 @@ macro_rules! paged_routes {
 
                 debug!(url = url, method = "get", call_id = as_debug!(call_id); "making API request");
 
-                let response = self.authenticated(self.client.get(&url)).send().await?;
+                let response = self.authenticated(self.client.get(&url)).header("Accept", "application/json").send().await?;
 
-                match response.error_for_status() {
-                    Ok(response) => {
-                        Page::new(self.clone(), response, call_id).await
-                    }
-                    Err(err) => {
-                        error!(err = as_debug!(err), url = url, method = stringify!($method), call_id = as_debug!(call_id); "error making API request");
-                        Err(err.into())
-                    }
-                }
+                Page::new(self.clone(), response, call_id).await
             }
         }
 
@@ -181,6 +155,62 @@ macro_rules! route_v2 {
         route_v2!{$($rest)*}
     };
 
+    ((post multipart ($($param:ident: $typ:ty,)*)) $name:ident: $url:expr => $ret:ty, $($rest:tt)*) => {
+        doc_comment! {
+            concat!(
+                "Equivalent to `post /api/v2/",
+                $url,
+                "`\n# Errors\nIf `access_token` is not set."),
+            pub async fn $name(&self, $($param: $typ,)*) -> Result<$ret> {
+                use reqwest::multipart::{Form, Part};
+                use std::io::Read;
+                use log::{debug, error, as_debug};
+                use uuid::Uuid;
+
+                let call_id = Uuid::new_v4();
+
+                let form_data = Form::new()
+                    $(
+                        .part(stringify!($param), {
+                            let path = $param.as_ref();
+                            match std::fs::File::open(path) {
+                                Ok(mut file) => {
+                                    let mut data = if let Ok(metadata) = file.metadata() {
+                                        Vec::with_capacity(metadata.len().try_into()?)
+                                    } else {
+                                        vec![]
+                                    };
+                                    file.read_to_end(&mut data)?;
+                                    Part::bytes(data)
+                                }
+                                Err(err) => {
+                                    error!(path = as_debug!(path), error = as_debug!(err); "error reading file contents for multipart form");
+                                    return Err(err.into());
+                                }
+                            }
+                        })
+                     )*;
+
+                let url = &self.route(concat!("/api/v2/", $url));
+
+                debug!(
+                    url = url, method = stringify!($method),
+                    multipart_form_data = as_debug!(form_data), call_id = as_debug!(call_id);
+                    "making API request"
+                );
+
+                let response = self.authenticated(self.client.post(url))
+                    .multipart(form_data)
+                    .header("Accept", "application/json")
+                    .send()
+                    .await?;
+
+                read_response(response).await
+            }
+        }
+
+        route!{$($rest)*}
+    };
     () => {}
 }
 
@@ -195,7 +225,7 @@ macro_rules! route {
             pub async fn $name(&self, $($param: $typ,)*) -> Result<$ret> {
                 use reqwest::multipart::{Form, Part};
                 use std::io::Read;
-                use log::{debug, error, as_debug, as_serde};
+                use log::{debug, error, as_debug};
                 use uuid::Uuid;
 
                 let call_id = Uuid::new_v4();
@@ -232,20 +262,11 @@ macro_rules! route {
 
                 let response = self.authenticated(self.client.post(url))
                     .multipart(form_data)
+                    .header("Accept", "application/json")
                     .send()
                     .await?;
 
-                match response.error_for_status() {
-                    Ok(response) => {
-                        let response = read_response(response).await?;
-                        debug!(response = as_serde!(response), url = url, method = stringify!($method), call_id = as_debug!(call_id); "received API response");
-                        Ok(response)
-                    }
-                    Err(err) => {
-                        error!(err = as_debug!(err), url = url, method = stringify!($method), call_id = as_debug!(call_id); "error making API request");
-                        Err(err.into())
-                    }
-                }
+                read_response(response).await
             }
         }
 
@@ -304,7 +325,7 @@ macro_rules! route {
                 "`\n# Errors\nIf `access_token` is not set.",
             ),
             pub async fn $name(&self, $($param: $typ,)*) -> Result<$ret> {
-                use log::{debug, error, as_debug, as_serde};
+                use log::{debug, as_debug, as_serde};
                 use uuid::Uuid;
 
                 let call_id = Uuid::new_v4();
@@ -324,20 +345,11 @@ macro_rules! route {
 
                 let response = self.authenticated(self.client.$method(url))
                     .json(&form_data)
+                    .header("Accept", "application/json")
                     .send()
                     .await?;
 
-                match response.error_for_status() {
-                    Ok(response) => {
-                        let response = read_response(response).await?;
-                        debug!(response = as_serde!(response), url = $url, method = stringify!($method), call_id = as_debug!(call_id); "received API response");
-                        Ok(response)
-                    }
-                    Err(err) => {
-                        error!(err = as_debug!(err), url = $url, method = stringify!($method), call_id = as_debug!(call_id); "error making API request");
-                        Err(err.into())
-                    }
-                }
+                read_response(response).await
             }
         }
 
@@ -352,7 +364,7 @@ macro_rules! route {
                 "`\n# Errors\nIf `access_token` is not set.",
                 "\n",
                 "```no_run",
-                "use elefren::prelude::*;\n",
+                "use mastodon_async::prelude::*;\n",
                 "let data = Data::default();\n",
                 "let client = Mastodon::from(data);\n",
                 "client.", stringify!($name), "();\n",
@@ -380,7 +392,7 @@ macro_rules! route_id {
                     "`\n# Errors\nIf `access_token` is not set.",
                     "\n",
                     "```no_run",
-                    "use elefren::prelude::*;\n",
+                    "use mastodon_async::prelude::*;\n",
                     "let data = Data::default();\n",
                     "let client = Mastodon::from(data);\n",
                     "client.", stringify!($name), "(\"42\");\n",
@@ -406,30 +418,22 @@ macro_rules! paged_routes_with_id {
                 "`\n# Errors\nIf `access_token` is not set.",
                 "\n",
                 "```no_run",
-                "use elefren::prelude::*;\n",
+                "use mastodon_async::prelude::*;\n",
                 "let data = Data::default();",
                 "let client = Mastodon::from(data);\n",
                 "client.", stringify!($name), "(\"some-id\");\n",
                 "```"
             ),
             pub async fn $name(&self, id: &str) -> Result<Page<$ret>> {
-                use log::{debug, error, as_debug};
+                use log::{debug, as_debug};
                 use uuid::Uuid;
 
                 let call_id = Uuid::new_v4();
                 let url = self.route(&format!(concat!("/api/v1/", $url), id));
 
                 debug!(url = url, method = stringify!($method), call_id = as_debug!(call_id); "making API request");
-                let response = self.authenticated(self.client.$method(&url)).send().await?;
-                match response.error_for_status() {
-                    Ok(response) => {
-                        Page::new(self.clone(), response, call_id).await
-                    }
-                    Err(err) => {
-                        error!(err = as_debug!(err), url = url, method = stringify!($method), call_id = as_debug!(call_id); "error making API request");
-                        Err(err.into())
-                    }
-                }
+                let response = self.authenticated(self.client.$method(&url)).header("Accept", "application/json").send().await?;
+                Page::new(self.clone(), response, call_id).await
             }
         }
 
@@ -446,8 +450,8 @@ macro_rules! streaming {
                 $desc,
                 "\n\nExample:\n\n",
                 "
-use elefren::prelude::*;
-use elefren::entities::event::Event;
+use mastodon_async::prelude::*;
+use mastodon_async::entities::event::Event;
 use futures_util::{pin_mut, StreamExt, TryStreamExt};
 
 tokio_test::block_on(async {
@@ -469,13 +473,19 @@ tokio_test::block_on(async {
             ),
             pub async fn $fn_name(&self) -> Result<impl TryStream<Ok=Event, Error=Error>> {
                 let url = self.route(&format!("/api/v1/streaming/{}", $stream));
-                let response = self.authenticated(self.client.get(&url)).send().await?;
+                let response = self.authenticated(self.client.get(&url)).header("Accept", "application/json").send().await?;
                 debug!(
                     status = log_serde!(response Status), url = &url,
                     headers = log_serde!(response Headers);
                     "received API response"
                 );
-                Ok(event_stream(response.error_for_status()?, url))
+                let status = response.status();
+                if status.is_success() {
+                     Ok(event_stream(response, url))
+                } else {
+                    let response = response.json().await?;
+                    Err(Error::Api{ status, response })
+                }
             }
         }
         streaming! { $($rest)* }
@@ -486,8 +496,8 @@ tokio_test::block_on(async {
                 $desc,
                 "\n\nExample:\n\n",
                 "
-use elefren::prelude::*;
-use elefren::entities::event::Event;
+use mastodon_async::prelude::*;
+use mastodon_async::entities::event::Event;
 use futures_util::{pin_mut, StreamExt, TryStreamExt};
 
 tokio_test::block_on(async {
@@ -513,13 +523,19 @@ tokio_test::block_on(async {
                 let mut url: Url = self.route(concat!("/api/v1/streaming/", stringify!($stream))).parse()?;
                 url.query_pairs_mut().append_pair(stringify!($param), $param.as_ref());
                 let url = url.to_string();
-                let response = self.authenticated(self.client.get(url.as_str())).send().await?;
+                let response = self.authenticated(self.client.get(url.as_str())).header("Accept", "application/json").send().await?;
                 debug!(
                     status = log_serde!(response Status), url = as_debug!(url),
                     headers = log_serde!(response Headers);
                     "received API response"
                 );
-                Ok(event_stream(response.error_for_status()?, url))
+                let status = response.status();
+                if status.is_success() {
+                     Ok(event_stream(response, url))
+                } else {
+                    let response = response.json().await?;
+                    Err(Error::Api{ status, response })
+                }
             }
         }
         streaming! { $($rest)* }

@@ -24,7 +24,7 @@ impl App {
     /// // Example
     ///
     /// ```
-    /// use elefren::apps::App;
+    /// use mastodon_async::apps::App;
     ///
     /// let mut builder = App::builder();
     /// ```
@@ -37,10 +37,10 @@ impl App {
     /// // Example
     ///
     /// ```
-    /// use elefren::{apps::App, scopes::Scopes};
+    /// use mastodon_async::{apps::App, scopes::Scopes};
     ///
     /// let mut builder = App::builder();
-    /// builder.client_name("elefren-test");
+    /// builder.client_name("mastodon-async-test");
     /// let app = builder.build().unwrap();
     /// let scopes = app.scopes();
     /// assert_eq!(scopes, &Scopes::read_all());
@@ -52,10 +52,10 @@ impl App {
 
 /// Builder struct for defining your application.
 /// ```
-/// use elefren::{apps::App};
+/// use mastodon_async::{apps::App};
 ///
 /// let mut builder = App::builder();
-/// builder.client_name("elefren_test");
+/// builder.client_name("mastodon-async_test");
 /// let app = builder.build().unwrap();
 /// ```
 #[derive(Clone, Debug, Default, PartialEq, Serialize)]

@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 /// Log metadata about this request based on the type given:
 ///
 /// ```no_run
-/// use elefren::log_serde;
+/// use mastodon_async::log_serde;
 /// tokio_test::block_on(async {
 ///   let request = reqwest::get("https://example.org/").await.unwrap();
 ///   log::warn!(

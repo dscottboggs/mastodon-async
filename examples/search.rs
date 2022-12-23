@@ -1,17 +1,15 @@
 #![cfg_attr(not(feature = "toml"), allow(dead_code))]
 #![cfg_attr(not(feature = "toml"), allow(unused_imports))]
-#[macro_use]
-extern crate pretty_env_logger;
 mod register;
 
-use register::Mastodon;
-use std::error;
+use mastodon_async::Result;
 
 #[cfg(feature = "toml")]
-fn main() -> Result<(), Box<error::Error>> {
-    let mastodon = register::get_mastodon_data()?;
+#[tokio::main]
+async fn main() -> Result<()> {
+    let mastodon = register::get_mastodon_data().await?;
     let input = register::read_line("Enter the term you'd like to search: ")?;
-    let result = mastodon.search(&input, false)?;
+    let result = mastodon.search(&input, false).await?;
 
     println!("{:#?}", result);
 

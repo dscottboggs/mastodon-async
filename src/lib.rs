@@ -1,14 +1,14 @@
-//! # Elefren: API Wrapper around the Mastodon API.
+//! # mastodon-async: API Wrapper around the Mastodon API.
 //!
 //! Most of the api is documented on [Mastodon's website](https://docs.joinmastodon.org/client/intro/)
 //!
 //! ```no_run
-//! use elefren::{helpers::cli, prelude::*};
+//! use mastodon_async::{helpers::cli, prelude::*};
 //! use futures_util::StreamExt;
 //!
 //! tokio_test::block_on(async {
 //!     let registration = Registration::new("https://botsin.space")
-//!         .client_name("elefren_test")
+//!         .client_name("mastodon-async_test")
 //!         .build()
 //!         .await
 //!         .unwrap();
@@ -28,12 +28,12 @@
 //! });
 //! ```
 //!
-//! Elefren also supports Mastodon's Streaming API:
+//! mastodon-async also supports Mastodon's Streaming API:
 //!
 //! ## Example
 //!
 //! ```no_run
-//! use elefren::{prelude::*, entities::event::Event};
+//! use mastodon_async::{prelude::*, entities::event::Event};
 //! use futures_util::TryStreamExt;
 //!
 //! let data = Data::default();

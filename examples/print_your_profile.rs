@@ -1,17 +1,14 @@
 #![cfg_attr(not(feature = "toml"), allow(dead_code))]
 #![cfg_attr(not(feature = "toml"), allow(unused_imports))]
-#[macro_use]
-extern crate pretty_env_logger;
-extern crate elefren;
 mod register;
 
-use register::Mastodon;
-use std::error;
+use mastodon_async::Result;
 
 #[cfg(feature = "toml")]
-fn main() -> Result<(), Box<error::Error>> {
-    let mastodon = register::get_mastodon_data()?;
-    let you = mastodon.verify_credentials()?;
+#[tokio::main]
+async fn main() -> Result<()> {
+    let mastodon = register::get_mastodon_data().await?;
+    let you = mastodon.verify_credentials().await?;
 
     println!("{:#?}", you);
 

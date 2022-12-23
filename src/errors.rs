@@ -22,7 +22,12 @@ pub type Result<T> = ::std::result::Result<T, Error>;
 pub enum Error {
     /// Error from the Mastodon API. This typically means something went
     /// wrong with your authentication or data.
-    Api(ApiError),
+    Api {
+        /// The response status.
+        status: StatusCode,
+        /// The JSON-decoded error response from the server.
+        response: ApiError,
+    },
     /// Error deserialising to json. Typically represents a breaking change in
     /// the Mastodon API
     Serde(SerdeError),
@@ -40,10 +45,6 @@ pub enum Error {
     ClientSecretRequired,
     /// Missing Access Token.
     AccessTokenRequired,
-    /// Generic client error.
-    Client(StatusCode),
-    /// Generic server error.
-    Server(StatusCode),
     /// MastodonBuilder & AppBuilder error
     MissingField(&'static str),
     #[cfg(feature = "toml")]
@@ -79,39 +80,40 @@ impl fmt::Display for Error {
 
 impl error::Error for Error {
     fn source(&self) -> Option<&(dyn error::Error + 'static)> {
-        Some(match *self {
-            Error::Api(ref e) => e,
-            Error::Serde(ref e) => e,
-            Error::UrlEncoded(ref e) => e,
-            Error::Http(ref e) => e,
-            Error::Io(ref e) => e,
-            Error::Url(ref e) => e,
+        match *self {
+            Error::Serde(ref e) => Some(e),
+            Error::UrlEncoded(ref e) => Some(e),
+            Error::Http(ref e) => Some(e),
+            Error::Io(ref e) => Some(e),
+            Error::Url(ref e) => Some(e),
             #[cfg(feature = "toml")]
-            Error::TomlSer(ref e) => e,
+            Error::TomlSer(ref e) => Some(e),
             #[cfg(feature = "toml")]
-            Error::TomlDe(ref e) => e,
-            Error::HeaderStrError(ref e) => e,
-            Error::HeaderParseError(ref e) => e,
+            Error::TomlDe(ref e) => Some(e),
+            Error::HeaderStrError(ref e) => Some(e),
+            Error::HeaderParseError(ref e) => Some(e),
             #[cfg(feature = "env")]
-            Error::Envy(ref e) => e,
-            Error::SerdeQs(ref e) => e,
-            Error::IntConversion(ref e) => e,
-            Error::Client(..) | Error::Server(..) => return None,
-            Error::ClientIdRequired => return None,
-            Error::ClientSecretRequired => return None,
-            Error::AccessTokenRequired => return None,
-            Error::MissingField(_) => return None,
-            Error::Other(..) => return None,
-        })
+            Error::Envy(ref e) => Some(e),
+            Error::SerdeQs(ref e) => Some(e),
+            Error::IntConversion(ref e) => Some(e),
+            Error::Api {
+                ..
+            }
+            | Error::ClientIdRequired
+            | Error::ClientSecretRequired
+            | Error::AccessTokenRequired
+            | Error::MissingField(_)
+            | Error::Other(..) => None,
+        }
     }
 }
 
 /// Error returned from the Mastodon API.
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct ApiError {
-    /// The type of error.
-    pub error: Option<String>,
-    /// The description of the error.
+    /// The error message.
+    pub error: String,
+    /// A longer description of the error, mainly provided with the OAuth API.
     pub error_description: Option<String>,
 }
 
@@ -143,7 +145,6 @@ from! {
     SerdeError => Serde,
     UrlEncodedError => UrlEncoded,
     UrlError => Url,
-    ApiError => Api,
     #[cfg(feature = "toml")] TomlSerError => TomlSer,
     #[cfg(feature = "toml")] TomlDeError => TomlDe,
     HeaderStrError => HeaderStrError,
@@ -211,16 +212,6 @@ mod tests {
         let err: UrlError = UrlError::EmptyHost;
         let err: Error = Error::from(err);
         assert_is!(err, Error::Url(..));
-    }
-
-    #[test]
-    fn from_api_error() {
-        let err: ApiError = ApiError {
-            error: None,
-            error_description: None,
-        };
-        let err: Error = Error::from(err);
-        assert_is!(err, Error::Api(..));
     }
 
     #[cfg(feature = "toml")]

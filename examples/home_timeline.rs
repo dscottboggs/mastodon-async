@@ -1,19 +1,27 @@
 #![cfg_attr(not(feature = "toml"), allow(dead_code))]
 #![cfg_attr(not(feature = "toml"), allow(unused_imports))]
-#[macro_use]
-extern crate pretty_env_logger;
 mod register;
-
-use register::Mastodon;
-use std::error;
+use futures_util::StreamExt;
+use mastodon_async::Result;
 
 #[cfg(feature = "toml")]
-fn main() -> Result<(), Box<error::Error>> {
-    let mastodon = register::get_mastodon_data()?;
-    let tl = mastodon.get_home_timeline()?;
-
-    println!("{:#?}", tl);
-
+#[tokio::main]
+async fn main() -> Result<()> {
+    register::get_mastodon_data()
+        .await?
+        .get_home_timeline()
+        .await?
+        .items_iter()
+        .for_each(|status| async move {
+            print!(
+                "\ttoot from {}:\n{}",
+                status.account.display_name,
+                html2text::parse(status.content.as_bytes())
+                    .render_plain(90)
+                    .into_string()
+            )
+        })
+        .await;
     Ok(())
 }
 

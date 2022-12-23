@@ -89,10 +89,8 @@ impl Mastodon {
         (post (domain: String,)) block_domain: "domain_blocks" => Empty,
         (post (id: &str,)) authorize_follow_request: "accounts/follow_requests/authorize" => Empty,
         (post (id: &str,)) reject_follow_request: "accounts/follow_requests/reject" => Empty,
-        (get  (q: &'a str, resolve: bool,)) search: "search" => SearchResult,
         (get  (local: bool,)) get_public_timeline: "timelines/public" => Vec<Status>,
         (post (uri: Cow<'static, str>,)) follows: "follows" => Account,
-        (post multipart (file: impl AsRef<Path>,)) media: "media" => Attachment,
         (post) clear_notifications: "notifications/clear" => Empty,
         (post (id: &str,)) dismiss_notification: "notifications/dismiss" => Empty,
         (get) get_push_subscription: "push/subscription" => Subscription,
@@ -102,7 +100,9 @@ impl Mastodon {
     }
 
     route_v2! {
-        (get (q: &'a str, resolve: bool,)) search_v2: "search" => SearchResultV2,
+        (get (q: &'a str, resolve: bool,)) search: "search" => SearchResult,
+        (post multipart (file: impl AsRef<Path>,)) media: "media" => Attachment,
+        (post multipart (file: impl AsRef<Path>, thumbnail: impl AsRef<Path>,)) media_with_thumbnail: "media" => Attachment,
     }
 
     route_id! {
@@ -170,14 +170,14 @@ impl Mastodon {
 
     /// POST /api/v1/filters
     pub async fn add_filter(&self, request: &mut AddFilterRequest) -> Result<Filter> {
-        Ok(self
+        let response = self
             .client
             .post(self.route("/api/v1/filters"))
             .json(&request)
             .send()
-            .await?
-            .json()
-            .await?)
+            .await?;
+
+        read_response(response).await
     }
 
     /// PUT /api/v1/filters/:id
@@ -185,15 +185,7 @@ impl Mastodon {
         let url = self.route(&format!("/api/v1/filters/{}", id));
         let response = self.client.put(&url).json(&request).send().await?;
 
-        let status = response.status();
-
-        if status.is_client_error() {
-            return Err(Error::Client(status.clone()));
-        } else if status.is_server_error() {
-            return Err(Error::Server(status.clone()));
-        }
-
-        Ok(read_response(response).await?)
+        read_response(response).await
     }
 
     /// Update the user credentials
@@ -202,15 +194,7 @@ impl Mastodon {
         let url = self.route("/api/v1/accounts/update_credentials");
         let response = self.client.patch(&url).json(&changes).send().await?;
 
-        let status = response.status();
-
-        if status.is_client_error() {
-            return Err(Error::Client(status.clone()));
-        } else if status.is_server_error() {
-            return Err(Error::Server(status.clone()));
-        }
-
-        Ok(read_response(response).await?)
+        read_response(response).await
     }
 
     /// Post a new status to the account.
@@ -226,7 +210,7 @@ impl Mastodon {
             headers = log_serde!(response Headers);
             "received API response"
         );
-        Ok(read_response(response).await?)
+        read_response(response).await
     }
 
     /// Get timeline filtered by a hashtag(eg. `#coffee`) either locally or
@@ -248,7 +232,7 @@ impl Mastodon {
     /// // Example
     ///
     /// ```no_run
-    /// use elefren::prelude::*;
+    /// use mastodon_async::prelude::*;
     /// tokio_test::block_on(async {
     ///     let data = Data::default();
     ///     let client = Mastodon::from(data);
@@ -257,7 +241,7 @@ impl Mastodon {
     /// ```
     ///
     /// ```no_run
-    /// use elefren::prelude::*;
+    /// use mastodon_async::prelude::*;
     /// tokio_test::block_on(async {
     ///     let data = Data::default();
     ///     let client = Mastodon::from(data);
@@ -280,15 +264,7 @@ impl Mastodon {
         debug!(url = url, method = stringify!($method), call_id = as_debug!(call_id); "making API request");
         let response = self.client.get(&url).send().await?;
 
-        match response.error_for_status() {
-            Ok(response) => Page::new(self.clone(), response, call_id).await,
-            Err(err) => {
-                error!(err = as_debug!(err), url = url, method = stringify!($method), call_id = as_debug!(call_id); "error making API request");
-                // Cannot retrieve request body as it's been moved into the
-                // other match arm.
-                Err(err.into())
-            },
-        }
+        Page::new(self.clone(), response, call_id).await
     }
 
     /// Returns the client account's relationship to a list of other accounts.
@@ -316,18 +292,7 @@ impl Mastodon {
         );
         let response = self.client.get(&url).send().await?;
 
-        match response.error_for_status() {
-            Ok(response) => Page::new(self.clone(), response, call_id).await,
-            Err(err) => {
-                error!(
-                    err = as_debug!(err), url = url,
-                    method = stringify!($method), call_id = as_debug!(call_id),
-                    account_ids = as_serde!(ids);
-                    "error making API request"
-                );
-                Err(err.into())
-            },
-        }
+        Page::new(self.clone(), response, call_id).await
     }
 
     /// Add a push notifications subscription
@@ -342,18 +307,7 @@ impl Mastodon {
         );
         let response = self.client.post(url).json(&request).send().await?;
 
-        match response.error_for_status() {
-            Ok(response) => {
-                let status = response.status();
-                let response = read_response(response).await?;
-                debug!(status = as_debug!(status), response = as_serde!(response); "received API response");
-                Ok(response)
-            },
-            Err(err) => {
-                error!(err = as_debug!(err), url = url, method = stringify!($method), call_id = as_debug!(call_id); "error making API request");
-                Err(err.into())
-            },
-        }
+        read_response(response).await
     }
 
     /// Update the `data` portion of the push subscription associated with this
@@ -369,18 +323,7 @@ impl Mastodon {
         );
         let response = self.client.post(url).json(&request).send().await?;
 
-        match response.error_for_status() {
-            Ok(response) => {
-                let status = response.status();
-                let response = read_response(response).await?;
-                debug!(status = as_debug!(status), response = as_serde!(response); "received API response");
-                Ok(response)
-            },
-            Err(err) => {
-                error!(err = as_debug!(err), url = url, method = stringify!($method), call_id = as_debug!(call_id); "error making API request");
-                Err(err.into())
-            },
-        }
+        read_response(response).await
     }
 
     /// Get all accounts that follow the authenticated user

@@ -1,50 +1,52 @@
 #![cfg_attr(not(feature = "toml"), allow(dead_code))]
 #![cfg_attr(not(feature = "toml"), allow(unused_imports))]
 
-pub use elefren::prelude::*;
+pub use mastodon_async::prelude::*;
 
-use std::{error::Error, io};
+use std::io;
 
-use elefren::helpers::cli;
 #[cfg(feature = "toml")]
-use elefren::helpers::toml;
+use mastodon_async::helpers::toml;
+use mastodon_async::{helpers::cli, Result};
 
 #[allow(dead_code)]
 #[cfg(feature = "toml")]
-fn main() -> Result<(), Box<Error>> {
-    register()?;
+#[tokio::main]
+async fn main() -> Result<()> {
+    register().await?;
     Ok(())
 }
 
 #[allow(dead_code)]
 #[cfg(feature = "toml")]
-pub fn get_mastodon_data() -> Result<Mastodon, Box<Error>> {
+pub async fn get_mastodon_data() -> Result<Mastodon> {
     if let Ok(data) = toml::from_file("mastodon-data.toml") {
         Ok(Mastodon::from(data))
     } else {
-        register()
+        register().await
     }
 }
 
 #[cfg(feature = "toml")]
-pub fn register() -> Result<Mastodon, Box<Error>> {
+pub async fn register() -> Result<Mastodon> {
     let website = read_line("Please enter your mastodon instance url:")?;
     let registration = Registration::new(website.trim())
         .client_name("elefren-examples")
         .scopes(Scopes::all())
-        .website("https://github.com/pwoolcoc/elefren")
-        .build()?;
-    let mastodon = cli::authenticate(registration)?;
+        .website("https://github.com/dscottboggs/mastodon-async")
+        .build()
+        .await?;
+    let mastodon = cli::authenticate(registration).await?;
 
     // Save app data for using on the next run.
-    toml::to_file(&*mastodon, "mastodon-data.toml")?;
+    toml::to_file(&mastodon.data, "mastodon-data.toml")?;
 
     Ok(mastodon)
 }
 
 #[cfg(feature = "toml")]
-pub fn read_line(message: &str) -> Result<String, Box<Error>> {
-    println!("{}", message);
+pub fn read_line(message: impl AsRef<str>) -> Result<String> {
+    println!("{}", message.as_ref());
 
     let mut input = String::new();
     io::stdin().read_line(&mut input)?;

@@ -1,18 +1,14 @@
 #![cfg_attr(not(feature = "toml"), allow(dead_code))]
 #![cfg_attr(not(feature = "toml"), allow(unused_imports))]
-#[macro_use]
-extern crate pretty_env_logger;
-extern crate elefren;
 mod register;
-
-use register::Mastodon;
-use std::error;
+use mastodon_async::Result;
 
 #[cfg(feature = "toml")]
-fn main() -> Result<(), Box<error::Error>> {
-    let mastodon = register::get_mastodon_data()?;
+#[tokio::main]
+async fn main() -> Result<()> {
+    let mastodon = register::get_mastodon_data().await?;
     let input = register::read_line("Enter the account id you'd like to follow: ")?;
-    let new_follow = mastodon.follow(input.trim())?;
+    let new_follow = mastodon.follow(input.trim()).await?;
 
     println!("{:#?}", new_follow);
     Ok(())

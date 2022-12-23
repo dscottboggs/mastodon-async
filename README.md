@@ -1,30 +1,28 @@
-# Elefren
+# Async Mastodon client library 
 
-## A Wrapper for the Mastodon API.
+[![Build Status](https://github.com/dscottboggs/mastodon-async/actions/workflows/rust.yml/badge.svg)]
+[![crates.io](https://img.shields.io/crates/v/mastodon-async.svg)](https://crates.io/crates/mastodon-async)
+[![Docs](https://docs.rs/mastodon-async/badge.svg)](https://docs.rs/mastodon-async)
+[![MIT/APACHE-2.0](https://img.shields.io/crates/l/mastodon-async.svg)](https://crates.io/crates/mastodon-async)
 
-[![Build Status](https://github.com/dscottboggs/elefren/actions/workflows/rust.yml/badge.svg)](https://travis-ci.org/pwoolcoc/elefren)
-<!-- [![Coverage Status](https://coveralls.io/repos/github/pwoolcoc/elefren/badge.svg?branch=master&service=github)](https://coveralls.io/github/pwoolcoc/elefren?branch=master) -->
-<!-- [![crates.io](https://img.shields.io/crates/v/elefren.svg)](https://crates.io/crates/elefren) -->
-<!-- [![Docs](https://docs.rs/elefren/badge.svg)](https://docs.rs/elefren) -->
-<!-- [![MIT/APACHE-2.0](https://img.shields.io/crates/l/elefren.svg)](https://crates.io/crates/elefren) -->
+[Documentation](https://docs.rs/mastodon-async/)
 
-[Documentation](https://docs.rs/elefren/)
-
-A wrapper around the [API](https://github.com/tootsuite/documentation/blob/master/docs/Using-the-API/API.md#tag) for [Mastodon](https://botsin.space/)
+A type-safe, async wrapper around the client [API](https://github.com/tootsuite/documentation/blob/master/docs/Using-the-API/API.md#tag)
+for [Mastodon](https://botsin.space/)
 
 ## Installation
 
-To add `elefren` to your project, add the following to the
+To add `mastodon-async` to your project, add the following to the
 `[dependencies]` section of your `Cargo.toml`
 
 ```toml
-elefren = "0.23"
+mastodon-async = "1.0"
 ```
 
 Alternatively, run the following command:
 
 ~~~console
-$ cargo add elefren
+$ cargo add mastodon-async
 ~~~
 
 ## Example
@@ -32,25 +30,24 @@ $ cargo add elefren
 In your `Cargo.toml`, make sure you enable the `toml` feature:
 
 ```toml
-[dependencies]
-elefren = { version = "0.22", features = ["toml"] }
+[dependencies.mastodon-async]
+version = "1.0"
+features = ["toml"]
 ```
 
 ```rust,no_run
 // src/main.rs
 
-use std::error::Error;
-
-use elefren::prelude::*;
-use elefren::helpers::toml; // requires `features = ["toml"]`
-use elefren::helpers::cli;
+use mastodon_async::prelude::*;
+use mastodon_async::helpers::toml; // requires `features = ["toml"]`
+use mastodon_async::{helpers::cli, Result};
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
+async fn main() -> Result<()> {
     let mastodon = if let Ok(data) = toml::from_file("mastodon-data.toml") {
         Mastodon::from(data)
     } else {
-        register()?
+        register().await?
     };
 
     let you = mastodon.verify_credentials().await?;
@@ -60,14 +57,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn register() -> Result<Mastodon, Box<dyn Error>> {
+async fn register() -> Result<Mastodon> {
     let registration = Registration::new("https://botsin.space")
-                                    .client_name("elefren-examples")
-                                    .build()?;
-    let mastodon = cli::authenticate(registration)?;
+                                    .client_name("mastodon-async-examples")
+                                    .build()
+                                    .await?;
+    let mastodon = cli::authenticate(registration).await?;
 
     // Save app data for using on the next run.
-    toml::to_file(&*mastodon, "mastodon-data.toml")?;
+    toml::to_file(&mastodon.data, "mastodon-data.toml")?;
 
     Ok(mastodon)
 }
@@ -76,24 +74,23 @@ fn register() -> Result<Mastodon, Box<dyn Error>> {
 It also supports the [Streaming API](https://docs.joinmastodon.org/api/streaming):
 
 ```rust,no_run
-use elefren::prelude::*;
-use elefren::entities::event::Event;
-
-use std::error::Error;
+use mastodon_async::{prelude::*, Result, entities::event::Event};
+use futures_util::TryStreamExt;
 
 #[tokio::main]
-async fn main() -> Result<(), Box<Error>> {
+async fn main() -> Result<()> {
     let client = Mastodon::from(Data::default());
 
     client.stream_user()
         .await?
-        .try_for_each(|event| {
+        .try_for_each(|event| async move {
             match event {
                 Event::Update(ref status) => { /* .. */ },
                 Event::Notification(ref notification) => { /* .. */ },
                 Event::Delete(ref id) => { /* .. */ },
                 Event::FiltersChanged => { /* .. */ },
             }
+            Ok(())
         })
         .await?;
     Ok(())
