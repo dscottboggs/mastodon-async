@@ -38,18 +38,16 @@ features = ["toml"]
 ```rust,no_run
 // src/main.rs
 
-use std::error::Error;
-
 use mastodon_async::prelude::*;
 use mastodon_async::helpers::toml; // requires `features = ["toml"]`
-use mastodon_async::helpers::cli;
+use mastodon_async::{helpers::cli, Result};
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
+async fn main() -> Result<()> {
     let mastodon = if let Ok(data) = toml::from_file("mastodon-data.toml") {
         Mastodon::from(data)
     } else {
-        register()?
+        register().await?
     };
 
     let you = mastodon.verify_credentials().await?;
@@ -59,14 +57,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn register() -> Result<Mastodon, Box<dyn Error>> {
+async fn register() -> Result<Mastodon> {
     let registration = Registration::new("https://botsin.space")
                                     .client_name("mastodon-async-examples")
-                                    .build()?;
-    let mastodon = cli::authenticate(registration)?;
+                                    .build()
+                                    .await?;
+    let mastodon = cli::authenticate(registration).await?;
 
     // Save app data for using on the next run.
-    toml::to_file(&*mastodon, "mastodon-data.toml")?;
+    toml::to_file(&mastodon.data, "mastodon-data.toml")?;
 
     Ok(mastodon)
 }
@@ -75,24 +74,23 @@ fn register() -> Result<Mastodon, Box<dyn Error>> {
 It also supports the [Streaming API](https://docs.joinmastodon.org/api/streaming):
 
 ```rust,no_run
-use mastodon_async::prelude::*;
-use mastodon_async::entities::event::Event;
-
-use std::error::Error;
+use mastodon_async::{prelude::*, Result, entities::event::Event};
+use futures_util::TryStreamExt;
 
 #[tokio::main]
-async fn main() -> Result<(), Box<Error>> {
+async fn main() -> Result<()> {
     let client = Mastodon::from(Data::default());
 
     client.stream_user()
         .await?
-        .try_for_each(|event| {
+        .try_for_each(|event| async move {
             match event {
                 Event::Update(ref status) => { /* .. */ },
                 Event::Notification(ref notification) => { /* .. */ },
                 Event::Delete(ref id) => { /* .. */ },
                 Event::FiltersChanged => { /* .. */ },
             }
+            Ok(())
         })
         .await?;
     Ok(())

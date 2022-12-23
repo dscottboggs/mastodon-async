@@ -1,23 +1,27 @@
 use std::time::Duration;
 
-use crate::errors::Result;
+use crate::{errors::Result, log_serde, page::Page, Error, Mastodon};
 use futures::pin_mut;
 use futures_util::StreamExt;
-use log::{as_serde, debug, trace, warn};
+use log::{as_debug, as_serde, debug, trace, warn};
 use reqwest::Response;
 use serde::{Deserialize, Serialize};
 use tokio::time::timeout;
 
 /// Adapter for reading JSON data from a response with better logging and a
 /// fail-safe timeout.
+///
+/// The reason for this is largely because there was an issue with responses
+/// being received, but not closed, we add a timeout on each read and try
+/// to parse whatever we got before the timeout.
 pub async fn read_response<T>(response: Response) -> Result<T>
 where
     T: for<'de> Deserialize<'de> + Serialize,
 {
     let mut bytes = vec![];
     let url = response.url().clone();
-    // let status = log_serde!(response Status);
-    // let headers = log_serde!(response Headers);
+    let status = response.status();
+    trace!(status = log_serde!(response Status), headers = log_serde!(response Headers); "attempting to stream response");
     let stream = response.bytes_stream();
     pin_mut!(stream);
     loop {
@@ -35,23 +39,36 @@ where
             );
         } else {
             warn!(
-                url = url.as_str(), // status = status, headers = headers,
+                url = url.as_str(),
                 data_received = bytes.len();
                 "API response timed out"
             );
             break;
         }
     }
+    // done growing the vec, let's just do this once.
+    let bytes = bytes.as_slice();
     trace!(
-        url = url.as_str(), // status = status, headers = headers,
-        data_received = bytes.len();
+        url = url.as_str(),
+        data = String::from_utf8_lossy(bytes);
         "parsing response"
     );
-    let result = serde_json::from_slice(bytes.as_slice())?;
-    debug!(
-        url = url.as_str(), // status = status, headers = headers,
-        result = as_serde!(result);
-        "result parsed successfully"
-    );
-    Ok(result)
+    if status.is_success() {
+        // the the response should deserialize to T
+        let result = serde_json::from_slice(bytes)?;
+        debug!(
+                url = url.as_str(),
+            result = as_serde!(result);
+            "result parsed successfully"
+        );
+        Ok(result)
+    } else {
+        // we've received an error message, let's deserialize that instead.
+        let response = serde_json::from_slice(bytes)?;
+        debug!(status = as_debug!(status), response = as_serde!(response); "error received from API");
+        Err(Error::Api {
+            status,
+            response,
+        })
+    }
 }

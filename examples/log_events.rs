@@ -10,7 +10,6 @@ use mastodon_async::Result;
 #[tokio::main]
 async fn main() -> Result<()> {
     use log::warn;
-    use mastodon_async::entities::prelude::Event;
 
     femme::with_level(log::LevelFilter::Info);
     let mastodon = register::get_mastodon_data().await?;

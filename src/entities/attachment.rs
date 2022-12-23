@@ -11,7 +11,7 @@ pub struct Attachment {
     #[serde(rename = "type")]
     pub media_type: MediaType,
     /// URL of the locally hosted version of the image.
-    pub url: String,
+    pub url: Option<String>,
     /// For remote images, the remote URL of the original image.
     pub remote_url: Option<String>,
     /// URL of the preview image.
