@@ -31,7 +31,7 @@ In your `Cargo.toml`, make sure you enable the `toml` feature:
 
 ```toml
 [dependencies.mastodon-async]
-version = "0.22"
+version = "1.0"
 features = ["toml"]
 ```
 
