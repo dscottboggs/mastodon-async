@@ -7,7 +7,7 @@
 
 [Documentation](https://docs.rs/mastodon-async/)
 
-A type-safe, async wrapper around the client [API](https://github.com/tootsuite/documentation/blob/master/docs/Using-the-API/API.md#tag)
+A type-safe, async wrapper around the client [API](https://docs.joinmastodon.org/client/intro/)
 for [Mastodon](https://botsin.space/)
 
 ## Installation
