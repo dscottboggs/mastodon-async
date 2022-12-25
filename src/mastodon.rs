@@ -101,8 +101,8 @@ impl Mastodon {
 
     route_v2! {
         (get (q: &'a str, resolve: bool,)) search: "search" => SearchResult,
-        (post multipart (file: impl AsRef<Path>,)) media: "media" => Attachment,
-        (post multipart (file: impl AsRef<Path>, thumbnail: impl AsRef<Path>,)) media_with_thumbnail: "media" => Attachment,
+        (post multipart with description (file: impl AsRef<Path>,)) media: "media" => Attachment,
+        (post multipart with description (file: impl AsRef<Path>, thumbnail: impl AsRef<Path>,)) media_with_thumbnail: "media" => Attachment,
     }
 
     route_id! {
