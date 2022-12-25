@@ -155,6 +155,68 @@ macro_rules! route_v2 {
         route_v2!{$($rest)*}
     };
 
+    ((post multipart with description ($($param:ident: $typ:ty,)*)) $name:ident: $url:expr => $ret:ty, $($rest:tt)*) => {
+        doc_comment! {
+            concat!(
+                "Equivalent to `post /api/v2/",
+                $url,
+                "`, with a description/alt-text.",
+                "\n# Errors\nIf `access_token` is not set."),
+            pub async fn $name(&self $(, $param: $typ)*, description: Option<String>) -> Result<$ret> {
+                use reqwest::multipart::{Form, Part};
+                use std::io::Read;
+                use log::{debug, error, as_debug};
+                use uuid::Uuid;
+
+                let call_id = Uuid::new_v4();
+
+                let form_data = Form::new()
+                    $(
+                        .part(stringify!($param), {
+                            let path = $param.as_ref();
+                            match std::fs::File::open(path) {
+                                Ok(mut file) => {
+                                    let mut data = if let Ok(metadata) = file.metadata() {
+                                        Vec::with_capacity(metadata.len().try_into()?)
+                                    } else {
+                                        vec![]
+                                    };
+                                    file.read_to_end(&mut data)?;
+                                    Part::bytes(data)
+                                }
+                                Err(err) => {
+                                    error!(path = as_debug!(path), error = as_debug!(err); "error reading file contents for multipart form");
+                                    return Err(err.into());
+                                }
+                            }
+                        })
+                     )*;
+
+                let form_data = if let Some(description) = description {
+                    form_data.text("description", description)
+                } else { form_data };
+
+                let url = &self.route(concat!("/api/v2/", $url));
+
+                debug!(
+                    url = url, method = stringify!($method),
+                    multipart_form_data = as_debug!(form_data), call_id = as_debug!(call_id);
+                    "making API request"
+                );
+
+                let response = self.authenticated(self.client.post(url))
+                    .multipart(form_data)
+                    .header("Accept", "application/json")
+                    .send()
+                    .await?;
+
+                read_response(response).await
+            }
+        }
+        route_v2! { $($rest)* }
+    };
+
+
     ((post multipart ($($param:ident: $typ:ty,)*)) $name:ident: $url:expr => $ret:ty, $($rest:tt)*) => {
         doc_comment! {
             concat!(
@@ -273,6 +335,66 @@ macro_rules! route {
         route!{$($rest)*}
     };
 
+    ((post multipart with description ($($param:ident: $typ:ty,)*)) $name:ident: $url:expr => $ret:ty, $($rest:tt)*) => {
+        doc_comment! {
+            concat!(
+                "Equivalent to `post /api/v1/",
+                $url,
+                "`, with a description/alt-text.",
+                "\n# Errors\nIf `access_token` is not set."),
+            pub async fn $name(&self $(, $param: $typ)*, description: Option<String>) -> Result<$ret> {
+                use reqwest::multipart::{Form, Part};
+                use std::io::Read;
+                use log::{debug, error, as_debug};
+                use uuid::Uuid;
+
+                let call_id = Uuid::new_v4();
+
+                let form_data = Form::new()
+                    $(
+                        .part(stringify!($param), {
+                            let path = $param.as_ref();
+                            match std::fs::File::open(path) {
+                                Ok(mut file) => {
+                                    let mut data = if let Ok(metadata) = file.metadata() {
+                                        Vec::with_capacity(metadata.len().try_into()?)
+                                    } else {
+                                        vec![]
+                                    };
+                                    file.read_to_end(&mut data)?;
+                                    Part::bytes(data)
+                                }
+                                Err(err) => {
+                                    error!(path = as_debug!(path), error = as_debug!(err); "error reading file contents for multipart form");
+                                    return Err(err.into());
+                                }
+                            }
+                        })
+                     )*;
+
+                let form_data = if let Some(description) = description {
+                    form_data.text("description", description)
+                } else { form_data };
+
+                let url = &self.route(concat!("/api/v1/", $url));
+
+                debug!(
+                    url = url, method = stringify!($method),
+                    multipart_form_data = as_debug!(form_data), call_id = as_debug!(call_id);
+                    "making API request"
+                );
+
+                let response = self.authenticated(self.client.post(url))
+                    .multipart(form_data)
+                    .header("Accept", "application/json")
+                    .send()
+                    .await?;
+
+                read_response(response).await
+            }
+        }
+        route! { $($rest)* }
+    };
     ((get ($($param:ident: $typ:ty,)*)) $name:ident: $url:expr => $ret:ty, $($rest:tt)*) => {
         doc_comment! {
             concat!(
