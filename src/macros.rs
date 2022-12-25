@@ -209,7 +209,7 @@ macro_rules! route_v2 {
             }
         }
 
-        route!{$($rest)*}
+        route_v2!{$($rest)*}
     };
     () => {}
 }
