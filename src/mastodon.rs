@@ -23,16 +23,21 @@ use crate::{
 };
 use futures::TryStream;
 use log::{as_debug, as_serde, debug, error, trace};
-use reqwest::{Client, RequestBuilder};
+#[cfg(feature = "magic")]
+use magic::CookieFlags;
+use reqwest::{multipart::Part, Client, RequestBuilder};
 use url::Url;
 use uuid::Uuid;
 
 /// The Mastodon client is a smart pointer to this struct
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct MastodonClient {
     pub(crate) client: Client,
     /// Raw data about your mastodon instance.
     pub data: Data,
+    /// A handle to access libmagic for mime-types.
+    #[cfg(feature = "magic")]
+    magic: magic::Cookie,
 }
 
 /// Your mastodon application client, handles all requests to and from Mastodon.
@@ -49,6 +54,18 @@ pub struct MastodonUnauthenticated {
 
 impl From<Data> for Mastodon {
     /// Creates a mastodon instance from the data struct.
+    #[cfg(feature = "magic")]
+    fn from(data: Data) -> Mastodon {
+        MastodonClient {
+            client: Client::new(),
+            data,
+            magic: Self::default_magic().expect("failed to open magic cookie or load database"),
+        }
+        .into()
+    }
+
+    /// Creates a mastodon instance from the data struct.
+    #[cfg(not(feature = "magic"))]
     fn from(data: Data) -> Mastodon {
         MastodonClient {
             client: Client::new(),
@@ -156,7 +173,41 @@ impl Mastodon {
         stream_direct@"direct",
     }
 
+    /// Return a magic cookie, loaded with the default mime
+    #[cfg(feature = "magic")]
+    fn default_magic() -> Result<magic::Cookie> {
+        let magic = magic::Cookie::open(Default::default())?;
+        magic.load::<&str>(&[])?;
+        magic.set_flags(CookieFlags::MIME)?;
+        Ok(magic)
+    }
+
     /// Create a new Mastodon Client
+    #[cfg(feature = "magic")]
+    pub fn new(client: Client, data: Data) -> Self {
+        Self::new_with_magic(
+            client,
+            data,
+            Self::default_magic().expect("failed to open magic cookie or load database"),
+        )
+    }
+
+    /// Create a new Mastodon Client, passing in a pre-constructed magic
+    /// cookie.
+    ///
+    /// This is mainly here so you have a wait to construct the client which
+    /// won't panic.
+    #[cfg(feature = "magic")]
+    pub fn new_with_magic(client: Client, data: Data, magic: magic::Cookie) -> Self {
+        Mastodon(Arc::new(MastodonClient {
+            client,
+            data,
+            magic,
+        }))
+    }
+
+    /// Create a new Mastodon Client
+    #[cfg(not(feature = "magic"))]
     pub fn new(client: Client, data: Data) -> Self {
         Mastodon(Arc::new(MastodonClient {
             client,
@@ -341,6 +392,43 @@ impl Mastodon {
     /// Set the bearer authentication token
     fn authenticated(&self, request: RequestBuilder) -> RequestBuilder {
         request.bearer_auth(&self.data.token)
+    }
+
+    /// Return a part for a multipart form submission from a file, including
+    /// the name of the file, and, if the "magic" feature is enabled, the mime-
+    /// type.
+    fn get_form_part(&self, path: impl AsRef<Path>) -> Result<Part> {
+        use std::io::Read;
+
+        let path = path.as_ref();
+        let mime = if cfg!(feature = "magic") {
+            self.magic.file(path).ok()
+            // if it doesn't work, it's no big deal. The server will look at
+            // the filepath if this isn't here and things should still work.
+        } else {
+            None
+        };
+        match std::fs::File::open(path) {
+            Ok(mut file) => {
+                let mut data = if let Ok(metadata) = file.metadata() {
+                    Vec::with_capacity(metadata.len().try_into()?)
+                } else {
+                    vec![]
+                };
+                file.read_to_end(&mut data)?;
+                let part =
+                    Part::bytes(data).file_name(Cow::Owned(path.to_string_lossy().to_string()));
+                Ok(if let Some(mime) = mime {
+                    part.mime_str(&mime)?
+                } else {
+                    part
+                })
+            },
+            Err(err) => {
+                error!(path = as_debug!(path), error = as_debug!(err); "error reading file contents for multipart form");
+                return Err(err.into());
+            },
+        }
     }
 }
 
