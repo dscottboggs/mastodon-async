@@ -4,29 +4,9 @@ mod register;
 use mastodon_async::{Result, StatusBuilder, Visibility};
 
 #[cfg(feature = "toml")]
-fn bool_input(message: impl AsRef<str>, default: bool) -> Result<bool> {
-    let input = register::read_line(message.as_ref())?;
-    if let Some(first_char) = input.chars().next() {
-        match first_char {
-            'Y' | 'y' => Ok(true),
-            'N' | 'n' => Ok(false),
-            '\n' => Ok(default),
-            _ => {
-                print!(
-                    "I didn't understand '{input}'. Please input something that begins with 'y' \
-                     or 'n', case insensitive:  "
-                );
-                bool_input(message, default)
-            },
-        }
-    } else {
-        Ok(default)
-    }
-}
-
-#[cfg(feature = "toml")]
 #[tokio::main]
 async fn main() -> Result<()> {
+    use register::bool_input;
     femme::with_level(femme::LevelFilter::Trace);
     let mastodon = register::get_mastodon_data().await?;
     let input = register::read_line("Enter the path to the photo you'd like to post: ")?;

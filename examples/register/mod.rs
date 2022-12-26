@@ -54,5 +54,26 @@ pub fn read_line(message: impl AsRef<str>) -> Result<String> {
     Ok(input.trim().to_string())
 }
 
+#[cfg(feature = "toml")]
+pub fn bool_input(message: impl AsRef<str>, default: bool) -> Result<bool> {
+    let input = read_line(message.as_ref())?;
+    if let Some(first_char) = input.chars().next() {
+        match first_char {
+            'Y' | 'y' => Ok(true),
+            'N' | 'n' => Ok(false),
+            '\n' => Ok(default),
+            _ => {
+                print!(
+                    "I didn't understand '{input}'. Please input something that begins with 'y' \
+                     or 'n', case insensitive:  "
+                );
+                bool_input(message, default)
+            },
+        }
+    } else {
+        Ok(default)
+    }
+}
+
 #[cfg(not(feature = "toml"))]
 fn main() {}
