@@ -1,6 +1,6 @@
 [package]
 name = "mastodon-async"
-version = "1.0.1"
+version = "1.0.2"
 authors = ["Aaron Power <theaaronepower@gmail.com>", "Paul Woolcock <paul@woolcock.us>", "D. Scott Boggs <scott@tams.tech>"]
 description = "A wrapper around the Mastodon API."
 readme = "README.md"
