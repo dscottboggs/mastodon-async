@@ -26,6 +26,10 @@ url = "1"
 hyper-old-types = "0.11.0"
 futures-util = "0.3.25"
 
+[dependencies.magic]
+version = "0.13.0"
+optional = true
+
 [dependencies.uuid]
 version = "1.2.2"
 features = ["v4"]
@@ -80,8 +84,9 @@ html2text = "0.4.4"
 version = "0.13"
 
 [features]
-all = ["toml", "json", "env"]
-default = ["reqwest/default-tls"]
+all = ["toml", "json", "env", "magic"]
+# default = ["reqwest/default-tls"]
+default = ["reqwest/default-tls", "magic"]
 env = ["envy"]
 json = []
 rustls-tls = ["reqwest/rustls-tls"]

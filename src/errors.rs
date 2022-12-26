@@ -3,6 +3,8 @@ use std::{error, fmt, io::Error as IoError, num::TryFromIntError};
 #[cfg(feature = "env")]
 use envy::Error as EnvyError;
 use hyper_old_types::Error as HeaderParseError;
+#[cfg(feature = "magic")]
+use magic::MagicError;
 use reqwest::{header::ToStrError as HeaderStrError, Error as HttpError, StatusCode};
 use serde::Deserialize;
 use serde_json::Error as SerdeError;
@@ -68,6 +70,9 @@ pub enum Error {
     /// At the time of writing, this can only be triggered when a file is
     /// larger than the system's usize allows.
     IntConversion(TryFromIntError),
+    #[cfg(feature = "magic")]
+    /// An error received from the magic crate
+    Magic(MagicError),
     /// Other errors
     Other(String),
 }
@@ -80,30 +85,33 @@ impl fmt::Display for Error {
 
 impl error::Error for Error {
     fn source(&self) -> Option<&(dyn error::Error + 'static)> {
+        use Error::*;
         match *self {
-            Error::Serde(ref e) => Some(e),
-            Error::UrlEncoded(ref e) => Some(e),
-            Error::Http(ref e) => Some(e),
-            Error::Io(ref e) => Some(e),
-            Error::Url(ref e) => Some(e),
+            Serde(ref e) => Some(e),
+            UrlEncoded(ref e) => Some(e),
+            Http(ref e) => Some(e),
+            Io(ref e) => Some(e),
+            Url(ref e) => Some(e),
             #[cfg(feature = "toml")]
-            Error::TomlSer(ref e) => Some(e),
+            TomlSer(ref e) => Some(e),
             #[cfg(feature = "toml")]
-            Error::TomlDe(ref e) => Some(e),
-            Error::HeaderStrError(ref e) => Some(e),
-            Error::HeaderParseError(ref e) => Some(e),
+            TomlDe(ref e) => Some(e),
+            HeaderStrError(ref e) => Some(e),
+            HeaderParseError(ref e) => Some(e),
             #[cfg(feature = "env")]
-            Error::Envy(ref e) => Some(e),
-            Error::SerdeQs(ref e) => Some(e),
-            Error::IntConversion(ref e) => Some(e),
-            Error::Api {
+            Envy(ref e) => Some(e),
+            SerdeQs(ref e) => Some(e),
+            IntConversion(ref e) => Some(e),
+            #[cfg(feature = "magic")]
+            Magic(ref e) => Some(e),
+            Api {
                 ..
             }
-            | Error::ClientIdRequired
-            | Error::ClientSecretRequired
-            | Error::AccessTokenRequired
-            | Error::MissingField(_)
-            | Error::Other(..) => None,
+            | ClientIdRequired
+            | ClientSecretRequired
+            | AccessTokenRequired
+            | MissingField(_)
+            | Other(..) => None,
         }
     }
 }
@@ -145,14 +153,19 @@ from! {
     SerdeError => Serde,
     UrlEncodedError => UrlEncoded,
     UrlError => Url,
-    #[cfg(feature = "toml")] TomlSerError => TomlSer,
-    #[cfg(feature = "toml")] TomlDeError => TomlDe,
+    #[cfg(feature = "toml")]
+    TomlSerError => TomlSer,
+    #[cfg(feature = "toml")]
+    TomlDeError => TomlDe,
     HeaderStrError => HeaderStrError,
     HeaderParseError => HeaderParseError,
-    #[cfg(feature = "env")] EnvyError => Envy,
+    #[cfg(feature = "env")]
+    EnvyError => Envy,
     SerdeQsError => SerdeQs,
     String => Other,
     TryFromIntError => IntConversion,
+    #[cfg(feature = "magic")]
+    MagicError => Magic,
 }
 
 #[macro_export]

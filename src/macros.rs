@@ -163,33 +163,15 @@ macro_rules! route_v2 {
                 "`, with a description/alt-text.",
                 "\n# Errors\nIf `access_token` is not set."),
             pub async fn $name(&self $(, $param: $typ)*, description: Option<String>) -> Result<$ret> {
-                use reqwest::multipart::{Form, Part};
-                use std::io::Read;
-                use log::{debug, error, as_debug};
+                use reqwest::multipart::Form;
+                use log::{debug, as_debug};
                 use uuid::Uuid;
 
                 let call_id = Uuid::new_v4();
 
                 let form_data = Form::new()
                     $(
-                        .part(stringify!($param), {
-                            let path = $param.as_ref();
-                            match std::fs::File::open(path) {
-                                Ok(mut file) => {
-                                    let mut data = if let Ok(metadata) = file.metadata() {
-                                        Vec::with_capacity(metadata.len().try_into()?)
-                                    } else {
-                                        vec![]
-                                    };
-                                    file.read_to_end(&mut data)?;
-                                    Part::bytes(data)
-                                }
-                                Err(err) => {
-                                    error!(path = as_debug!(path), error = as_debug!(err); "error reading file contents for multipart form");
-                                    return Err(err.into());
-                                }
-                            }
-                        })
+                        .part(stringify!($param), self.get_form_part($param)?)
                      )*;
 
                 let form_data = if let Some(description) = description {
@@ -224,33 +206,16 @@ macro_rules! route_v2 {
                 $url,
                 "`\n# Errors\nIf `access_token` is not set."),
             pub async fn $name(&self, $($param: $typ,)*) -> Result<$ret> {
-                use reqwest::multipart::{Form, Part};
-                use std::io::Read;
-                use log::{debug, error, as_debug};
+                use reqwest::multipart::Form;
+                use log::{debug, as_debug};
                 use uuid::Uuid;
+
 
                 let call_id = Uuid::new_v4();
 
                 let form_data = Form::new()
                     $(
-                        .part(stringify!($param), {
-                            let path = $param.as_ref();
-                            match std::fs::File::open(path) {
-                                Ok(mut file) => {
-                                    let mut data = if let Ok(metadata) = file.metadata() {
-                                        Vec::with_capacity(metadata.len().try_into()?)
-                                    } else {
-                                        vec![]
-                                    };
-                                    file.read_to_end(&mut data)?;
-                                    Part::bytes(data)
-                                }
-                                Err(err) => {
-                                    error!(path = as_debug!(path), error = as_debug!(err); "error reading file contents for multipart form");
-                                    return Err(err.into());
-                                }
-                            }
-                        })
+                        .part(stringify!($param), self.get_form_part($param)?)
                      )*;
 
                 let url = &self.route(concat!("/api/v2/", $url));
@@ -285,33 +250,16 @@ macro_rules! route {
                 $url,
                 "`\n# Errors\nIf `access_token` is not set."),
             pub async fn $name(&self, $($param: $typ,)*) -> Result<$ret> {
-                use reqwest::multipart::{Form, Part};
-                use std::io::Read;
-                use log::{debug, error, as_debug};
+                use reqwest::multipart::Form;
+                use log::{debug, as_debug};
                 use uuid::Uuid;
+
 
                 let call_id = Uuid::new_v4();
 
                 let form_data = Form::new()
                     $(
-                        .part(stringify!($param), {
-                            let path = $param.as_ref();
-                            match std::fs::File::open(path) {
-                                Ok(mut file) => {
-                                    let mut data = if let Ok(metadata) = file.metadata() {
-                                        Vec::with_capacity(metadata.len().try_into()?)
-                                    } else {
-                                        vec![]
-                                    };
-                                    file.read_to_end(&mut data)?;
-                                    Part::bytes(data)
-                                }
-                                Err(err) => {
-                                    error!(path = as_debug!(path), error = as_debug!(err); "error reading file contents for multipart form");
-                                    return Err(err.into());
-                                }
-                            }
-                        })
+                        .part(stringify!($param), self.get_form_part($param)?)
                      )*;
 
                 let url = &self.route(concat!("/api/v1/", $url));
@@ -343,33 +291,16 @@ macro_rules! route {
                 "`, with a description/alt-text.",
                 "\n# Errors\nIf `access_token` is not set."),
             pub async fn $name(&self $(, $param: $typ)*, description: Option<String>) -> Result<$ret> {
-                use reqwest::multipart::{Form, Part};
-                use std::io::Read;
-                use log::{debug, error, as_debug};
+                use reqwest::multipart::Form;
+                use log::{debug, as_debug};
                 use uuid::Uuid;
+
 
                 let call_id = Uuid::new_v4();
 
                 let form_data = Form::new()
                     $(
-                        .part(stringify!($param), {
-                            let path = $param.as_ref();
-                            match std::fs::File::open(path) {
-                                Ok(mut file) => {
-                                    let mut data = if let Ok(metadata) = file.metadata() {
-                                        Vec::with_capacity(metadata.len().try_into()?)
-                                    } else {
-                                        vec![]
-                                    };
-                                    file.read_to_end(&mut data)?;
-                                    Part::bytes(data)
-                                }
-                                Err(err) => {
-                                    error!(path = as_debug!(path), error = as_debug!(err); "error reading file contents for multipart form");
-                                    return Err(err.into());
-                                }
-                            }
-                        })
+                        .part(stringify!($param), self.get_form_part($param)?)
                      )*;
 
                 let form_data = if let Some(description) = description {
