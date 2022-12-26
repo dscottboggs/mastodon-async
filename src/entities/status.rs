@@ -88,7 +88,11 @@ pub struct Emoji {
     pub url: String,
 }
 
-/// Hashtags in the status.
+/// Hashtags in the status. This functions both as a
+/// [`Status::Tag`](https://docs.joinmastodon.org/entities/Status/#Tag), and
+/// as a [`Tag`](https://docs.joinmastodon.org/entities/Tag/). In the case of
+/// the former, at the time of writing, the history field is always empty and
+/// the following field is always none.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Tag {
     /// The hashtag, not including the preceding `#`.
@@ -96,6 +100,7 @@ pub struct Tag {
     /// The URL of the hashtag.
     pub url: String,
     /// Usage statistics for given days (typically the past week).
+    #[serde(default = "Vec::new")]
     pub history: Vec<TagHistory>,
     /// Whether the current token’s authorized user is following this tag.
     pub following: Option<bool>,
