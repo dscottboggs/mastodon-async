@@ -65,7 +65,7 @@ pub struct Status {
 }
 
 /// A mention of another user.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Mention {
     /// URL of user's profile (can be remote).
     pub url: String,
