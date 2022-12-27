@@ -107,7 +107,7 @@ pub struct Tag {
 }
 
 /// Application details.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Application {
     /// Name of the application.
     pub name: String,
