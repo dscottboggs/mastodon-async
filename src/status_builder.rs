@@ -220,7 +220,7 @@ impl StatusBuilder {
 }
 
 /// Represents a post that can be sent to the POST /api/v1/status endpoint
-#[derive(Debug, Default, Clone, Serialize, PartialEq)]
+#[derive(Debug, Default, Clone, Serialize, PartialEq, Eq)]
 pub struct NewStatus {
     #[serde(skip_serializing_if = "Option::is_none")]
     status: Option<String>,
