@@ -348,11 +348,11 @@ impl Mastodon {
                 file.read_to_end(&mut data)?;
                 // TODO extract filename, error on dirs, etc.
                 Ok(Part::bytes(data).file_name(Cow::Owned(path.to_string_lossy().to_string())))
-            },
+            }
             Err(err) => {
                 error!(path = as_debug!(path), error = as_debug!(err); "error reading file contents for multipart form");
                 Err(err.into())
-            },
+            }
         }
     }
 }

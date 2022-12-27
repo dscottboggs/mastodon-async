@@ -68,7 +68,7 @@ pub fn bool_input(message: impl AsRef<str>, default: bool) -> Result<bool> {
                      or 'n', case insensitive:  "
                 );
                 bool_input(message, default)
-            },
+            }
         }
     } else {
         Ok(default)

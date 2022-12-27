@@ -285,11 +285,11 @@ impl FromStr for Scope {
             read if read.starts_with("read:") => {
                 let r: Read = Read::from_str(&read[5..])?;
                 Scope::Read(Some(r))
-            },
+            }
             write if write.starts_with("write:") => {
                 let w: Write = Write::from_str(&write[6..])?;
                 Scope::Write(Some(w))
-            },
+            }
             _ => return Err(Error::Other("Unknown scope".to_string())),
         })
     }

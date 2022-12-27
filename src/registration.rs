@@ -197,7 +197,7 @@ impl<'a> Registration<'a> {
                     "received API response"
                 );
                 Ok(response)
-            },
+            }
             Err(err) => {
                 error!(
                     err = as_debug!(err), url = url, method = stringify!($method),
@@ -205,7 +205,7 @@ impl<'a> Registration<'a> {
                     "error making API request"
                 );
                 Err(err.into())
-            },
+            }
         }
     }
 }
