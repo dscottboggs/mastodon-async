@@ -110,7 +110,7 @@ impl<'a> AppBuilder<'a> {
         Ok(App {
             client_name: self
                 .client_name
-                .ok_or_else(|| Error::MissingField("client_name"))?
+                .ok_or(Error::MissingField("client_name"))?
                 .into(),
             redirect_uris: self
                 .redirect_uris
