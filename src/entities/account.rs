@@ -74,7 +74,7 @@ impl MetadataField {
 }
 
 /// An extra object given from `verify_credentials` giving defaults about a user
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
 pub struct Source {
     privacy: Option<status_builder::Visibility>,
     #[serde(deserialize_with = "string_or_bool")]
