@@ -173,7 +173,7 @@ from! {
 macro_rules! format_err {
     ( $( $arg:tt )* ) => {
         {
-            crate::Error::Other(format!($($arg)*))
+            $crate::Error::Other(format!($($arg)*))
         }
     }
 }
