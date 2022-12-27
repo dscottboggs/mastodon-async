@@ -12,7 +12,7 @@ use crate::{
 ///
 /// let keys = Keys::new("anetohias===", "oeatssah=");
 /// ```
-#[derive(Debug, Default, Clone, PartialEq)]
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct Keys {
     pub(crate) p256dh: String,
     pub(crate) auth: String,
