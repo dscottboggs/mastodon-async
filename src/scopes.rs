@@ -184,7 +184,7 @@ impl Scopes {
             .scopes
             .union(&other.scopes)
             .into_iter()
-            .map(|s| *s)
+            .copied()
             .collect();
         Scopes {
             scopes: newset,
