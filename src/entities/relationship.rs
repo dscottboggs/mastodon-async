@@ -4,7 +4,7 @@
 use serde::{Deserialize, Serialize};
 
 /// A struct containing information about a relationship with another account.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Relationship {
     /// Target account id
     pub id: String,
