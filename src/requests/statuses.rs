@@ -29,7 +29,7 @@ mod bool_qs_serialize {
 /// request.only_media().pinned().since_id("foo");
 /// assert_eq!(&request.to_querystring().expect("Couldn't serialize qs")[..], "?only_media=1&pinned=1&since_id=foo");
 /// ```
-#[derive(Clone, Debug, Default, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize)]
 pub struct StatusesRequest<'a> {
     #[serde(skip_serializing_if = "bool_qs_serialize::is_false")]
     #[serde(serialize_with = "bool_qs_serialize::serialize")]
