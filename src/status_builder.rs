@@ -241,7 +241,7 @@ pub struct NewStatus {
 }
 
 /// The visibility of a status.
-#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq)]
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum Visibility {
     /// A Direct message to a user
