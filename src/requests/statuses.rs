@@ -50,20 +50,6 @@ pub struct StatusesRequest<'a> {
     min_id: Option<Cow<'a, str>>,
 }
 
-impl<'a> From<&'a mut StatusesRequest<'a>> for Option<StatusesRequest<'a>> {
-    fn from(sr: &'a mut StatusesRequest<'a>) -> Self {
-        Some(StatusesRequest {
-            only_media: sr.only_media,
-            exclude_replies: sr.exclude_replies,
-            pinned: sr.pinned,
-            max_id: sr.max_id.clone(),
-            since_id: sr.since_id.clone(),
-            limit: sr.limit,
-            min_id: sr.min_id.clone(),
-        })
-    }
-}
-
 impl<'a> StatusesRequest<'a> {
     /// Construct a new `StatusesRequest` object
     pub fn new() -> Self {
