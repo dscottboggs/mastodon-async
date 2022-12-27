@@ -14,7 +14,7 @@ pub struct Alerts {
 }
 
 /// Represents a new Push subscription
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Subscription {
     /// The `id` of the subscription
     pub id: String,
