@@ -3,3 +3,4 @@ Cargo.lock
 .env
 mastodon-data.toml*
 libtest.rmeta
+examples/playground.rs

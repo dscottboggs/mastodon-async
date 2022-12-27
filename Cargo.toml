@@ -20,7 +20,6 @@ serde_json = "1"
 serde_qs = "0.4.5"
 serde_urlencoded = "0.6.1"
 tap-reader = "1"
-tungstenite = "0.18"
 url = "1"
 # Provides parsing for the link header in get_links() in page.rs
 hyper-old-types = "0.11.0"
@@ -79,9 +78,16 @@ tempfile = "3"
 # for examples:
 femme = "2.2.1"
 html2text = "0.4.4"
+[dev-dependencies.criterion]
+version = "0.4.0"
+features = ["async_tokio"]
 
 [build-dependencies.skeptic]
 version = "0.13"
+
+[[bench]]
+name = "magic"
+harness = false
 
 [features]
 all = ["toml", "json", "env", "magic"]

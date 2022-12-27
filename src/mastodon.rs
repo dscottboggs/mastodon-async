@@ -23,11 +23,14 @@ use crate::{
 };
 use futures::TryStream;
 use log::{as_debug, as_serde, debug, error, trace};
-#[cfg(feature = "magic")]
-use magic::CookieFlags;
 use reqwest::{multipart::Part, Client, RequestBuilder};
 use url::Url;
 use uuid::Uuid;
+
+#[cfg(feature = "magic")]
+use magic::CookieFlags;
+#[cfg(feature = "magic")]
+use std::sync::Mutex;
 
 /// The Mastodon client is a smart pointer to this struct
 #[derive(Debug)]
@@ -37,7 +40,7 @@ pub struct MastodonClient {
     pub data: Data,
     /// A handle to access libmagic for mime-types.
     #[cfg(feature = "magic")]
-    magic: magic::Cookie,
+    magic: Mutex<magic::Cookie>,
 }
 
 /// Your mastodon application client, handles all requests to and from Mastodon.
@@ -56,12 +59,11 @@ impl From<Data> for Mastodon {
     /// Creates a mastodon instance from the data struct.
     #[cfg(feature = "magic")]
     fn from(data: Data) -> Mastodon {
-        MastodonClient {
-            client: Client::new(),
+        Mastodon::new_with_magic(
+            Client::new(),
             data,
-            magic: Self::default_magic().expect("failed to open magic cookie or load database"),
-        }
-        .into()
+            Self::default_magic().expect("failed to open magic cookie or load database"),
+        )
     }
 
     /// Creates a mastodon instance from the data struct.
@@ -202,7 +204,7 @@ impl Mastodon {
         Mastodon(Arc::new(MastodonClient {
             client,
             data,
-            magic,
+            magic: Mutex::new(magic),
         }))
     }
 
@@ -405,7 +407,7 @@ impl Mastodon {
         // if it doesn't work, it's no big deal. The server will look at
         // the filepath if this isn't here and things should still work.
         #[cfg(feature = "magic")]
-        let mime = self.magic.file(path).ok();
+        let mime = self.magic.lock().expect("mutex lock").file(path).ok();
         #[cfg(not(feature = "magic"))]
         let mime: Option<String> = None;
 
@@ -419,7 +421,7 @@ impl Mastodon {
                 file.read_to_end(&mut data)?;
                 let part =
                     Part::bytes(data).file_name(Cow::Owned(path.to_string_lossy().to_string()));
-                Ok(if let Some(mime) = mime {
+                Ok(if let Some(mime) = &mime {
                     part.mime_str(&mime)?
                 } else {
                     part
