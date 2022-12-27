@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 /// Represents the `alerts` key of the `Subscription` object
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 pub struct Alerts {
     /// flag for follow alerts
     pub follow: Option<bool>,
