@@ -40,3 +40,14 @@ jobs:
           components: clippy
       - run: cargo clippy -- -D warnings
 
+  fmt:
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.65.0
+          components: rustfmt
+      - run: cargo fmt --check
+
