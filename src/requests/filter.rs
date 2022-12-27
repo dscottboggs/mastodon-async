@@ -9,7 +9,7 @@ use std::time::Duration;
 /// use mastodon_async::{entities::filter::FilterContext, requests::AddFilterRequest};
 /// let request = AddFilterRequest::new("foo", FilterContext::Home);
 /// ```
-#[derive(Debug, Clone, PartialEq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct AddFilterRequest {
     phrase: String,
     context: FilterContext,
