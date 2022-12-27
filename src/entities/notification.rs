@@ -21,7 +21,7 @@ pub struct Notification {
 }
 
 /// The type of notification.
-#[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum NotificationType {
     /// Someone mentioned the application client in another status.
