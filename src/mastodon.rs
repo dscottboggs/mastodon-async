@@ -427,7 +427,7 @@ impl Mastodon {
             },
             Err(err) => {
                 error!(path = as_debug!(path), error = as_debug!(err); "error reading file contents for multipart form");
-                return Err(err.into());
+                Err(err.into())
             },
         }
     }
