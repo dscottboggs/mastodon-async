@@ -116,7 +116,7 @@ pub struct Application {
 }
 
 /// Usage statistics for given days (typically the past week).
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct TagHistory {
     /// UNIX timestamp on midnight of the given day.
     pub day: String,
