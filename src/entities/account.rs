@@ -108,7 +108,7 @@ fn string_or_bool<'de, D: Deserializer<'de>>(val: D) -> ::std::result::Result<bo
     })
 }
 
-#[derive(Debug, Default, Clone, Serialize, PartialEq)]
+#[derive(Debug, Default, Clone, Serialize, PartialEq, Eq)]
 pub(crate) struct UpdateSource {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) privacy: Option<status_builder::Visibility>,
