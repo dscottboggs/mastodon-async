@@ -60,7 +60,7 @@ pub(crate) mod update_data {
 
     use super::Alerts;
 
-    #[derive(Debug, Clone, PartialEq, Serialize, Default)]
+    #[derive(Debug, Clone, PartialEq, Eq, Serialize, Default)]
     pub(crate) struct Data {
         pub(crate) alerts: Option<Alerts>,
     }
