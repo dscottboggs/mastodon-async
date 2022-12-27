@@ -49,7 +49,7 @@ pub(crate) mod add_subscription {
         pub(crate) auth: String,
     }
 
-    #[derive(Debug, Clone, PartialEq, Serialize, Default)]
+    #[derive(Debug, Clone, PartialEq, Eq, Serialize, Default)]
     pub(crate) struct Data {
         pub(crate) alerts: Option<Alerts>,
     }
