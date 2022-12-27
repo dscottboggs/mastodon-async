@@ -43,7 +43,7 @@ pub(crate) mod add_subscription {
         pub(crate) keys: Keys,
     }
 
-    #[derive(Debug, Clone, PartialEq, Serialize, Default)]
+    #[derive(Debug, Clone, PartialEq, Eq, Serialize, Default)]
     pub(crate) struct Keys {
         pub(crate) p256dh: String,
         pub(crate) auth: String,
