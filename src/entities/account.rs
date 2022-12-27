@@ -116,7 +116,7 @@ pub(crate) struct UpdateSource {
     pub(crate) sensitive: Option<bool>,
 }
 
-#[derive(Debug, Default, Serialize, PartialEq)]
+#[derive(Debug, Default, Serialize, PartialEq, Eq)]
 pub(crate) struct Credentials {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) display_name: Option<String>,
