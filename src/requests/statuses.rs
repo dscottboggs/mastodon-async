@@ -50,16 +50,16 @@ pub struct StatusesRequest<'a> {
     min_id: Option<Cow<'a, str>>,
 }
 
-impl<'a> Into<Option<StatusesRequest<'a>>> for &'a mut StatusesRequest<'a> {
-    fn into(self) -> Option<StatusesRequest<'a>> {
+impl<'a> From<&'a mut StatusesRequest<'a>> for Option<StatusesRequest<'a>> {
+    fn from(sr: &'a mut StatusesRequest<'a>) -> Self {
         Some(StatusesRequest {
-            only_media: self.only_media,
-            exclude_replies: self.exclude_replies,
-            pinned: self.pinned,
-            max_id: self.max_id.clone(),
-            since_id: self.since_id.clone(),
-            limit: self.limit,
-            min_id: self.min_id.clone(),
+            only_media: sr.only_media,
+            exclude_replies: sr.exclude_replies,
+            pinned: sr.pinned,
+            max_id: sr.max_id.clone(),
+            since_id: sr.since_id.clone(),
+            limit: sr.limit,
+            min_id: sr.min_id.clone(),
         })
     }
 }
