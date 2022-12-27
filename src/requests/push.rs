@@ -55,7 +55,7 @@ impl Keys {
 ///     client.add_push_subscription(&request).await.unwrap();
 /// });
 /// ```
-#[derive(Debug, Default, Clone, PartialEq)]
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct AddPushRequest {
     endpoint: String,
 
