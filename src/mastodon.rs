@@ -401,13 +401,14 @@ impl Mastodon {
         use std::io::Read;
 
         let path = path.as_ref();
-        let mime = if cfg!(feature = "magic") {
-            self.magic.file(path).ok()
-            // if it doesn't work, it's no big deal. The server will look at
-            // the filepath if this isn't here and things should still work.
-        } else {
-            None
-        };
+
+        // if it doesn't work, it's no big deal. The server will look at
+        // the filepath if this isn't here and things should still work.
+        #[cfg(feature = "magic")]
+        let mime = self.magic.file(path).ok();
+        #[cfg(not(feature = "magic"))]
+        let mime: Option<String> = None;
+
         match std::fs::File::open(path) {
             Ok(mut file) => {
                 let mut data = if let Ok(metadata) = file.metadata() {
