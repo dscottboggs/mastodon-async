@@ -48,9 +48,9 @@ impl From<&reqwest::Response> for Status {
 
 /// Helper for logging request headers
 #[derive(Debug)]
-pub struct Headers(pub reqwest::header::HeaderMap);
+pub struct Headers<'h>(pub &'h reqwest::header::HeaderMap);
 
-impl Serialize for Headers {
+impl<'h> Serialize for Headers<'h> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
@@ -63,8 +63,8 @@ impl Serialize for Headers {
     }
 }
 
-impl From<&reqwest::Response> for Headers {
-    fn from(value: &reqwest::Response) -> Self {
-        Headers(value.headers().clone())
+impl<'h> From<&'h reqwest::Response> for Headers<'h> {
+    fn from(value: &'h reqwest::Response) -> Self {
+        Headers(value.headers())
     }
 }
