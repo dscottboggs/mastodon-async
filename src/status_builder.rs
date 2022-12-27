@@ -17,7 +17,7 @@ use serde::{Deserialize, Serialize};
 ///     .language(Language::Eng)
 ///     .build().unwrap();
 /// ```
-#[derive(Debug, Default, Clone, PartialEq)]
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct StatusBuilder {
     status: Option<String>,
     in_reply_to_id: Option<String>,
