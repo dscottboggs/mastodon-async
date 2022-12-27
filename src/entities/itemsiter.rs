@@ -90,9 +90,7 @@ impl<'a, T: Clone + for<'de> Deserialize<'de> + Serialize> ItemsIter<T> {
                 Some((item, this))
             } else {
                 if this.need_next_page() {
-                    if this.fill_next_page().await.is_none() {
-                        return None;
-                    }
+                    this.fill_next_page().await?;
                 }
                 let idx = this.cur_idx;
                 this.cur_idx += 1;
