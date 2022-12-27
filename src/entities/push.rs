@@ -37,7 +37,7 @@ pub(crate) mod add_subscription {
         pub(crate) data: Option<Data>,
     }
 
-    #[derive(Debug, Clone, PartialEq, Serialize, Default)]
+    #[derive(Debug, Clone, PartialEq, Eq, Serialize, Default)]
     pub(crate) struct Subscription {
         pub(crate) endpoint: String,
         pub(crate) keys: Keys,
