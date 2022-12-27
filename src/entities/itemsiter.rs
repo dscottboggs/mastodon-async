@@ -59,11 +59,11 @@ impl<'a, T: Clone + for<'de> Deserialize<'de> + Serialize> ItemsIter<T> {
                 self.buffer = items;
                 self.cur_idx = 0;
                 Some(())
-            },
+            }
             Err(err) => {
                 warn!(err = as_debug!(err); "error encountered filling next page");
                 None
-            },
+            }
             _ => None,
         }
     }

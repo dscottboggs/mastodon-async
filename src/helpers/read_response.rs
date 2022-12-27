@@ -66,9 +66,6 @@ where
         // we've received an error message, let's deserialize that instead.
         let response = serde_json::from_slice(bytes)?;
         debug!(status = as_debug!(status), response = as_serde!(response); "error received from API");
-        Err(Error::Api {
-            status,
-            response,
-        })
+        Err(Error::Api { status, response })
     }
 }

@@ -73,18 +73,18 @@ fn make_event(lines: &[String]) -> Result<Event> {
                 .ok_or_else(|| Error::Other("Missing `data` line for notification".to_string()))?;
             let notification = serde_json::from_str::<Notification>(&data)?;
             Event::Notification(notification)
-        },
+        }
         "update" => {
             let data =
                 data.ok_or_else(|| Error::Other("Missing `data` line for update".to_string()))?;
             let status = serde_json::from_str::<Status>(&data)?;
             Event::Update(status)
-        },
+        }
         "delete" => {
             let data =
                 data.ok_or_else(|| Error::Other("Missing `data` line for delete".to_string()))?;
             Event::Delete(data)
-        },
+        }
         "filters_changed" => Event::FiltersChanged,
         _ => return Err(Error::Other(format!("Unknown event `{}`", event))),
     })

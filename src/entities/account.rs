@@ -4,8 +4,7 @@ use crate::status_builder;
 use chrono::prelude::*;
 use serde::{
     de::{self, Deserializer, Unexpected},
-    Deserialize,
-    Serialize,
+    Deserialize, Serialize,
 };
 use std::path::PathBuf;
 
@@ -104,7 +103,7 @@ fn string_or_bool<'de, D: Deserializer<'de>>(val: D) -> ::std::result::Result<bo
                     &"true or false",
                 ));
             }
-        },
+        }
     })
 }
 
