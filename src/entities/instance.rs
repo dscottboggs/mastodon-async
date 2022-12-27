@@ -32,7 +32,7 @@ pub struct Instance {
 }
 
 /// Object containing url for streaming api.
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
 pub struct StreamingApi {
     /// Url for streaming API, typically a `wss://` url.
     pub streaming_api: String,
