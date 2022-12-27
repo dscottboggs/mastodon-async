@@ -84,7 +84,7 @@ pub struct Source {
 }
 
 fn string_or_bool<'de, D: Deserializer<'de>>(val: D) -> ::std::result::Result<bool, D::Error> {
-    #[derive(Clone, Debug, Deserialize, PartialEq)]
+    #[derive(Clone, Debug, Deserialize, PartialEq, Eq)]
     #[serde(untagged)]
     pub enum BoolOrString {
         Bool(bool),
