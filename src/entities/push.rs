@@ -65,7 +65,7 @@ pub(crate) mod update_data {
         pub(crate) alerts: Option<Alerts>,
     }
 
-    #[derive(Debug, Clone, PartialEq, Serialize, Default)]
+    #[derive(Debug, Clone, PartialEq, Eq, Serialize, Default)]
     pub(crate) struct Form {
         pub(crate) id: String,
         pub(crate) data: Data,
