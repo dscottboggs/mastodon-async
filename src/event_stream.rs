@@ -30,7 +30,7 @@ pub fn event_stream(
         while let Some(line) = lines_iter.next_line().await? {
             debug!(message = line, location = &location; "received message");
             let line = line.trim().to_string();
-            if line.starts_with(":") || line.is_empty() {
+            if line.starts_with(':') || line.is_empty() {
                 continue;
             }
             lines.push(line);
