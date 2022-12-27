@@ -78,7 +78,7 @@ pub struct Mention {
 }
 
 /// Struct representing an emoji within text.
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Emoji {
     /// The shortcode of the emoji
     pub shortcode: String,
