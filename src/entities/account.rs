@@ -56,7 +56,7 @@ pub struct Account {
 }
 
 /// A single name: value pair from a user's profile
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
 pub struct MetadataField {
     /// name part of metadata
     pub name: String,
