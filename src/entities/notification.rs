@@ -5,6 +5,7 @@ use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
 
 /// A struct containing info about a notification.
+#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 pub struct Notification {
     /// The notification ID.
