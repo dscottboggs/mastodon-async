@@ -93,6 +93,7 @@ pub struct Emoji {
 /// as a [`Tag`](https://docs.joinmastodon.org/entities/Tag/). In the case of
 /// the former, at the time of writing, the history field is always empty and
 /// the following field is always none.
+#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Tag {
     /// The hashtag, not including the preceding `#`.
