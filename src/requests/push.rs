@@ -215,7 +215,7 @@ impl AddPushRequest {
 ///     client.update_push_data(&request).await.unwrap();
 /// });
 /// ```
-#[derive(Debug, Default, Clone, PartialEq, Serialize)]
+#[derive(Debug, Default, Clone, PartialEq, Eq, Serialize)]
 pub struct UpdatePushRequest {
     id: String,
     follow: Option<bool>,
