@@ -18,7 +18,7 @@ futures = "0.3.25"
 doc-comment = "0.3"
 serde_json = "1"
 serde_qs = "0.10.1"
-serde_urlencoded = "0.6.1"
+serde_urlencoded = "0.7.1"
 tap-reader = "1"
 url = "1"
 # Provides parsing for the link header in get_links() in page.rs
