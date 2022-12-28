@@ -1,6 +1,6 @@
 [package]
 name = "mastodon-async"
-version = "1.0.2"
+version = "1.0.3"
 authors = ["Aaron Power <theaaronepower@gmail.com>", "Paul Woolcock <paul@woolcock.us>", "D. Scott Boggs <scott@tams.tech>"]
 description = "A wrapper around the Mastodon API."
 readme = "README.md"
@@ -20,15 +20,11 @@ serde_json = "1"
 serde_qs = "0.4.5"
 serde_urlencoded = "0.6.1"
 tap-reader = "1"
-tungstenite = "0.18"
 url = "1"
 # Provides parsing for the link header in get_links() in page.rs
 hyper-old-types = "0.11.0"
 futures-util = "0.3.25"
-
-[dependencies.magic]
-version = "0.13.0"
-optional = true
+static_assertions = "1.1.0"
 
 [dependencies.uuid]
 version = "1.2.2"
@@ -79,14 +75,17 @@ tempfile = "3"
 # for examples:
 femme = "2.2.1"
 html2text = "0.4.4"
+[dev-dependencies.criterion]
+version = "0.4.0"
+features = ["async_tokio"]
 
 [build-dependencies.skeptic]
 version = "0.13"
 
 [features]
-all = ["toml", "json", "env", "magic"]
+all = ["toml", "json", "env"]
 # default = ["reqwest/default-tls"]
-default = ["reqwest/default-tls", "magic"]
+default = ["reqwest/default-tls"]
 env = ["envy"]
 json = []
 rustls-tls = ["reqwest/rustls-tls"]
