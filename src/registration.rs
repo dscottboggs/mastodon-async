@@ -1,8 +1,8 @@
 use std::borrow::Cow;
 
 use log::{as_debug, as_serde, debug, error, trace};
+use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
 use reqwest::Client;
-use url::percent_encoding::{utf8_percent_encode, DEFAULT_ENCODE_SET};
 use uuid::Uuid;
 
 use crate::{
@@ -10,10 +10,7 @@ use crate::{
     helpers::read_response::read_response,
     log_serde,
     scopes::Scopes,
-    Data,
-    Error,
-    Mastodon,
-    Result,
+    Data, Error, Mastodon, Result,
 };
 
 const DEFAULT_REDIRECT_URI: &str = "urn:ietf:wg:oauth:2.0:oob";
@@ -309,7 +306,7 @@ impl Registered {
     /// in a browser.
     pub fn authorize_url(&self) -> Result<String> {
         let scopes = format!("{}", self.scopes);
-        let scopes: String = utf8_percent_encode(&scopes, DEFAULT_ENCODE_SET).collect();
+        let scopes: String = utf8_percent_encode(&scopes, NON_ALPHANUMERIC).collect();
         let url = if self.force_login {
             format!(
                 "{}/oauth/authorize?client_id={}&redirect_uri={}&scope={}&force_login=true&\
