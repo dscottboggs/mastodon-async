@@ -193,6 +193,7 @@ mod tests {
             website: None,
         };
         let expected = app.clone();
+        #[allow(clippy::useless_conversion)]
         let result = app.try_into().expect("Couldn't make App into App");
         assert_eq!(expected, result);
     }
