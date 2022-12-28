@@ -7,7 +7,6 @@
     "favourited",
     "indoc",
     "isolang",
-    "libmagic",
     "querystring",
     "reblog",
     "reqwest",

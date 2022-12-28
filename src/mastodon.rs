@@ -11,15 +11,8 @@ use crate::{
     errors::{Error, Result},
     event_stream::event_stream,
     helpers::read_response::read_response,
-    log_serde,
-    AddFilterRequest,
-    AddPushRequest,
-    Data,
-    NewStatus,
-    Page,
-    StatusesRequest,
-    UpdateCredsRequest,
-    UpdatePushRequest,
+    log_serde, AddFilterRequest, AddPushRequest, Data, NewStatus, Page, StatusesRequest,
+    UpdateCredsRequest, UpdatePushRequest,
 };
 use futures::TryStream;
 use log::{as_debug, as_serde, debug, error, trace};
@@ -27,25 +20,20 @@ use reqwest::{multipart::Part, Client, RequestBuilder};
 use url::Url;
 use uuid::Uuid;
 
-#[cfg(feature = "magic")]
-use magic::CookieFlags;
-#[cfg(feature = "magic")]
-use std::sync::Mutex;
-
 /// The Mastodon client is a smart pointer to this struct
 #[derive(Debug)]
 pub struct MastodonClient {
     pub(crate) client: Client,
     /// Raw data about your mastodon instance.
     pub data: Data,
-    /// A handle to access libmagic for mime-types.
-    #[cfg(feature = "magic")]
-    magic: Mutex<magic::Cookie>,
 }
 
 /// Your mastodon application client, handles all requests to and from Mastodon.
 #[derive(Debug, Clone)]
 pub struct Mastodon(Arc<MastodonClient>);
+
+// This ensures we don't accidentally make Mastodon not Send or Sync again
+static_assertions::assert_impl_all!(Mastodon: Send, Sync);
 
 /// A client for making unauthenticated requests to the public API.
 #[derive(Clone, Debug)]
@@ -57,23 +45,8 @@ pub struct MastodonUnauthenticated {
 
 impl From<Data> for Mastodon {
     /// Creates a mastodon instance from the data struct.
-    #[cfg(feature = "magic")]
     fn from(data: Data) -> Mastodon {
-        Mastodon::new_with_magic(
-            Client::new(),
-            data,
-            Self::default_magic().expect("failed to open magic cookie or load database"),
-        )
-    }
-
-    /// Creates a mastodon instance from the data struct.
-    #[cfg(not(feature = "magic"))]
-    fn from(data: Data) -> Mastodon {
-        MastodonClient {
-            client: Client::new(),
-            data,
-        }
-        .into()
+        Mastodon::new(Client::new(), data)
     }
 }
 impl Mastodon {
@@ -175,46 +148,9 @@ impl Mastodon {
         stream_direct@"direct",
     }
 
-    /// Return a magic cookie, loaded with the default mime
-    #[cfg(feature = "magic")]
-    fn default_magic() -> Result<magic::Cookie> {
-        let magic = magic::Cookie::open(Default::default())?;
-        magic.load::<&str>(&[])?;
-        magic.set_flags(CookieFlags::MIME)?;
-        Ok(magic)
-    }
-
-    /// Create a new Mastodon Client
-    #[cfg(feature = "magic")]
+    /// A new instance.
     pub fn new(client: Client, data: Data) -> Self {
-        Self::new_with_magic(
-            client,
-            data,
-            Self::default_magic().expect("failed to open magic cookie or load database"),
-        )
-    }
-
-    /// Create a new Mastodon Client, passing in a pre-constructed magic
-    /// cookie.
-    ///
-    /// This is mainly here so you have a wait to construct the client which
-    /// won't panic.
-    #[cfg(feature = "magic")]
-    pub fn new_with_magic(client: Client, data: Data, magic: magic::Cookie) -> Self {
-        Mastodon(Arc::new(MastodonClient {
-            client,
-            data,
-            magic: Mutex::new(magic),
-        }))
-    }
-
-    /// Create a new Mastodon Client
-    #[cfg(not(feature = "magic"))]
-    pub fn new(client: Client, data: Data) -> Self {
-        Mastodon(Arc::new(MastodonClient {
-            client,
-            data,
-        }))
+        Mastodon(Arc::new(MastodonClient { client, data }))
     }
 
     fn route(&self, url: &str) -> String {
@@ -397,19 +333,11 @@ impl Mastodon {
     }
 
     /// Return a part for a multipart form submission from a file, including
-    /// the name of the file, and, if the "magic" feature is enabled, the mime-
-    /// type.
-    fn get_form_part(&self, path: impl AsRef<Path>) -> Result<Part> {
+    /// the name of the file.
+    fn get_form_part(path: impl AsRef<Path>) -> Result<Part> {
         use std::io::Read;
 
         let path = path.as_ref();
-
-        // if it doesn't work, it's no big deal. The server will look at
-        // the filepath if this isn't here and things should still work.
-        #[cfg(feature = "magic")]
-        let mime = self.magic.lock().expect("mutex lock").file(path).ok();
-        #[cfg(not(feature = "magic"))]
-        let mime: Option<String> = None;
 
         match std::fs::File::open(path) {
             Ok(mut file) => {
@@ -419,13 +347,8 @@ impl Mastodon {
                     vec![]
                 };
                 file.read_to_end(&mut data)?;
-                let part =
-                    Part::bytes(data).file_name(Cow::Owned(path.to_string_lossy().to_string()));
-                Ok(if let Some(mime) = &mime {
-                    part.mime_str(&mime)?
-                } else {
-                    part
-                })
+                // TODO extract filename, error on dirs, etc.
+                Ok(Part::bytes(data).file_name(Cow::Owned(path.to_string_lossy().to_string())))
             },
             Err(err) => {
                 error!(path = as_debug!(path), error = as_debug!(err); "error reading file contents for multipart form");

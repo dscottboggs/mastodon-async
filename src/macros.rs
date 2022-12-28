@@ -173,7 +173,7 @@ macro_rules! route_v2 {
 
                 let form_data = Form::new()
                     $(
-                        .part(stringify!($param), self.get_form_part($param)?)
+                        .part(stringify!($param), Self::get_form_part($param)?)
                      )*;
 
                 let form_data = if let Some(description) = description {
@@ -217,7 +217,7 @@ macro_rules! route_v2 {
 
                 let form_data = Form::new()
                     $(
-                        .part(stringify!($param), self.get_form_part($param)?)
+                        .part(stringify!($param), Self::get_form_part($param)?)
                      )*;
 
                 let url = &self.route(concat!("/api/v2/", $url));
@@ -261,7 +261,7 @@ macro_rules! route {
 
                 let form_data = Form::new()
                     $(
-                        .part(stringify!($param), self.get_form_part($param)?)
+                        .part(stringify!($param), Self::get_form_part($param)?)
                      )*;
 
                 let url = &self.route(concat!("/api/v1/", $url));
@@ -302,7 +302,7 @@ macro_rules! route {
 
                 let form_data = Form::new()
                     $(
-                        .part(stringify!($param), self.get_form_part($param)?)
+                        .part(stringify!($param), Self::get_form_part($param)?)
                      )*;
 
                 let form_data = if let Some(description) = description {
