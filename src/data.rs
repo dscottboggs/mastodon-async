@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 /// Raw data about mastodon app. Save `Data` using `serde` to prevent needing
 /// to authenticate on every run.
-#[derive(Clone, Debug, PartialEq, Deserialize, Serialize, Default)]
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize, Default)]
 pub struct Data {
     /// Base url of instance eg. `https://botsin.space`.
     pub base: Cow<'static, str>,

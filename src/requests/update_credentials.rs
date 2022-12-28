@@ -26,7 +26,7 @@ use crate::{
 ///     let result = client.update_credentials(&mut builder).await.unwrap();
 /// });
 /// ```
-#[derive(Debug, Default, Clone, PartialEq)]
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct UpdateCredsRequest {
     display_name: Option<String>,
     note: Option<String>,
@@ -176,8 +176,8 @@ impl UpdateCredsRequest {
             avatar: self.avatar.clone(),
             header: self.avatar.clone(),
             source: Some(UpdateSource {
-                privacy: self.privacy.clone(),
-                sensitive: self.sensitive.clone(),
+                privacy: self.privacy,
+                sensitive: self.sensitive,
             }),
             fields_attributes: self.field_attributes.clone(),
         })

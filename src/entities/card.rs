@@ -3,7 +3,7 @@
 use serde::{Deserialize, Serialize};
 
 /// A card of a status.
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
 pub struct Card {
     /// The url associated with the card.
     pub url: String,

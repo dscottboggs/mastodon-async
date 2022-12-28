@@ -38,7 +38,7 @@ impl FromStr for Scopes {
     fn from_str(s: &str) -> Result<Scopes, Self::Err> {
         let mut set = HashSet::new();
         for scope in s.split_whitespace() {
-            let scope = Scope::from_str(&scope)?;
+            let scope = Scope::from_str(scope)?;
             set.insert(scope);
         }
         Ok(Scopes {
@@ -184,7 +184,7 @@ impl Scopes {
             .scopes
             .union(&other.scopes)
             .into_iter()
-            .map(|s| *s)
+            .copied()
             .collect();
         Scopes {
             scopes: newset,
@@ -264,7 +264,7 @@ impl fmt::Display for Scopes {
 /// Permission scope of the application.
 /// [Details on what each permission provides][1]
 /// [1]: https://github.com/tootsuite/documentation/blob/master/Using-the-API/OAuth-details.md)
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Hash, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
 enum Scope {
     /// Read only permissions.
     #[serde(rename = "read")]
@@ -299,6 +299,12 @@ impl FromStr for Scope {
             },
             _ => return Err(Error::Other("Unknown scope".to_string())),
         })
+    }
+}
+
+impl PartialOrd for Scope {
+    fn partial_cmp(&self, other: &Scope) -> Option<Ordering> {
+       Some(self.cmp(other))
     }
 }
 

@@ -179,7 +179,7 @@ fn get_links(response: &Response, call_id: Uuid) -> Result<(Option<Url>, Option<
         let link_header = link_header.to_str()?;
         trace!(link_header = link_header, call_id = as_debug!(call_id); "parsing link header");
         let link_header = link_header.as_bytes();
-        let link_header: Link = parsing::from_raw_str(&link_header)?;
+        let link_header: Link = parsing::from_raw_str(link_header)?;
         for value in link_header.values() {
             if let Some(relations) = value.rel() {
                 if relations.contains(&RelationType::Next) {

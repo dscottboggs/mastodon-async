@@ -3,7 +3,7 @@
 use serde::{Deserialize, Serialize};
 
 /// A struct containing info about a report.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Report {
     /// The ID of the report.
     pub id: String,

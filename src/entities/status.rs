@@ -65,7 +65,7 @@ pub struct Status {
 }
 
 /// A mention of another user.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Mention {
     /// URL of user's profile (can be remote).
     pub url: String,
@@ -78,7 +78,7 @@ pub struct Mention {
 }
 
 /// Struct representing an emoji within text.
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Emoji {
     /// The shortcode of the emoji
     pub shortcode: String,
@@ -93,6 +93,7 @@ pub struct Emoji {
 /// as a [`Tag`](https://docs.joinmastodon.org/entities/Tag/). In the case of
 /// the former, at the time of writing, the history field is always empty and
 /// the following field is always none.
+#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Tag {
     /// The hashtag, not including the preceding `#`.
@@ -107,7 +108,7 @@ pub struct Tag {
 }
 
 /// Application details.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Application {
     /// Name of the application.
     pub name: String,
@@ -116,7 +117,7 @@ pub struct Application {
 }
 
 /// Usage statistics for given days (typically the past week).
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct TagHistory {
     /// UNIX timestamp on midnight of the given day.
     pub day: String,

@@ -110,13 +110,13 @@ impl<'a> AppBuilder<'a> {
         Ok(App {
             client_name: self
                 .client_name
-                .ok_or_else(|| Error::MissingField("client_name"))?
+                .ok_or(Error::MissingField("client_name"))?
                 .into(),
             redirect_uris: self
                 .redirect_uris
                 .unwrap_or_else(|| "urn:ietf:wg:oauth:2.0:oob".into())
                 .into(),
-            scopes: self.scopes.unwrap_or_else(|| Scopes::read_all()),
+            scopes: self.scopes.unwrap_or_else(Scopes::read_all),
             website: self.website.map(|s| s.into()),
         })
     }
@@ -126,7 +126,7 @@ impl<'a> TryInto<App> for AppBuilder<'a> {
     type Error = Error;
 
     fn try_into(self) -> Result<App> {
-        Ok(self.build()?)
+        self.build()
     }
 }
 

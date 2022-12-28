@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 /// Represents the `alerts` key of the `Subscription` object
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 pub struct Alerts {
     /// flag for follow alerts
     pub follow: Option<bool>,
@@ -14,7 +14,7 @@ pub struct Alerts {
 }
 
 /// Represents a new Push subscription
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Subscription {
     /// The `id` of the subscription
     pub id: String,
@@ -37,19 +37,19 @@ pub(crate) mod add_subscription {
         pub(crate) data: Option<Data>,
     }
 
-    #[derive(Debug, Clone, PartialEq, Serialize, Default)]
+    #[derive(Debug, Clone, PartialEq, Eq, Serialize, Default)]
     pub(crate) struct Subscription {
         pub(crate) endpoint: String,
         pub(crate) keys: Keys,
     }
 
-    #[derive(Debug, Clone, PartialEq, Serialize, Default)]
+    #[derive(Debug, Clone, PartialEq, Eq, Serialize, Default)]
     pub(crate) struct Keys {
         pub(crate) p256dh: String,
         pub(crate) auth: String,
     }
 
-    #[derive(Debug, Clone, PartialEq, Serialize, Default)]
+    #[derive(Debug, Clone, PartialEq, Eq, Serialize, Default)]
     pub(crate) struct Data {
         pub(crate) alerts: Option<Alerts>,
     }
@@ -60,12 +60,12 @@ pub(crate) mod update_data {
 
     use super::Alerts;
 
-    #[derive(Debug, Clone, PartialEq, Serialize, Default)]
+    #[derive(Debug, Clone, PartialEq, Eq, Serialize, Default)]
     pub(crate) struct Data {
         pub(crate) alerts: Option<Alerts>,
     }
 
-    #[derive(Debug, Clone, PartialEq, Serialize, Default)]
+    #[derive(Debug, Clone, PartialEq, Eq, Serialize, Default)]
     pub(crate) struct Form {
         pub(crate) id: String,
         pub(crate) data: Data,

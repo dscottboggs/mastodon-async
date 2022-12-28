@@ -86,6 +86,7 @@ macro_rules! paged_routes {
                     _marker: ::std::marker::PhantomData<&'a ()>,
                 }
 
+                #[allow(clippy::redundant_field_names)]
                 let qs_data = Data {
                     $(
                             $param: $param,
@@ -135,6 +136,7 @@ macro_rules! route_v2 {
                     _marker: ::std::marker::PhantomData<&'a ()>,
                 }
 
+                #[allow(clippy::redundant_field_names)]
                 let qs_data = Data {
                     $(
                             $param: $param,
@@ -349,6 +351,7 @@ macro_rules! route {
                     _marker: ::std::marker::PhantomData<&'a ()>,
                 }
 
+                #[allow(clippy::redundant_field_names)]
                 let qs_data = Data {
                     $(
                             $param: $param,

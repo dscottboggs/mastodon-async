@@ -32,14 +32,14 @@ pub struct Instance {
 }
 
 /// Object containing url for streaming api.
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
 pub struct StreamingApi {
     /// Url for streaming API, typically a `wss://` url.
     pub streaming_api: String,
 }
 
 /// Statistics about the Mastodon instance.
-#[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq)]
 pub struct Stats {
     user_count: u64,
     status_count: u64,

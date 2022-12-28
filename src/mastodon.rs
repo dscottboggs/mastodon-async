@@ -326,11 +326,11 @@ impl Mastodon {
 
         if ids.len() == 1 {
             url += "id=";
-            url += &ids[0];
+            url += ids[0];
         } else {
             for id in ids {
                 url += "id[]=";
-                url += &id;
+                url += id;
                 url += "&";
             }
             url.pop();
@@ -427,7 +427,7 @@ impl Mastodon {
             },
             Err(err) => {
                 error!(path = as_debug!(path), error = as_debug!(err); "error reading file contents for multipart form");
-                return Err(err.into());
+                Err(err.into())
             },
         }
     }

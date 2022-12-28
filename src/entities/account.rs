@@ -56,7 +56,7 @@ pub struct Account {
 }
 
 /// A single name: value pair from a user's profile
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
 pub struct MetadataField {
     /// name part of metadata
     pub name: String,
@@ -74,7 +74,7 @@ impl MetadataField {
 }
 
 /// An extra object given from `verify_credentials` giving defaults about a user
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
 pub struct Source {
     privacy: Option<status_builder::Visibility>,
     #[serde(deserialize_with = "string_or_bool")]
@@ -84,7 +84,7 @@ pub struct Source {
 }
 
 fn string_or_bool<'de, D: Deserializer<'de>>(val: D) -> ::std::result::Result<bool, D::Error> {
-    #[derive(Clone, Debug, Deserialize, PartialEq)]
+    #[derive(Clone, Debug, Deserialize, PartialEq, Eq)]
     #[serde(untagged)]
     pub enum BoolOrString {
         Bool(bool),
@@ -108,7 +108,7 @@ fn string_or_bool<'de, D: Deserializer<'de>>(val: D) -> ::std::result::Result<bo
     })
 }
 
-#[derive(Debug, Default, Clone, Serialize, PartialEq)]
+#[derive(Debug, Default, Clone, Serialize, PartialEq, Eq)]
 pub(crate) struct UpdateSource {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) privacy: Option<status_builder::Visibility>,
@@ -116,7 +116,7 @@ pub(crate) struct UpdateSource {
     pub(crate) sensitive: Option<bool>,
 }
 
-#[derive(Debug, Default, Serialize, PartialEq)]
+#[derive(Debug, Default, Serialize, PartialEq, Eq)]
 pub(crate) struct Credentials {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) display_name: Option<String>,

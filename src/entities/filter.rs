@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 /// Represents a single Filter
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Filter {
     id: String,
     phrase: String,
@@ -12,7 +12,7 @@ pub struct Filter {
 }
 
 /// Represents the various types of Filter contexts
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum FilterContext {
     /// Represents the "home" context
     #[serde(rename = "home")]
