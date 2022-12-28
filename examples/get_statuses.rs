@@ -6,18 +6,20 @@ use mastodon_async::Result;
 #[cfg(feature = "toml")]
 #[tokio::main]
 async fn main() -> Result<()> {
-    use futures::StreamExt;
+    use futures_util::StreamExt;
+    use mastodon_async::StatusesRequest;
 
+    let mut filters = StatusesRequest::new();
+    filters.limit(3);
     let mastodon = register::get_mastodon_data().await?;
+    let you = mastodon.verify_credentials().await?;
+
     mastodon
-        .follows_me()
+        .statuses(&you.id, filters)
         .await?
         .items_iter()
-        .for_each(|account| async move {
-            println!("{}", account.acct);
-        })
+        .for_each(|status| async move { println!("{status:?}") })
         .await;
-
     Ok(())
 }
 
@@ -25,6 +27,6 @@ async fn main() -> Result<()> {
 fn main() {
     println!(
         "examples require the `toml` feature, run this command for this example:\n\ncargo run \
-         --example follows_me --features toml\n"
+         --example get_statuses --features toml\n"
     );
 }

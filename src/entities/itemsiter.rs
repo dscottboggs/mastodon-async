@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
 /// tokio_test::block_on(async {
 ///     let data = Data::default();
 ///     let client = Mastodon::from(data);
-///     let statuses = client.statuses("user-id", None).await.unwrap().items_iter();
+///     let statuses = client.statuses("user-id", Default::default()).await.unwrap().items_iter();
 ///     statuses.for_each(|status| async move {
 ///         // Do something with the status
 ///     }).await;

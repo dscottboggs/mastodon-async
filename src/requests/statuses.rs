@@ -27,7 +27,7 @@ mod bool_qs_serialize {
 /// use mastodon_async::requests::StatusesRequest;
 /// let mut request = StatusesRequest::new();
 /// request.only_media().pinned().since_id("foo");
-/// assert_eq!(&request.to_querystring().expect("Couldn't serialize qs")[..], "?only_media=1&pinned=1&since_id=foo");
+/// assert_eq!(&request.to_query_string().expect("Couldn't serialize qs")[..], "?only_media=1&pinned=1&since_id=foo");
 /// ```
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize)]
 pub struct StatusesRequest<'a> {
@@ -75,8 +75,9 @@ impl<'a> StatusesRequest<'a> {
     /// // Example
     ///
     /// ```
-    /// let mut request = mastodon_async::requests::StatusesRequest::new();
-    /// assert_eq!(&request.only_media().to_querystring().expect("Couldn't serialize qs"), "?only_media=1");
+    /// use mastodon_async::requests::StatusesRequest;
+    /// let mut request = StatusesRequest::new();
+    /// assert_eq!(&request.only_media().to_query_string().expect("Couldn't serialize qs"), "?only_media=1");
     /// ```
     pub fn only_media(&mut self) -> &mut Self {
         self.only_media = true;
@@ -88,11 +89,12 @@ impl<'a> StatusesRequest<'a> {
     /// // Example
     ///
     /// ```
-    /// let mut request = mastodon_async::requests::StatusesRequest::new();
+    /// use mastodon_async::requests::StatusesRequest;
+    /// let mut request = StatusesRequest::new();
     /// assert_eq!(
     ///     &request
     ///         .exclude_replies()
-    ///         .to_querystring()
+    ///         .to_query_string()
     ///         .expect("Couldn't serialize qs"),
     ///     "?exclude_replies=1"
     /// );
@@ -107,11 +109,12 @@ impl<'a> StatusesRequest<'a> {
     /// // Example
     ///
     /// ```
-    /// let mut request = mastodon_async::requests::StatusesRequest::new();
+    /// use mastodon_async::requests::StatusesRequest;
+    /// let mut request = StatusesRequest::new();
     /// assert_eq!(
     ///     &request
     ///         .pinned()
-    ///         .to_querystring()
+    ///         .to_query_string()
     ///         .expect("Couldn't serialize qs"),
     ///     "?pinned=1"
     /// );
@@ -126,11 +129,12 @@ impl<'a> StatusesRequest<'a> {
     /// // Example
     ///
     /// ```
-    /// let mut request = mastodon_async::requests::StatusesRequest::new();
+    /// use mastodon_async::requests::StatusesRequest;
+    /// let mut request = StatusesRequest::new();
     /// assert_eq!(
     ///     &request
     ///         .max_id("foo")
-    ///         .to_querystring()
+    ///         .to_query_string()
     ///         .expect("Couldn't serialize qs"),
     ///     "?max_id=foo"
     /// );
@@ -145,11 +149,12 @@ impl<'a> StatusesRequest<'a> {
     /// // Example
     ///
     /// ```
-    /// let mut request = mastodon_async::requests::StatusesRequest::new();
+    /// use mastodon_async::requests::StatusesRequest;
+    /// let mut request = StatusesRequest::new();
     /// assert_eq!(
     ///     &request
     ///         .since_id("foo")
-    ///         .to_querystring()
+    ///         .to_query_string()
     ///         .expect("Couldn't serialize qs"),
     ///     "?since_id=foo"
     /// );
@@ -164,11 +169,12 @@ impl<'a> StatusesRequest<'a> {
     /// // Example
     ///
     /// ```
-    /// let mut request = mastodon_async::requests::StatusesRequest::new();
+    /// use mastodon_async::requests::StatusesRequest;
+    /// let mut request = StatusesRequest::new();
     /// assert_eq!(
     ///     &request
     ///         .limit(10)
-    ///         .to_querystring()
+    ///         .to_query_string()
     ///         .expect("Couldn't serialize qs"),
     ///     "?limit=10"
     /// );
@@ -183,11 +189,12 @@ impl<'a> StatusesRequest<'a> {
     /// // Example
     ///
     /// ```
-    /// let mut request = mastodon_async::requests::StatusesRequest::new();
+    /// use mastodon_async::requests::StatusesRequest;
+    /// let mut request = StatusesRequest::new();
     /// assert_eq!(
     ///     &request
     ///         .min_id("foobar")
-    ///         .to_querystring()
+    ///         .to_query_string()
     ///         .expect("Couldn't serialize qs"),
     ///     "?min_id=foobar"
     /// );
@@ -197,22 +204,8 @@ impl<'a> StatusesRequest<'a> {
         self
     }
 
-    /// Turns this builder into a querystring
-    ///
-    /// // Example
-    ///
-    /// ```
-    /// let mut request = mastodon_async::requests::StatusesRequest::new();
-    /// assert_eq!(
-    ///     &request
-    ///         .limit(10)
-    ///         .pinned()
-    ///         .to_querystring()
-    ///         .expect("Couldn't serialize qs"),
-    ///     "?pinned=1&limit=10"
-    /// );
-    /// ```
-    pub fn to_querystring(&self) -> Result<String, Error> {
+    /// Serialize into a query string
+    pub fn to_query_string(&self) -> Result<String, Error> {
         Ok(format!("?{}", serde_qs::to_string(&self)?))
     }
 }
@@ -359,13 +352,13 @@ mod tests {
         );
     }
     #[test]
-    fn test_to_querystring() {
+    fn test_to_query_string() {
         macro_rules! qs_test {
             (|$r:ident| $b:block, $expected:expr) => {
                 {
                     let mut $r = StatusesRequest::new();
                     $b
-                    let qs = $r.to_querystring().expect("Failed to serialize querystring");
+                    let qs = $r.to_query_string().expect("Failed to serialize querystring");
                     assert_eq!(&qs, $expected);
                 }
             }

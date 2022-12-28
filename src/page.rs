@@ -1,9 +1,6 @@
 use super::{Mastodon, Result};
 use crate::{
-    entities::itemsiter::ItemsIter,
-    format_err,
-    helpers::read_response::read_response,
-    Error,
+    entities::itemsiter::ItemsIter, format_err, helpers::read_response::read_response, Error,
 };
 use futures::Stream;
 use hyper_old_types::header::{parsing, Link, RelationType};
@@ -130,10 +127,7 @@ impl<'a, T: for<'de> Deserialize<'de> + Serialize> Page<T> {
             })
         } else {
             let response = response.json().await?;
-            Err(Error::Api {
-                status,
-                response,
-            })
+            Err(Error::Api { status, response })
         }
     }
 }

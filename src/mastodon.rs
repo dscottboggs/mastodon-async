@@ -225,7 +225,7 @@ impl Mastodon {
     /// tokio_test::block_on(async {
     ///     let data = Data::default();
     ///     let client = Mastodon::from(data);
-    ///     let statuses = client.statuses("user-id", None).await.unwrap();
+    ///     let statuses = client.statuses("user-id", Default::default()).await.unwrap();
     /// });
     /// ```
     ///
@@ -239,16 +239,15 @@ impl Mastodon {
     ///     let statuses = client.statuses("user-id", request).await.unwrap();
     /// });
     /// ```
-    pub async fn statuses<'a, 'b: 'a, S>(&'b self, id: &'b str, request: S) -> Result<Page<Status>>
-    where
-        S: Into<Option<StatusesRequest<'a>>>,
-    {
+    pub async fn statuses<'a, 'b: 'a>(
+        &'b self,
+        id: &'b str,
+        request: StatusesRequest<'a>,
+    ) -> Result<Page<Status>> {
         let call_id = Uuid::new_v4();
         let mut url = format!("{}/api/v1/accounts/{}/statuses", self.data.base, id);
 
-        if let Some(request) = request.into() {
-            url = format!("{}{}", url, request.to_querystring()?);
-        }
+        url += request.to_query_string()?.as_str();
 
         debug!(url = url, method = stringify!($method), call_id = as_debug!(call_id); "making API request");
         let response = self.client.get(&url).send().await?;
