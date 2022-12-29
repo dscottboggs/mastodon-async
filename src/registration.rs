@@ -336,11 +336,15 @@ impl Registered {
 
     /// Create an access token from the client id, client secret, and code
     /// provided by the authorization url.
-    pub async fn complete(&self, code: &str) -> Result<Mastodon> {
-        let url = format!(
+    pub async fn complete<C>(&self, code: C) -> Result<Mastodon>
+    where
+        C: AsRef<str>,
+    {
+        let url =
+            format!(
             "{}/oauth/token?client_id={}&client_secret={}&code={}&grant_type=authorization_code&\
              redirect_uri={}",
-            self.base, self.client_id, self.client_secret, code, self.redirect
+            self.base, self.client_id, self.client_secret, code.as_ref(), self.redirect
         );
         debug!(url = url; "completing registration");
         let response = self.client.post(&url).send().await?;
