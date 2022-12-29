@@ -30,7 +30,7 @@ pub fn from_reader<R: Read>(mut r: R) -> Result<Data> {
 pub fn from_file<P: AsRef<Path>>(path: P) -> Result<Data> {
     let path = path.as_ref();
     let file = File::open(path)?;
-    Ok(from_reader(file)?)
+    from_reader(file)
 }
 
 /// Attempts to serialize a Data struct to a String
