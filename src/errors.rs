@@ -18,10 +18,11 @@ use url::ParseError as UrlError;
 pub type Result<T> = ::std::result::Result<T, Error>;
 
 /// enum of possible errors encountered using the mastodon API.
-#[derive(Debug)]
+#[derive(Debug, thiserror::Error)]
 pub enum Error {
     /// Error from the Mastodon API. This typically means something went
     /// wrong with your authentication or data.
+    #[error("API error: status: {status:?}, response:\n{response:#?}")]
     Api {
         /// The response status.
         status: StatusCode,
@@ -30,81 +31,63 @@ pub enum Error {
     },
     /// Error deserialising to json. Typically represents a breaking change in
     /// the Mastodon API
-    Serde(SerdeError),
+    #[error("error from serde")]
+    Serde(#[from] SerdeError),
     /// Error serializing to url-encoded string
-    UrlEncoded(UrlEncodedError),
+    #[error("error serializing to url-encoded string")]
+    UrlEncoded(#[from] UrlEncodedError),
     /// Error encountered in the HTTP backend while requesting a route.
-    Http(HttpError),
+    #[error("Error encountered in the HTTP backend while requesting a route.")]
+    Http(#[from] HttpError),
     /// Wrapper around the `std::io::Error` struct.
-    Io(IoError),
+    #[error("io error")]
+    Io(#[from] IoError),
     /// Wrapper around the `url::ParseError` struct.
-    Url(UrlError),
+    #[error("error parsing URL")]
+    Url(#[from] UrlError),
     /// Missing Client Id.
+    #[error("Missing Client Id.")]
     ClientIdRequired,
     /// Missing Client Secret.
+    #[error("Missing Client Secret.")]
     ClientSecretRequired,
     /// Missing Access Token.
+    #[error("Missing Access Token.")]
     AccessTokenRequired,
     /// MastodonBuilder & AppBuilder error
+    #[error("builder required field {0:?} to be constructed")]
     MissingField(&'static str),
     #[cfg(feature = "toml")]
     /// Error serializing to toml
-    TomlSer(TomlSerError),
+    #[error("Error serializing to toml")]
+    TomlSer(#[from] TomlSerError),
     #[cfg(feature = "toml")]
     /// Error deserializing from toml
-    TomlDe(TomlDeError),
+    #[error("Error deserializing from toml")]
+    TomlDe(#[from] TomlDeError),
     /// Error converting an http header to a string
-    HeaderStrError(HeaderStrError),
+    #[error("Error converting an http header to a string")]
+    HeaderStrError(#[from] HeaderStrError),
     /// Error parsing the http Link header
-    HeaderParseError(HeaderParseError),
+    #[error("Error parsing the http Link header")]
+    HeaderParseError(#[from] HeaderParseError),
     #[cfg(feature = "env")]
-    /// Error deserializing from the environment
-    Envy(EnvyError),
+    /// Error deserializing config from the environment
+    #[error("Error deserializing config from the environment")]
+    Envy(#[from] EnvyError),
     /// Error serializing to a query string
-    SerdeQs(SerdeQsError),
+    #[error("Error serializing to a query string")]
+    SerdeQs(#[from] SerdeQsError),
     /// An integer conversion was attempted, but the value didn't fit into the
     /// target type.
     ///
     /// At the time of writing, this can only be triggered when a file is
     /// larger than the system's usize allows.
-    IntConversion(TryFromIntError),
+    #[error("integer didn't fit in the target size")]
+    IntConversion(#[from] TryFromIntError),
     /// Other errors
+    #[error("other error: {0:?}")]
     Other(String),
-}
-
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self)
-    }
-}
-
-impl error::Error for Error {
-    fn source(&self) -> Option<&(dyn error::Error + 'static)> {
-        use Error::*;
-        match *self {
-            Serde(ref e) => Some(e),
-            UrlEncoded(ref e) => Some(e),
-            Http(ref e) => Some(e),
-            Io(ref e) => Some(e),
-            Url(ref e) => Some(e),
-            #[cfg(feature = "toml")]
-            TomlSer(ref e) => Some(e),
-            #[cfg(feature = "toml")]
-            TomlDe(ref e) => Some(e),
-            HeaderStrError(ref e) => Some(e),
-            HeaderParseError(ref e) => Some(e),
-            #[cfg(feature = "env")]
-            Envy(ref e) => Some(e),
-            SerdeQs(ref e) => Some(e),
-            IntConversion(ref e) => Some(e),
-            Api { .. }
-            | ClientIdRequired
-            | ClientSecretRequired
-            | AccessTokenRequired
-            | MissingField(_)
-            | Other(..) => None,
-        }
-    }
 }
 
 /// Error returned from the Mastodon API.
@@ -123,39 +106,6 @@ impl fmt::Display for ApiError {
 }
 
 impl error::Error for ApiError {}
-
-macro_rules! from {
-    ($($(#[$met:meta])* $typ:ident => $variant:ident,)*) => {
-        $(
-            $(#[$met])*
-            impl From<$typ> for Error {
-                fn from(from: $typ) -> Self {
-                    use Error::*;
-                    $variant(from)
-                }
-            }
-        )*
-    }
-}
-
-from! {
-    HttpError => Http,
-    IoError => Io,
-    SerdeError => Serde,
-    UrlEncodedError => UrlEncoded,
-    UrlError => Url,
-    #[cfg(feature = "toml")]
-    TomlSerError => TomlSer,
-    #[cfg(feature = "toml")]
-    TomlDeError => TomlDe,
-    HeaderStrError => HeaderStrError,
-    HeaderParseError => HeaderParseError,
-    #[cfg(feature = "env")]
-    EnvyError => Envy,
-    SerdeQsError => SerdeQs,
-    String => Other,
-    TryFromIntError => IntConversion,
-}
 
 #[macro_export]
 /// Used to easily create errors from strings
