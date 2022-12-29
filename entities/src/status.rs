@@ -9,7 +9,7 @@ use time::{serde::iso8601, OffsetDateTime};
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Status {
     /// The ID of the status.
-    pub id: String,
+    pub id: StatusId,
     /// A Fediverse-unique resource ID.
     pub uri: String,
     /// URL to the status page (can be remote)
@@ -63,6 +63,17 @@ pub struct Status {
     pub language: Option<String>,
     /// Whether this is the pinned status for the account that posted it.
     pub pinned: Option<bool>,
+}
+
+/// Wrapper type for a status ID string
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(transparent)]
+pub struct StatusId(String);
+
+impl AsRef<str> for StatusId {
+    fn as_ref(&self) -> &str {
+        &self.0
+    }
 }
 
 /// A mention of another user.
