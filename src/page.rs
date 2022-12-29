@@ -1,9 +1,6 @@
 use super::{Mastodon, Result};
-use crate::{
-    entities::itemsiter::ItemsIter, format_err, helpers::read_response::read_response, Error,
-};
+use crate::{entities::itemsiter::ItemsIter, helpers::read_response::read_response, Error};
 use futures::Stream;
-use hyper_old_types::header::{parsing, Link, RelationType};
 use log::{as_debug, as_serde, debug, error, trace};
 use reqwest::{header::LINK, Response, Url};
 use serde::{Deserialize, Serialize};
@@ -171,30 +168,19 @@ fn get_links(response: &Response, call_id: Uuid) -> Result<(Option<Url>, Option<
 
     if let Some(link_header) = response.headers().get(LINK) {
         let link_header = link_header.to_str()?;
+        let raw_link_header = link_header.to_string();
         trace!(link_header = link_header, call_id = as_debug!(call_id); "parsing link header");
-        let link_header = link_header.as_bytes();
-        let link_header: Link = parsing::from_raw_str(link_header)?;
-        for value in link_header.values() {
-            if let Some(relations) = value.rel() {
-                if relations.contains(&RelationType::Next) {
-                    // next = Some(Url::parse(value.link())?);
-                    next = if let Ok(url) = Url::parse(value.link()) {
-                        trace!(next = url.as_str(), call_id = as_debug!(call_id); "parsed link header");
-                        Some(url)
-                    } else {
-                        // HACK: url::ParseError::into isn't working for some reason.
-                        return Err(format_err!("error parsing url {:?}", value.link()));
-                    };
-                }
-
-                if relations.contains(&RelationType::Prev) {
-                    prev = if let Ok(url) = Url::parse(value.link()) {
-                        trace!(prev = url.as_str(), call_id = as_debug!(call_id); "parsed link header");
-                        Some(url)
-                    } else {
-                        // HACK: url::ParseError::into isn't working for some reason.
-                        return Err(format_err!("error parsing url {:?}", value.link()));
-                    };
+        let link_header = parse_link_header::parse(link_header)?;
+        for (rel, link) in link_header.iter() {
+            match rel.as_ref().map(|it| it.as_str()) {
+                Some("next") => next = Some(link.uri.clone()),
+                Some("prev") => prev = Some(link.uri.clone()),
+                None => debug!(link = as_debug!(link); "link header with no rel specified"),
+                Some(other) => {
+                    return Err(Error::UnrecognizedRel {
+                        rel: other.to_string(),
+                        link: raw_link_header,
+                    })
                 }
             }
         }

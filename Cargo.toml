@@ -21,12 +21,14 @@ serde_qs = "0.10.1"
 serde_urlencoded = "0.7.1"
 tap-reader = "1"
 url = "1"
-# Provides parsing for the link header in get_links() in page.rs
-hyper-old-types = "0.11.0"
 futures-util = "0.3.25"
 static_assertions = "1.1.0"
 percent-encoding = "2.2.0"
 thiserror = "1.0.38"
+
+[dependencies.parse_link_header]
+version = "0.3.3"
+features = ["url"]
 
 [dependencies.uuid]
 version = "1.2.2"
