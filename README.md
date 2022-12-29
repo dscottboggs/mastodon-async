@@ -25,6 +25,23 @@ Alternatively, run the following command:
 $ cargo add mastodon-async
 ~~~
 
+## A Note on Debugging
+This library offers structured logging. To get better information about bugs or
+how something is working, I recommend adding the femme crate as a dependency,
+then adding this line to the beginning of your main() function:
+
+```rust
+femme::with_level(log::LevelFilter::Trace);
+```
+
+When compiling for the debug target, this offers a mostly-human-readable output
+with a lot of details about what's happening. When targeting release, JSON-
+structured metadata is offered, which can be filtered and manipulated with
+scripts or at the shell with jq.
+
+There are other crates which make use of the log crate's new (unstable) kv
+features, this is just the one that works for me for now.
+
 ## Example
 
 In your `Cargo.toml`, make sure you enable the `toml` feature:
