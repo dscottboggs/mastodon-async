@@ -1,8 +1,8 @@
 //! Module containing all info about notifications.
 
 use super::{account::Account, status::Status};
-use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
+use time::{serde::iso8601, OffsetDateTime};
 
 /// A struct containing info about a notification.
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -14,7 +14,8 @@ pub struct Notification {
     #[serde(rename = "type")]
     pub notification_type: NotificationType,
     /// The time the notification was created.
-    pub created_at: DateTime<Utc>,
+    #[serde(with = "iso8601")]
+    pub created_at: OffsetDateTime,
     /// The Account sending the notification to the user.
     pub account: Account,
     /// The Status associated with the notification, if applicable.

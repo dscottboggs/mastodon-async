@@ -36,9 +36,9 @@ features = ["v4"]
 version = "0.4"
 features = ["kv_unstable", "serde", "std", "kv_unstable_serde", "kv_unstable_std"]
 
-[dependencies.chrono]
-version = "0.4"
-features = ["serde"]
+[dependencies.time]
+version = "0.3"
+features = ["parsing", "serde", "formatting"]
 
 [dependencies.envy]
 version = "0.4"
