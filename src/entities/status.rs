@@ -2,8 +2,8 @@
 
 use super::prelude::*;
 use crate::{entities::card::Card, status_builder::Visibility};
-use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
+use time::{serde::iso8601, OffsetDateTime};
 
 /// A status from the instance.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -28,7 +28,8 @@ pub struct Status {
     /// (remote HTML already sanitized)
     pub content: String,
     /// The time the status was created.
-    pub created_at: DateTime<Utc>,
+    #[serde(with = "iso8601")]
+    pub created_at: OffsetDateTime,
     /// An array of Emoji
     pub emojis: Vec<Emoji>,
     /// The numbef or replies to this status.

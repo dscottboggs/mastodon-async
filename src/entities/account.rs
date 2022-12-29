@@ -1,12 +1,12 @@
 //! A module containing everything relating to a account returned from the api.
 
 use crate::status_builder;
-use chrono::prelude::*;
 use serde::{
     de::{self, Deserializer, Unexpected},
     Deserialize, Serialize,
 };
 use std::path::PathBuf;
+use time::{serde::iso8601, OffsetDateTime};
 
 /// A struct representing an Account.
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
@@ -18,7 +18,8 @@ pub struct Account {
     /// URL to the avatar static image (gif)
     pub avatar_static: String,
     /// The time the account was created.
-    pub created_at: DateTime<Utc>,
+    #[serde(with = "iso8601")]
+    pub created_at: OffsetDateTime,
     /// The account's display name.
     pub display_name: String,
     /// The number of followers for the account.
