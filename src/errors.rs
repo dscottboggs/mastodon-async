@@ -2,7 +2,6 @@ use std::{error, fmt, io::Error as IoError, num::TryFromIntError};
 
 #[cfg(feature = "env")]
 use envy::Error as EnvyError;
-use hyper_old_types::Error as HeaderParseError;
 use reqwest::{header::ToStrError as HeaderStrError, Error as HttpError, StatusCode};
 use serde::Deserialize;
 use serde_json::Error as SerdeError;
@@ -69,8 +68,16 @@ pub enum Error {
     #[error("Error converting an http header to a string")]
     HeaderStrError(#[from] HeaderStrError),
     /// Error parsing the http Link header
-    #[error("Error parsing the http Link header")]
-    HeaderParseError(#[from] HeaderParseError),
+    #[error("error parsing http link header")]
+    LinkHeaderParse(#[from] parse_link_header::Error),
+    /// Error returned when an unexpected rel was parsed.
+    #[error("unrecognized rel {rel:?} in link header {link:?}")]
+    UnrecognizedRel {
+        /// The relation which was not recognized
+        rel: String,
+        /// The raw link header
+        link: String,
+    },
     #[cfg(feature = "env")]
     /// Error deserializing config from the environment
     #[error("Error deserializing config from the environment")]
