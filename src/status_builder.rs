@@ -3,6 +3,8 @@ use std::str::FromStr;
 use isolang::Language;
 use serde::{Deserialize, Serialize};
 
+use crate::format_err;
+
 /// A builder pattern struct for constructing a status.
 ///
 /// // Example
@@ -269,7 +271,7 @@ impl FromStr for Visibility {
             "private" => Ok(Visibility::Private),
             "unlisted" => Ok(Visibility::Unlisted),
             "public" => Ok(Visibility::Public),
-            invalid => Err(format!("unrecognized visibility '{invalid}'").into()),
+            invalid => Err(format_err!("unrecognized visibility '{invalid}'")),
         }
     }
 }
