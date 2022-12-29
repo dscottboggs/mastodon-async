@@ -41,7 +41,7 @@ jobs:
         with:
           toolchain: 1.65.0
           components: clippy
-      - run: cargo clippy -- -D warnings
+      - run: cargo clippy --all-features -- -D warnings
 
   fmt:
     needs: [build]
