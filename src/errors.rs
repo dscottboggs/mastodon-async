@@ -64,6 +64,13 @@ pub enum Error {
     /// Error deserializing from toml
     #[error("Error deserializing from toml")]
     TomlDe(#[from] TomlDeError),
+
+    #[cfg(any(feature = "toml", feature = "json"))]
+    /// Error raised in the helpers::json::to_writer or helpers::toml::to_writer function if not
+    /// all bytes were written to the writer
+    #[error("Not all bytes were written")]
+    NotAllBytesWritten,
+
     /// Error converting an http header to a string
     #[error("Error converting an http header to a string")]
     HeaderStrError(#[from] HeaderStrError),
