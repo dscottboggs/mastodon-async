@@ -21,7 +21,7 @@ use url::Url;
 use uuid::Uuid;
 
 /// The Mastodon client is a smart pointer to this struct
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct MastodonClient {
     pub(crate) client: Client,
     /// Raw data about your mastodon instance.
