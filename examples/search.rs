@@ -5,8 +5,7 @@ mod register;
 use mastodon_async::Result;
 
 #[cfg(feature = "toml")]
-#[tokio::main]
-async fn main() -> Result<()> {
+async fn run() -> Result<()> {
     let mastodon = register::get_mastodon_data().await?;
     let input = register::read_line("Enter the term you'd like to search: ")?;
     let result = mastodon.search(&input, false).await?;
@@ -14,6 +13,18 @@ async fn main() -> Result<()> {
     println!("{:#?}", result);
 
     Ok(())
+}
+
+#[cfg(all(feature = "toml", feature = "mt"))]
+#[tokio::main]
+async fn main() -> Result<()> {
+    run().await
+}
+
+#[cfg(all(feature = "toml", not(feature = "mt")))]
+#[tokio::main(flavor = "current_thread")]
+async fn main() -> Result<()> {
+    run().await
 }
 
 #[cfg(not(feature = "toml"))]

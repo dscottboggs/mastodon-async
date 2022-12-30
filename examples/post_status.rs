@@ -5,8 +5,7 @@ mod register;
 use mastodon_async::{Language, Result, StatusBuilder, Visibility};
 
 #[cfg(feature = "toml")]
-#[tokio::main]
-async fn main() -> Result<()> {
+async fn run() -> Result<()> {
     let mastodon = register::get_mastodon_data().await?;
     let status = StatusBuilder::new()
         .status(register::read_line(
@@ -32,6 +31,18 @@ async fn main() -> Result<()> {
     }
 
     Ok(())
+}
+
+#[cfg(all(feature = "toml", feature = "mt"))]
+#[tokio::main]
+async fn main() -> Result<()> {
+    run().await
+}
+
+#[cfg(all(feature = "toml", not(feature = "mt")))]
+#[tokio::main(flavor = "current_thread")]
+async fn main() -> Result<()> {
+    run().await
 }
 
 #[cfg(not(feature = "toml"))]

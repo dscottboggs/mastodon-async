@@ -64,7 +64,7 @@ optional = true
 
 [dependencies.tokio]
 version = "1.22.0"
-features = ["macros"]
+features = ["macros", "io-util", "time"]
 
 [dependencies.tokio-util]
 version = "0.7.4"
@@ -91,5 +91,6 @@ all = ["toml", "json", "env"]
 # default = ["reqwest/default-tls"]
 default = ["reqwest/default-tls"]
 env = ["envy"]
+mt = ["tokio/rt-multi-thread"]
 json = []
 rustls-tls = ["reqwest/rustls-tls"]
