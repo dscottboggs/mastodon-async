@@ -4,8 +4,7 @@ mod register;
 use mastodon_async::{Result, StatusBuilder, Visibility};
 
 #[cfg(feature = "toml")]
-#[tokio::main]
-async fn main() -> Result<()> {
+async fn run() -> Result<()> {
     use register::bool_input;
     femme::with_level(femme::LevelFilter::Trace);
     let mastodon = register::get_mastodon_data().await?;
@@ -31,6 +30,18 @@ async fn main() -> Result<()> {
     }
 
     Ok(())
+}
+
+#[cfg(all(feature = "toml", feature = "mt"))]
+#[tokio::main]
+async fn main() -> Result<()> {
+    run().await
+}
+
+#[cfg(all(feature = "toml", not(feature = "mt")))]
+#[tokio::main(flavor = "current_thread")]
+async fn main() -> Result<()> {
+    run().await
 }
 
 #[cfg(not(feature = "toml"))]

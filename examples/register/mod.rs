@@ -10,8 +10,16 @@ use mastodon_async::helpers::toml;
 use mastodon_async::{helpers::cli, Result};
 
 #[allow(dead_code)]
-#[cfg(feature = "toml")]
+#[cfg(all(feature = "toml", feature = "mt"))]
 #[tokio::main]
+async fn main() -> Result<()> {
+    register().await?;
+    Ok(())
+}
+
+#[allow(dead_code)]
+#[cfg(all(feature = "toml", not(feature = "mt")))]
+#[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<()> {
     register().await?;
     Ok(())

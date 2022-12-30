@@ -7,8 +7,7 @@ use log::{as_serde, info};
 use mastodon_async::Result;
 
 #[cfg(feature = "toml")]
-#[tokio::main]
-async fn main() -> Result<()> {
+async fn run() -> Result<()> {
     use log::warn;
 
     femme::with_level(log::LevelFilter::Info);
@@ -25,6 +24,18 @@ async fn main() -> Result<()> {
         })
         .await?;
     Ok(())
+}
+
+#[cfg(all(feature = "toml", feature = "mt"))]
+#[tokio::main]
+async fn main() -> Result<()> {
+    run().await
+}
+
+#[cfg(all(feature = "toml", not(feature = "mt")))]
+#[tokio::main(flavor = "current_thread")]
+async fn main() -> Result<()> {
+    run().await
 }
 
 #[cfg(not(feature = "toml"))]

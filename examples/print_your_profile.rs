@@ -5,14 +5,25 @@ mod register;
 use mastodon_async::Result;
 
 #[cfg(feature = "toml")]
-#[tokio::main]
-async fn main() -> Result<()> {
+async fn run() -> Result<()> {
     let mastodon = register::get_mastodon_data().await?;
     let you = mastodon.verify_credentials().await?;
 
     println!("{:#?}", you);
 
     Ok(())
+}
+
+#[cfg(all(feature = "toml", feature = "mt"))]
+#[tokio::main]
+async fn main() -> Result<()> {
+    run().await
+}
+
+#[cfg(all(feature = "toml", not(feature = "mt")))]
+#[tokio::main(flavor = "current_thread")]
+async fn main() -> Result<()> {
+    run().await
 }
 
 #[cfg(not(feature = "toml"))]

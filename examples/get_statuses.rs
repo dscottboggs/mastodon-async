@@ -4,8 +4,7 @@ mod register;
 use mastodon_async::Result;
 
 #[cfg(feature = "toml")]
-#[tokio::main]
-async fn main() -> Result<()> {
+async fn run() -> Result<()> {
     use futures_util::StreamExt;
     use mastodon_async::StatusesRequest;
 
@@ -21,6 +20,18 @@ async fn main() -> Result<()> {
         .for_each(|status| async move { println!("{status:?}") })
         .await;
     Ok(())
+}
+
+#[cfg(all(feature = "toml", feature = "mt"))]
+#[tokio::main]
+async fn main() -> Result<()> {
+    run().await
+}
+
+#[cfg(all(feature = "toml", not(feature = "mt")))]
+#[tokio::main(flavor = "current_thread")]
+async fn main() -> Result<()> {
+    run().await
 }
 
 #[cfg(not(feature = "toml"))]
