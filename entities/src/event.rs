@@ -1,4 +1,4 @@
-use crate::entities::{notification::Notification, status::Status};
+use crate::{notification::Notification, status::Status};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Deserialize, Serialize)]

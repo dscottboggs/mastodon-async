@@ -92,11 +92,12 @@ pub use errors::{ApiError, Error, Result};
 pub use isolang::Language;
 pub use mastodon::{Mastodon, MastodonUnauthenticated};
 // pub use mastodon_client::{MastodonClient, MastodonUnauthenticated};
+pub use mastodon_async_entities::visibility::Visibility;
 pub use registration::Registration;
 pub use requests::{
     AddFilterRequest, AddPushRequest, StatusesRequest, UpdateCredsRequest, UpdatePushRequest,
 };
-pub use status_builder::{NewStatus, StatusBuilder, Visibility};
+pub use status_builder::{NewStatus, StatusBuilder};
 
 /// Registering your App
 pub mod apps;
@@ -126,7 +127,6 @@ mod macros;
 pub mod prelude {
     pub use crate::{
         scopes::Scopes,
-        status_builder::Visibility,
         Data,
         Mastodon,
         // MastodonClient,
@@ -134,6 +134,7 @@ pub mod prelude {
         Registration,
         StatusBuilder,
         StatusesRequest,
+        Visibility,
     };
 }
 /// The mastodon client

@@ -1,3 +1,11 @@
+[workspace]
+resolver = "2"
+
+members = [
+    ".",
+    "entities",
+]
+
 [package]
 name = "mastodon-async"
 version = "1.0.3"
@@ -12,6 +20,10 @@ repository = "https://github.com/dscottboggs/mastodon-async.git"
 
 [package.metadata.docs.rs]
 features = ["all"]
+
+[dependencies.mastodon-async-entities]
+path = "./entities"
+version = "1.0.3"
 
 [dependencies]
 futures = "0.3.25"

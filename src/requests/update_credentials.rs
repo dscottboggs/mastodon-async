@@ -6,15 +6,15 @@ use std::{
 use crate::{
     entities::account::{Credentials, MetadataField, UpdateSource},
     errors::Result,
-    status_builder,
 };
+use mastodon_async_entities::visibility::Visibility;
 
 /// Builder to pass to the Mastodon::update_credentials method
 ///
 /// // Example
 ///
 /// ```no_run
-/// use mastodon_async::{prelude::*, status_builder::Visibility, UpdateCredsRequest};
+/// use mastodon_async::{prelude::*, entities::visibility::Visibility, UpdateCredsRequest};
 ///
 /// let data = Data::default();
 /// let client = Mastodon::from(data);
@@ -35,7 +35,7 @@ pub struct UpdateCredsRequest {
     field_attributes: Vec<MetadataField>,
 
     // UpdateSource fields
-    privacy: Option<status_builder::Visibility>,
+    privacy: Option<Visibility>,
     sensitive: Option<bool>,
 }
 
@@ -126,13 +126,13 @@ impl UpdateCredsRequest {
     /// // Example
     ///
     /// ```
-    /// use mastodon_async::{status_builder::Visibility, UpdateCredsRequest};
+    /// use mastodon_async::{entities::visibility::Visibility, UpdateCredsRequest};
     ///
     /// let mut builder = UpdateCredsRequest::new();
     ///
     /// builder.privacy(Visibility::Public);
     /// ```
-    pub fn privacy(&mut self, privacy: status_builder::Visibility) -> &mut Self {
+    pub fn privacy(&mut self, privacy: Visibility) -> &mut Self {
         self.privacy = Some(privacy);
         self
     }
@@ -188,7 +188,7 @@ impl UpdateCredsRequest {
 mod tests {
     use super::*;
     use crate::entities::account::{Credentials, MetadataField, UpdateSource};
-    use status_builder::Visibility;
+    use mastodon_async_entities::visibility::Visibility;
 
     #[test]
     fn test_update_creds_request_new() {
