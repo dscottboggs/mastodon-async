@@ -1,9 +1,7 @@
-use std::str::FromStr;
-
 use isolang::Language;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
-use crate::format_err;
+use mastodon_async_entities::visibility::Visibility;
 
 /// A builder pattern struct for constructing a status.
 ///
@@ -37,7 +35,7 @@ impl StatusBuilder {
     /// // Example
     ///
     /// ```rust,no_run
-    /// use mastodon_async::{status_builder::Visibility, prelude::*};
+    /// use mastodon_async::{entities::visibility::Visibility, prelude::*};
     ///
     /// let data = Data::default();
     /// let client = Mastodon::from(data);
@@ -150,7 +148,7 @@ impl StatusBuilder {
     /// // Example
     ///
     /// ```rust
-    /// use mastodon_async::{prelude::*, status_builder::Visibility};
+    /// use mastodon_async::{prelude::*, entities::visibility::Visibility};
     /// let status = StatusBuilder::new()
     ///     .status("awooooooo")
     ///     .visibility(Visibility::Public)
@@ -240,40 +238,6 @@ pub struct NewStatus {
     language: Option<Language>,
     #[serde(skip_serializing_if = "Option::is_none")]
     content_type: Option<String>,
-}
-
-/// The visibility of a status.
-#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "lowercase")]
-pub enum Visibility {
-    /// A Direct message to a user
-    Direct,
-    /// Only available to followers
-    Private,
-    /// Not shown in public timelines
-    Unlisted,
-    /// Posted to public timelines
-    Public,
-}
-
-impl Default for Visibility {
-    fn default() -> Self {
-        Visibility::Public
-    }
-}
-
-impl FromStr for Visibility {
-    type Err = crate::Error;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s.to_ascii_lowercase().as_str() {
-            "direct" => Ok(Visibility::Direct),
-            "private" => Ok(Visibility::Private),
-            "unlisted" => Ok(Visibility::Unlisted),
-            "public" => Ok(Visibility::Public),
-            invalid => Err(format_err!("unrecognized visibility '{invalid}'")),
-        }
-    }
 }
 
 #[cfg(test)]

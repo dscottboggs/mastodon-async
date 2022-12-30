@@ -1,0 +1,13 @@
+[package]
+name = "mastodon-async-entities"
+version = "1.0.3"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+futures = "0.3.25"
+log = { version = "0.4", features = ["kv_unstable", "serde", "std", "kv_unstable_serde", "kv_unstable_std"] }
+serde = { version = "1", features = ["derive"] }
+thiserror = "1"
+time = { version = "0.3", features = ["parsing", "serde", "formatting"] }

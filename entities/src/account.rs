@@ -1,6 +1,5 @@
 //! A module containing everything relating to a account returned from the api.
 
-use crate::status_builder;
 use serde::{
     de::{self, Deserializer, Unexpected},
     Deserialize, Serialize,
@@ -65,7 +64,7 @@ pub struct MetadataField {
 }
 
 impl MetadataField {
-    pub(crate) fn new(name: &str, value: &str) -> MetadataField {
+    pub fn new(name: &str, value: &str) -> MetadataField {
         MetadataField {
             name: name.into(),
             value: value.into(),
@@ -76,7 +75,7 @@ impl MetadataField {
 /// An extra object given from `verify_credentials` giving defaults about a user
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
 pub struct Source {
-    privacy: Option<status_builder::Visibility>,
+    privacy: Option<crate::visibility::Visibility>,
     #[serde(deserialize_with = "string_or_bool")]
     sensitive: bool,
     note: Option<String>,
@@ -109,33 +108,33 @@ fn string_or_bool<'de, D: Deserializer<'de>>(val: D) -> ::std::result::Result<bo
 }
 
 #[derive(Debug, Default, Clone, Serialize, PartialEq, Eq)]
-pub(crate) struct UpdateSource {
+pub struct UpdateSource {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub(crate) privacy: Option<status_builder::Visibility>,
+    pub privacy: Option<crate::visibility::Visibility>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub(crate) sensitive: Option<bool>,
+    pub sensitive: Option<bool>,
 }
 
 #[derive(Debug, Default, Serialize, PartialEq, Eq)]
-pub(crate) struct Credentials {
+pub struct Credentials {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub(crate) display_name: Option<String>,
+    pub display_name: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub(crate) note: Option<String>,
+    pub note: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub(crate) avatar: Option<PathBuf>,
+    pub avatar: Option<PathBuf>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub(crate) header: Option<PathBuf>,
+    pub header: Option<PathBuf>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub(crate) source: Option<UpdateSource>,
+    pub source: Option<UpdateSource>,
     #[serde(serialize_with = "fields_attributes_ser::ser")]
-    pub(crate) fields_attributes: Vec<MetadataField>,
+    pub fields_attributes: Vec<MetadataField>,
 }
 
 mod fields_attributes_ser {
     use super::*;
     use serde::ser::{SerializeMap, Serializer};
-    pub(crate) fn ser<S>(attrs: &Vec<MetadataField>, serializer: S) -> Result<S::Ok, S::Error>
+    pub fn ser<S>(attrs: &Vec<MetadataField>, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {

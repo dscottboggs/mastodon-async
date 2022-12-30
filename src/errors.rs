@@ -99,6 +99,9 @@ pub enum Error {
     /// larger than the system's usize allows.
     #[error("integer didn't fit in the target size")]
     IntConversion(#[from] TryFromIntError),
+    /// Error from mastodon-async-entities
+    #[error(transparent)]
+    Entities(#[from] mastodon_async_entities::error::Error),
     /// Other errors
     #[error("other error: {0:?}")]
     Other(String),

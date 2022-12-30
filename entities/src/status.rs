@@ -1,7 +1,7 @@
 //! Module containing all info relating to a status.
 
 use super::prelude::*;
-use crate::{entities::card::Card, status_builder::Visibility};
+use crate::{card::Card, visibility::Visibility};
 use serde::{Deserialize, Serialize};
 use time::{serde::iso8601, OffsetDateTime};
 

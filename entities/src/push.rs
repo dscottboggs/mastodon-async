@@ -26,48 +26,48 @@ pub struct Subscription {
     pub alerts: Option<Alerts>,
 }
 
-pub(crate) mod add_subscription {
+pub mod add_subscription {
     use serde::Serialize;
 
     use super::Alerts;
 
-    #[derive(Debug, Clone, PartialEq, Serialize, Default)]
-    pub(crate) struct Form {
-        pub(crate) subscription: Subscription,
-        pub(crate) data: Option<Data>,
+    #[derive(Debug, Clone, PartialEq, Eq, Serialize, Default)]
+    pub struct Form {
+        pub subscription: Subscription,
+        pub data: Option<Data>,
     }
 
     #[derive(Debug, Clone, PartialEq, Eq, Serialize, Default)]
-    pub(crate) struct Subscription {
-        pub(crate) endpoint: String,
-        pub(crate) keys: Keys,
+    pub struct Subscription {
+        pub endpoint: String,
+        pub keys: Keys,
     }
 
     #[derive(Debug, Clone, PartialEq, Eq, Serialize, Default)]
-    pub(crate) struct Keys {
-        pub(crate) p256dh: String,
-        pub(crate) auth: String,
+    pub struct Keys {
+        pub p256dh: String,
+        pub auth: String,
     }
 
     #[derive(Debug, Clone, PartialEq, Eq, Serialize, Default)]
-    pub(crate) struct Data {
-        pub(crate) alerts: Option<Alerts>,
+    pub struct Data {
+        pub alerts: Option<Alerts>,
     }
 }
 
-pub(crate) mod update_data {
+pub mod update_data {
     use serde::Serialize;
 
     use super::Alerts;
 
     #[derive(Debug, Clone, PartialEq, Eq, Serialize, Default)]
-    pub(crate) struct Data {
-        pub(crate) alerts: Option<Alerts>,
+    pub struct Data {
+        pub alerts: Option<Alerts>,
     }
 
     #[derive(Debug, Clone, PartialEq, Eq, Serialize, Default)]
-    pub(crate) struct Form {
-        pub(crate) id: String,
-        pub(crate) data: Data,
+    pub struct Form {
+        pub id: String,
+        pub data: Data,
     }
 }
