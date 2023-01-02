@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use time::{serde::iso8601, OffsetDateTime};
 
 /// Represents a single Filter
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -6,7 +7,8 @@ pub struct Filter {
     id: String,
     phrase: String,
     context: Vec<FilterContext>,
-    expires_at: Option<String>, // TODO: timestamp
+    #[serde(with = "iso8601::option")]
+    expires_at: Option<OffsetDateTime>,
     irreversible: bool,
     whole_word: bool,
 }
