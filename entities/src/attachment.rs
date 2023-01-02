@@ -38,13 +38,13 @@ pub struct Meta {
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 pub struct ImageDetails {
     /// width of attachment.
-    width: u64,
+    pub width: u64,
     /// height of attachment.
-    height: u64,
+    pub height: u64,
     /// A string of `widthxheight`.
-    size: Option<String>,
+    pub size: Option<String>,
     /// The aspect ratio of the attachment.
-    aspect: Option<f64>,
+    pub aspect: Option<f64>,
 }
 
 /// The type of media attachment.
