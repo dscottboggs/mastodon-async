@@ -255,8 +255,7 @@ impl fmt::Display for Scopes {
 }
 
 /// Permission scope of the application.
-/// [Details on what each permission provides][1]
-/// [1]: https://github.com/tootsuite/documentation/blob/master/Using-the-API/OAuth-details.md)
+/// [Details on what each permission provides](https://github.com/tootsuite/documentation/blob/master/Using-the-API/OAuth-details.md)
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
 enum Scope {
     /// Read only permissions.
