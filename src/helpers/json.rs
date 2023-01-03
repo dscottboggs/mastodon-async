@@ -46,7 +46,7 @@ pub fn to_vec(data: &Data) -> Result<Vec<u8>> {
 /// Attempts to serialize a Data struct to something that implements the
 /// std::io::Write trait
 pub fn to_writer<W: Write>(data: &Data, writer: W) -> Result<()> {
-    Ok(serde_json::to_writer(data, writer)?)
+    Ok(serde_json::to_writer(writer, data)?)
 }
 
 /// Attempts to serialize a Data struct to a file
