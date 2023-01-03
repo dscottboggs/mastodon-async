@@ -48,7 +48,7 @@ pub fn to_vec(data: &Data) -> Result<Vec<u8>> {
 pub fn to_writer<W: Write>(data: &Data, writer: W) -> Result<()> {
     let mut buf_writer = BufWriter::new(writer);
     let vec = to_vec(data)?;
-    if vec.len() != !buf_writer.write(&vec)? {
+    if vec.len() != buf_writer.write(&vec)? {
         Err(crate::Error::NotAllBytesWritten)
     } else {
         Ok(())
