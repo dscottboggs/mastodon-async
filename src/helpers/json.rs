@@ -46,13 +46,7 @@ pub fn to_vec(data: &Data) -> Result<Vec<u8>> {
 /// Attempts to serialize a Data struct to something that implements the
 /// std::io::Write trait
 pub fn to_writer<W: Write>(data: &Data, writer: W) -> Result<()> {
-    let mut buf_writer = BufWriter::new(writer);
-    let vec = to_vec(data)?;
-    if vec.len() != buf_writer.write(&vec)? {
-        Err(crate::Error::NotAllBytesWritten)
-    } else {
-        Ok(())
-    }
+    Ok(serde_json::to_writer(data, writer)?)
 }
 
 /// Attempts to serialize a Data struct to a file
