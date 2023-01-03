@@ -1,6 +1,6 @@
 use std::{
     fs::{File, OpenOptions},
-    io::{BufWriter, Read, Write},
+    io::{Read, Write},
     path::Path,
 };
 
