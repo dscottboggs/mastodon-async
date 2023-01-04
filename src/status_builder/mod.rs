@@ -3,7 +3,8 @@ mod new_status;
 use isolang::Language;
 
 pub use self::new_status::NewStatus;
-use mastodon_async_entities::visibility::Visibility;
+// For backwards compatibility:
+pub use mastodon_async_entities::visibility::Visibility;
 
 /// A builder pattern struct for constructing a status.
 ///
