@@ -1,7 +1,7 @@
 use isolang::Language;
 use serde::Serialize;
 
-use mastodon_async_entities::visibility::Visibility;
+pub use mastodon_async_entities::visibility::Visibility;
 
 /// A builder pattern struct for constructing a status.
 ///
