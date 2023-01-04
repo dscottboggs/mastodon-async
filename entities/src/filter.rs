@@ -176,8 +176,10 @@ mod v1 {
 
 #[cfg(test)]
 mod tests {
+    #[cfg(feature = "json")]
     use super::*;
 
+    #[cfg(feature = "json")]
     #[test]
     fn test_filter_action_serialize_and_deserialize() {
         use Action::*;
