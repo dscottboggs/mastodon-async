@@ -34,4 +34,6 @@ pub enum NotificationType {
     Favourite,
     /// Someone followed the application client.
     Follow,
+    /// A poll the application client previously voted in has ended.
+    Poll,
 }
