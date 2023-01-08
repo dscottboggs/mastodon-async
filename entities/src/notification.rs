@@ -34,6 +34,9 @@ pub enum NotificationType {
     Favourite,
     /// Someone followed the application client.
     Follow,
+    /// Someone asked to followed the application client when follow requests must be approved.
+    #[serde(rename = "follow_request")]
+    FollowRequest,
     /// A poll the application client previously voted in has ended.
     Poll,
 }
