@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Relationship {
     /// Target account id
-    pub id: String,
+    pub id: RelationshipId,
     /// Whether the application client follows the account.
     pub following: bool,
     /// Whether the account follows the application client.
@@ -30,4 +30,15 @@ pub struct Relationship {
     /// making it `Option<bool>` here means we shouldn't get deser errors when
     /// making calls to pleroma or mastodon<2.5.0 instances
     pub endorsed: Option<bool>,
+}
+
+/// Wrapper type for a relationship ID string
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(transparent)]
+pub struct RelationshipId(String);
+
+impl AsRef<str> for RelationshipId {
+    fn as_ref(&self) -> &str {
+        &self.0
+    }
 }
