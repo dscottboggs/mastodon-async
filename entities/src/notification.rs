@@ -39,6 +39,18 @@ impl NotificationId {
     }
 }
 
+static_assertions::assert_not_impl_any!(
+    NotificationId: PartialEq<crate::account::AccountId>,
+    PartialEq<crate::attachment::AttachmentId>,
+    PartialEq<crate::filter::FilterId>,
+    PartialEq<crate::mention::MentionId>,
+    PartialEq<crate::list::ListId>,
+    PartialEq<crate::push::SubscriptionId>,
+    PartialEq<crate::relationship::RelationshipId>,
+    PartialEq<crate::report::ReportId>,
+    PartialEq<crate::status::StatusId>,
+);
+
 /// The type of notification.
 #[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]

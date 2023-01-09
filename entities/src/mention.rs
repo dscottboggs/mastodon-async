@@ -29,3 +29,15 @@ impl MentionId {
         Self(value.into())
     }
 }
+
+static_assertions::assert_not_impl_any!(
+    Mention: PartialEq<crate::account::AccountId>,
+    PartialEq<crate::attachment::AttachmentId>,
+    PartialEq<crate::filter::FilterId>,
+    PartialEq<crate::list::ListId>,
+    PartialEq<crate::notification::NotificationId>,
+    PartialEq<crate::relationship::RelationshipId>,
+    PartialEq<crate::push::SubscriptionId>,
+    PartialEq<crate::report::ReportId>,
+    PartialEq<crate::status::StatusId>,
+);

@@ -68,6 +68,18 @@ impl FilterId {
     }
 }
 
+static_assertions::assert_not_impl_any!(
+    FilterId: PartialEq<crate::account::AccountId>,
+    PartialEq<crate::attachment::AttachmentId>,
+    PartialEq<crate::list::ListId>,
+    PartialEq<crate::mention::MentionId>,
+    PartialEq<crate::notification::NotificationId>,
+    PartialEq<crate::relationship::RelationshipId>,
+    PartialEq<crate::push::SubscriptionId>,
+    PartialEq<crate::report::ReportId>,
+    PartialEq<crate::status::StatusId>,
+);
+
 /// Represents the various types of Filter contexts
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]

@@ -41,6 +41,18 @@ impl AttachmentId {
     }
 }
 
+static_assertions::assert_not_impl_any!(
+    AttachmentId: PartialEq<crate::account::AccountId>,
+    PartialEq<crate::filter::FilterId>,
+    PartialEq<crate::list::ListId>,
+    PartialEq<crate::mention::MentionId>,
+    PartialEq<crate::notification::NotificationId>,
+    PartialEq<crate::relationship::RelationshipId>,
+    PartialEq<crate::report::ReportId>,
+    PartialEq<crate::push::SubscriptionId>,
+    PartialEq<crate::status::StatusId>,
+);
+
 /// Information about the attachment itself.
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 pub struct Meta {

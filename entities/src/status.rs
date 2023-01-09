@@ -82,6 +82,18 @@ impl StatusId {
     }
 }
 
+static_assertions::assert_not_impl_any!(
+    StatusId: PartialEq<crate::account::AccountId>,
+    PartialEq<crate::attachment::AttachmentId>,
+    PartialEq<crate::filter::FilterId>,
+    PartialEq<crate::push::SubscriptionId>,
+    PartialEq<crate::mention::MentionId>,
+    PartialEq<crate::notification::NotificationId>,
+    PartialEq<crate::relationship::RelationshipId>,
+    PartialEq<crate::report::ReportId>,
+    PartialEq<crate::list::ListId>,
+);
+
 /// A mention of another user.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Mention {
