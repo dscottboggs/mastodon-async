@@ -12,3 +12,20 @@ pub struct Mention {
     /// Account ID
     pub id: String,
 }
+
+/// Wrapper type for a mention ID string
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(transparent)]
+pub struct MentionId(String);
+
+impl AsRef<str> for MentionId {
+    fn as_ref(&self) -> &str {
+        &self.0
+    }
+}
+
+impl MentionId {
+    pub fn new(value: impl Into<String>) -> Self {
+        Self(value.into())
+    }
+}
