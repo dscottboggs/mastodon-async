@@ -480,12 +480,12 @@ macro_rules! paged_routes_with_id {
                 "client.", stringify!($name), "(\"some-id\");\n",
                 "```"
             ),
-            pub async fn $name(&self, id: &str) -> Result<Page<$ret>> {
+            pub async fn $name(&self, id: impl AsRef<str>) -> Result<Page<$ret>> {
                 use log::{debug, as_debug};
                 use uuid::Uuid;
 
                 let call_id = Uuid::new_v4();
-                let url = self.route(&format!(concat!("/api/v1/", $url), id));
+                let url = self.route(&format!(concat!("/api/v1/", $url), id.as_ref()));
 
                 debug!(url = url, method = stringify!($method), call_id = as_debug!(call_id); "making API request");
                 let response = self.authenticated(self.client.$method(&url)).header("Accept", "application/json").send().await?;
