@@ -35,7 +35,7 @@ use time::{serde::iso8601, OffsetDateTime};
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Filter {
     /// The ID of the Filter in the database.
-    pub id: String,
+    pub id: FilterId,
     /// A title given by the user to name the filter.
     pub title: String,
     /// The contexts in which the filter should be applied.
@@ -49,6 +49,17 @@ pub struct Filter {
     pub keywords: Vec<Keyword>,
     /// The statuses grouped under this filter.
     pub statuses: Vec<Status>,
+}
+
+/// Wrapper type for a filter ID string
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(transparent)]
+pub struct FilterId(String);
+
+impl AsRef<str> for FilterId {
+    fn as_ref(&self) -> &str {
+        &self.0
+    }
 }
 
 /// Represents the various types of Filter contexts
