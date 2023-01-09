@@ -17,13 +17,24 @@ pub struct Alerts {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Subscription {
     /// The `id` of the subscription
-    pub id: String,
+    pub id: SubscriptionId,
     /// The endpoint of the subscription
     pub endpoint: String,
     /// The server key of the subscription
     pub server_key: String,
     /// The status of the alerts for this subscription
     pub alerts: Option<Alerts>,
+}
+
+/// Wrapper type for a subscription ID string
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(transparent)]
+pub struct SubscriptionId(String);
+
+impl AsRef<str> for SubscriptionId {
+    fn as_ref(&self) -> &str {
+        &self.0
+    }
 }
 
 pub mod add_subscription {
