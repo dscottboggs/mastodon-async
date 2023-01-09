@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 pub struct Attachment {
     /// ID of the attachment.
-    pub id: String,
+    pub id: AttachmentId,
     /// The media type of an attachment.
     #[serde(rename = "type")]
     pub media_type: MediaType,
@@ -23,6 +23,16 @@ pub struct Attachment {
     pub meta: Option<Meta>,
     /// Noop will be removed.
     pub description: Option<String>,
+}
+/// Wrapper type for a attachment ID string
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(transparent)]
+pub struct AttachmentId(String);
+
+impl AsRef<str> for AttachmentId {
+    fn as_ref(&self) -> &str {
+        &self.0
+    }
 }
 
 /// Information about the attachment itself.
