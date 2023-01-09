@@ -9,7 +9,7 @@ use time::{serde::iso8601, OffsetDateTime};
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 pub struct Notification {
     /// The notification ID.
-    pub id: String,
+    pub id: NotificationId,
     /// The type of notification.
     #[serde(rename = "type")]
     pub notification_type: NotificationType,
@@ -20,6 +20,17 @@ pub struct Notification {
     pub account: Account,
     /// The Status associated with the notification, if applicable.
     pub status: Option<Status>,
+}
+
+/// Wrapper type for a notification ID string
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(transparent)]
+pub struct NotificationId(String);
+
+impl AsRef<str> for NotificationId {
+    fn as_ref(&self) -> &str {
+        &self.0
+    }
 }
 
 /// The type of notification.
