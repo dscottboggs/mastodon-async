@@ -42,3 +42,9 @@ impl AsRef<str> for RelationshipId {
         &self.0
     }
 }
+
+impl RelationshipId {
+    pub fn new(value: impl Into<String>) -> Self {
+        Self(value.into())
+    }
+}

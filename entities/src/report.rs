@@ -21,3 +21,9 @@ impl AsRef<str> for ReportId {
         &self.0
     }
 }
+
+impl ReportId {
+    pub fn new(value: impl Into<String>) -> Self {
+        Self(value.into())
+    }
+}

@@ -62,6 +62,12 @@ impl AsRef<str> for FilterId {
     }
 }
 
+impl FilterId {
+    pub fn new(value: impl Into<String>) -> Self {
+        Self(value.into())
+    }
+}
+
 /// Represents the various types of Filter contexts
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
