@@ -71,6 +71,18 @@ impl AccountId {
     }
 }
 
+static_assertions::assert_not_impl_any!(
+    AccountId: PartialEq<crate::attachment::AttachmentId>,
+    PartialEq<crate::filter::FilterId>,
+    PartialEq<crate::list::ListId>,
+    PartialEq<crate::mention::MentionId>,
+    PartialEq<crate::notification::NotificationId>,
+    PartialEq<crate::relationship::RelationshipId>,
+    PartialEq<crate::push::SubscriptionId>,
+    PartialEq<crate::report::ReportId>,
+    PartialEq<crate::status::StatusId>,
+);
+
 /// A single name: value pair from a user's profile
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
 pub struct MetadataField {

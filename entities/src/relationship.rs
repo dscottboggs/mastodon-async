@@ -48,3 +48,15 @@ impl RelationshipId {
         Self(value.into())
     }
 }
+
+static_assertions::assert_not_impl_any!(
+    RelationshipId: PartialEq<crate::account::AccountId>,
+    PartialEq<crate::attachment::AttachmentId>,
+    PartialEq<crate::filter::FilterId>,
+    PartialEq<crate::push::SubscriptionId>,
+    PartialEq<crate::mention::MentionId>,
+    PartialEq<crate::notification::NotificationId>,
+    PartialEq<crate::list::ListId>,
+    PartialEq<crate::report::ReportId>,
+    PartialEq<crate::status::StatusId>,
+);
