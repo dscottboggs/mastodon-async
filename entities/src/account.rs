@@ -30,7 +30,7 @@ pub struct Account {
     /// URL to the header static image (gif).
     pub header_static: String,
     /// The ID of the account.
-    pub id: String,
+    pub id: AccountId,
     /// Boolean for when the account cannot be followed without waiting for
     /// approval first.
     pub locked: bool,
@@ -52,6 +52,17 @@ pub struct Account {
     pub fields: Option<Vec<MetadataField>>,
     /// Boolean indicating whether this account is a bot or not
     pub bot: Option<bool>,
+}
+
+/// Wrapper type for a account ID string
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(transparent)]
+pub struct AccountId(String);
+
+impl AsRef<str> for AccountId {
+    fn as_ref(&self) -> &str {
+        &self.0
+    }
 }
 
 /// A single name: value pair from a user's profile
