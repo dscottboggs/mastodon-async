@@ -33,6 +33,12 @@ impl AsRef<str> for NotificationId {
     }
 }
 
+impl NotificationId {
+    pub fn new(value: impl Into<String>) -> Self {
+        Self(value.into())
+    }
+}
+
 /// The type of notification.
 #[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]

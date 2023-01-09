@@ -37,6 +37,12 @@ impl AsRef<str> for SubscriptionId {
     }
 }
 
+impl SubscriptionId {
+    pub fn new(value: impl Into<String>) -> Self {
+        Self(value.into())
+    }
+}
+
 pub mod add_subscription {
     use serde::Serialize;
 

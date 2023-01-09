@@ -35,6 +35,12 @@ impl AsRef<str> for AttachmentId {
     }
 }
 
+impl AttachmentId {
+    pub fn new(value: impl Into<String>) -> Self {
+        Self(value.into())
+    }
+}
+
 /// Information about the attachment itself.
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 pub struct Meta {

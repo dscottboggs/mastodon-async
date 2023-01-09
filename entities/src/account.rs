@@ -65,6 +65,12 @@ impl AsRef<str> for AccountId {
     }
 }
 
+impl AccountId {
+    pub fn new(value: impl Into<String>) -> Self {
+        Self(value.into())
+    }
+}
+
 /// A single name: value pair from a user's profile
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
 pub struct MetadataField {

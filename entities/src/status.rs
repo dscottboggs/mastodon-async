@@ -76,6 +76,12 @@ impl AsRef<str> for StatusId {
     }
 }
 
+impl StatusId {
+    pub fn new(value: impl Into<String>) -> Self {
+        Self(value.into())
+    }
+}
+
 /// A mention of another user.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Mention {
