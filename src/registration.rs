@@ -57,6 +57,22 @@ impl<'a> Registration<'a> {
             force_login: false,
         }
     }
+
+    /// Construct a new registration process to the instance of the `base` url,
+    /// using the provided [Client].
+    /// ```
+    /// use mastodon_async::prelude::*;
+    ///
+    /// let registration = Registration::new("https://botsin.space");
+    /// ```
+    pub fn new_with_client<I: Into<String>>(base: I, client: Client) -> Self {
+        Registration {
+            base: base.into(),
+            client,
+            app_builder: AppBuilder::new(),
+            force_login: false,
+        }
+    }
 }
 
 impl<'a> Registration<'a> {
