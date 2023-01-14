@@ -58,7 +58,8 @@ impl<'a> Registration<'a> {
     /// ```
     /// use mastodon_async::prelude::*;
     ///
-    /// let registration = Registration::new("https://botsin.space");
+    /// let client = reqwest::Client::builder().user_agent("my cool app").build().unwrap();
+    /// let registration = Registration::new_with_client("https://botsin.space", client);
     /// ```
     pub fn new_with_client<I: Into<String>>(base: I, client: Client) -> Self {
         Registration {
