@@ -50,12 +50,7 @@ impl<'a> Registration<'a> {
     /// let registration = Registration::new("https://botsin.space");
     /// ```
     pub fn new<I: Into<String>>(base: I) -> Self {
-        Registration {
-            base: base.into(),
-            client: Client::new(),
-            app_builder: AppBuilder::new(),
-            force_login: false,
-        }
+        Registration::new_with_client(base, Client::new())
     }
 
     /// Construct a new registration process to the instance of the `base` url,
