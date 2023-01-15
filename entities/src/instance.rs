@@ -54,3 +54,16 @@ pub struct Rule {
     /// The rule to be followed.
     pub text: String,
 }
+
+/// A struct containing info of an instance-level domain block.
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
+pub struct DomainBlock {
+    /// URI of the domain in question
+    pub domain: String,
+    /// Digest
+    pub digest: String,
+    /// Severity of the block
+    pub severity: String,
+    /// Admin's public comment.
+    pub comment: String,
+}
