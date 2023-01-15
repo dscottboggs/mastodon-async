@@ -17,9 +17,9 @@ use crate::{
 use futures::TryStream;
 use log::{as_debug, as_serde, debug, error, trace};
 use reqwest::{multipart::Part, Client, RequestBuilder};
+use std::collections::HashMap;
 use url::Url;
 use uuid::Uuid;
-use std::collections::HashMap;
 
 /// The Mastodon client is a smart pointer to this struct
 #[derive(Debug)]
@@ -64,6 +64,7 @@ impl Mastodon {
         (get) notifications: "notifications" => Notification,
         (get) instance_peers: "instance/peers" => String,
         (get) instance_activity: "instance/activity" => HashMap<String, String>,
+        (get) instance_rules: "instance/rules" => Rule,
         (get) reports: "reports" => Report,
         (get (q: &'a str, #[serde(skip_serializing_if = "Option::is_none")] limit: Option<u64>, following: bool,)) search_accounts: "accounts/search" => Account,
         (get) get_endorsements: "endorsements" => Account,
