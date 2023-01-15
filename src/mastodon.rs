@@ -61,6 +61,7 @@ impl Mastodon {
         (get) get_emojis: "custom_emojis" => Emoji,
         (get) mutes: "mutes" => Account,
         (get) notifications: "notifications" => Notification,
+        (get) instance_peers: "instance/peers" => String,
         (get) reports: "reports" => Report,
         (get (q: &'a str, #[serde(skip_serializing_if = "Option::is_none")] limit: Option<u64>, following: bool,)) search_accounts: "accounts/search" => Account,
         (get) get_endorsements: "endorsements" => Account,
