@@ -45,3 +45,12 @@ pub struct Stats {
     status_count: u64,
     domain_count: u64,
 }
+
+/// Statistics about the Mastodon instance.
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
+pub struct Rule {
+    /// An identifier for the rule.
+    pub id: String,
+    /// The rule to be followed.
+    pub text: String,
+}
