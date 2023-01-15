@@ -59,6 +59,7 @@ impl Mastodon {
         (get) favourites: "favourites" => Status,
         (get) blocks: "blocks" => Account,
         (get) domain_blocks: "domain_blocks" => String,
+        (get) instance_domain_blocks: "instance/domain_blocks" => DomainBlock,
         (get) follow_requests: "follow_requests" => Account,
         (get) get_home_timeline: "timelines/home" => Status,
         (get) get_emojis: "custom_emojis" => Emoji,
