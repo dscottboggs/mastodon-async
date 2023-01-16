@@ -19,7 +19,6 @@ use futures::TryStream;
 use log::{as_debug, as_serde, debug, error, trace};
 use mastodon_async_entities::attachment::ProcessedAttachment;
 use reqwest::{multipart::Part, Client, RequestBuilder};
-use std::collections::HashMap;
 use url::Url;
 use uuid::Uuid;
 
@@ -67,7 +66,7 @@ impl Mastodon {
         (get) mutes: "mutes" => Account,
         (get) notifications: "notifications" => Notification,
         (get) instance_peers: "instance/peers" => String,
-        (get) instance_activity: "instance/activity" => HashMap<String, String>,
+        (get) instance_activity: "instance/activity" => Activity,
         (get) instance_rules: "instance/rules" => Rule,
         (get) reports: "reports" => Report,
         (get (q: &'a str, #[serde(skip_serializing_if = "Option::is_none")] limit: Option<u64>, following: bool,)) search_accounts: "accounts/search" => Account,

@@ -67,3 +67,12 @@ pub struct DomainBlock {
     /// Admin's public comment.
     pub comment: String,
 }
+
+/// Weekly activity on an instance
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
+pub struct Activity {
+    pub week: String,
+    pub statuses: String,
+    pub logins: String,
+    pub registrations: String,
+}
