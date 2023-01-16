@@ -46,7 +46,7 @@ pub struct Stats {
     domain_count: u64,
 }
 
-/// Statistics about the Mastodon instance.
+/// Rules of an instance
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
 pub struct Rule {
     /// An identifier for the rule.
@@ -55,7 +55,7 @@ pub struct Rule {
     pub text: String,
 }
 
-/// A struct containing info of an instance-level domain block.
+/// An instance-level domain block.
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
 pub struct DomainBlock {
     /// URI of the domain in question
