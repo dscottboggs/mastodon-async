@@ -10,8 +10,10 @@ pub mod account;
 pub mod attachment;
 /// Data structures for ser/de of card-related resources
 pub mod card;
-/// Data structures for ser/de of contetx-related resources
+/// Data structures for ser/de of context-related resources
 pub mod context;
+/// Data structures for ser/de of custom emoji
+pub mod custom_emoji;
 /// Data structures for ser/de of streaming events
 pub mod event;
 /// Data structures for ser/de of filter-related resources

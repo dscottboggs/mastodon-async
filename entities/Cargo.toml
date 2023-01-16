@@ -15,3 +15,8 @@ serde = { version = "1", features = ["derive"] }
 thiserror = "1"
 time = { version = "0.3", features = ["parsing", "serde", "formatting"] }
 static_assertions = "1"
+url = { version = "2.3.1", features = ["serde"] }
+classic-bitfield = { version = "0.2", features = ["serde"] }
+
+[dev-dependencies]
+serde_json = "1.0.91"
