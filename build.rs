@@ -1,7 +1,4 @@
 #[cfg(feature = "toml")]
-extern crate skeptic;
-
-#[cfg(feature = "toml")]
 fn main() {
     skeptic::generate_doc_tests(&["README.md"]);
 }
