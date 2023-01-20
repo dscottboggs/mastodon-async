@@ -7,18 +7,38 @@ use crate::{errors::Result, registration::Registered, Mastodon};
 pub async fn authenticate(registration: Registered) -> Result<Mastodon> {
     let url = registration.authorize_url()?;
 
-    let stdout = io::stdout();
-    let stdin = io::stdin();
+    let code = {
+        let stdout = io::stdout();
+        let stdin = io::stdin();
 
-    let mut stdout = stdout.lock();
-    let mut stdin = stdin.lock();
+        let mut stdout = stdout.lock();
+        let mut stdin = stdin.lock();
 
-    writeln!(&mut stdout, "Click this link to authorize: {}", url)?;
-    write!(&mut stdout, "Paste the returned authorization code: ")?;
-    stdout.flush()?;
+        writeln!(&mut stdout, "Click this link to authorize: {}", url)?;
+        write!(&mut stdout, "Paste the returned authorization code: ")?;
+        stdout.flush()?;
 
-    let mut input = String::new();
-    stdin.read_line(&mut input)?;
-    let code = input.trim();
+        let mut input = String::new();
+        stdin.read_line(&mut input)?;
+        input
+    };
+    let code = code.trim();
+
     registration.complete(code).await
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn send_sync() {
+        fn assert_send_sync(_: impl Send + Sync) {}
+
+        let mock_reg = || -> Registered { unimplemented!() };
+        let no_run = || async move {
+            let _ = authenticate(mock_reg()).await;
+        };
+        assert_send_sync(no_run());
+    }
 }
