@@ -1,7 +1,7 @@
 //! Module containing everything related to an instance.
 use serde::{Deserialize, Serialize};
 
-use crate::{account::Account, conversion};
+use crate::{account::Account, conversion, RuleId};
 
 /// A struct containing info of an instance.
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
@@ -50,7 +50,7 @@ pub struct Stats {
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
 pub struct Rule {
     /// An identifier for the rule.
-    pub id: String,
+    pub id: RuleId,
     /// The rule to be followed.
     pub text: String,
 }
