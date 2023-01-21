@@ -1,7 +1,7 @@
 //! Module containing everything related to an instance.
 use serde::{Deserialize, Serialize};
 
-use super::account::Account;
+use crate::{account::Account, conversion};
 
 /// A struct containing info of an instance.
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
@@ -74,9 +74,12 @@ pub struct Activity {
     /// UNIX Timestamp at midnight at the first day of the week.
     pub week: String,
     /// The number of Statuses created since the week began (cast from an integer)
-    pub statuses: String,
+    #[serde(with = "conversion::string_to_u64")]
+    pub statuses: u64,
     /// The number of user logins since the week began (cast from an integer)
-    pub logins: String,
+    #[serde(with = "conversion::string_to_u64")]
+    pub logins: u64,
     /// The number of user registrations since the week began (cast from an integer)
-    pub registrations: String,
+    #[serde(with = "conversion::string_to_u64")]
+    pub registrations: u64,
 }
