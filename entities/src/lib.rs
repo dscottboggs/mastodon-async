@@ -46,21 +46,21 @@ pub struct Empty {}
 /// modules:
 pub mod prelude {
     pub use super::{
-        account::{Account, Source},
-        attachment::{Attachment, MediaType},
+        account::{Account, AccountId, Source},
+        attachment::{Attachment, AttachmentId, MediaType},
         card::Card,
         context::Context,
         event::Event,
-        filter::{Filter, FilterContext},
+        filter::{Filter, FilterContext, FilterId},
         instance::*,
-        list::List,
-        mention::Mention,
-        notification::Notification,
-        push::Subscription,
-        relationship::Relationship,
-        report::Report,
+        list::{List, ListId},
+        mention::{Mention, MentionId},
+        notification::{Notification, NotificationId},
+        push::{Subscription, SubscriptionId},
+        relationship::{Relationship, RelationshipId},
+        report::{Report, ReportId},
         search_result::SearchResult,
-        status::{Application, Emoji, Status},
+        status::{Application, Emoji, Status, StatusId},
         Empty,
     };
 }
