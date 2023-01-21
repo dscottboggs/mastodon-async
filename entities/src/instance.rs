@@ -50,10 +50,39 @@ pub struct Stats {
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
 pub struct Rule {
     /// An identifier for the rule.
-    pub id: String,
+    pub id: RuleId,
     /// The rule to be followed.
     pub text: String,
 }
+
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(transparent)]
+pub struct RuleId(String);
+
+impl AsRef<str> for RuleId {
+    fn as_ref(&self) -> &str {
+        &self.0
+    }
+}
+
+impl RuleId {
+    pub fn new(value: impl Into<String>) -> Self {
+        Self(value.into())
+    }
+}
+
+static_assertions::assert_not_impl_any!(
+    RuleId: PartialEq<crate::account::AccountId>,
+    PartialEq<crate::attachment::AttachmentId>,
+    PartialEq<crate::list::ListId>,
+    PartialEq<crate::mention::MentionId>,
+    PartialEq<crate::notification::NotificationId>,
+    PartialEq<crate::relationship::RelationshipId>,
+    PartialEq<crate::push::SubscriptionId>,
+    PartialEq<crate::report::ReportId>,
+    PartialEq<crate::status::StatusId>,
+    PartialEq<crate::filter::FilterId>,
+);
 
 /// An instance-level domain block.
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]

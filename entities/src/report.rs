@@ -38,4 +38,5 @@ static_assertions::assert_not_impl_any!(
     PartialEq<crate::relationship::RelationshipId>,
     PartialEq<crate::list::ListId>,
     PartialEq<crate::status::StatusId>,
+    PartialEq<crate::instance::RuleId>,
 );
