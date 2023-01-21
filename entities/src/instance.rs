@@ -71,8 +71,12 @@ pub struct DomainBlock {
 /// Weekly activity on an instance
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
 pub struct Activity {
+    /// UNIX Timestamp at midnight at the first day of the week.
     pub week: String,
+    /// The number of Statuses created since the week began (cast from an integer)
     pub statuses: String,
+    /// The number of user logins since the week began (cast from an integer)
     pub logins: String,
+    /// The number of user registrations since the week began (cast from an integer)
     pub registrations: String,
 }
