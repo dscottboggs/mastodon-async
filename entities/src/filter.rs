@@ -8,7 +8,7 @@ use time::{serde::iso8601, OffsetDateTime};
 ///
 /// ## Example
 /// ```rust
-/// use mastodon_async::entities::filter::Filter;
+/// use mastodon_async_entities::prelude::*;
 /// let subject = r#"{
 ///     "id": "19972",
 ///     "title": "Test filter",
@@ -32,7 +32,7 @@ use time::{serde::iso8601, OffsetDateTime};
 ///     ]
 /// }"#;
 /// let subject: Filter = serde_json::from_str(subject).expect("deserialize");
-/// assert_eq!(subject.id, "19972");
+/// assert_eq!(subject.id, FilterId::new("19972"));
 /// ```
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Filter {

@@ -439,7 +439,7 @@ macro_rules! route {
 
 macro_rules! route_id {
 
-    ($(($method:ident) $name:ident: $url:expr => $ret:ty,)*) => {
+    ($(($method:ident) $name:ident[$id_type:ty]: $url:expr => $ret:ty,)*) => {
         $(
             doc_comment! {
                 concat!(
@@ -456,7 +456,7 @@ macro_rules! route_id {
                     "# }\n",
                     "```"
                 ),
-                pub async fn $name(&self, id: &str) -> Result<$ret> {
+                pub async fn $name(&self, id: &$id_type) -> Result<$ret> {
                     self.$method(self.route(&format!(concat!("/api/v1/", $url), id))).await
                 }
             }

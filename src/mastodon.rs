@@ -98,27 +98,27 @@ impl Mastodon {
     }
 
     route_id! {
-        (get) get_account: "accounts/{}" => Account,
-        (post) follow: "accounts/{}/follow" => Relationship,
-        (post) unfollow: "accounts/{}/unfollow" => Relationship,
-        (post) block: "accounts/{}/block" => Relationship,
-        (post) unblock: "accounts/{}/unblock" => Relationship,
-        (get) mute: "accounts/{}/mute" => Relationship,
-        (get) unmute: "accounts/{}/unmute" => Relationship,
-        (get) get_notification: "notifications/{}" => Notification,
-        (get) get_status: "statuses/{}" => Status,
-        (get) get_context: "statuses/{}/context" => Context,
-        (get) get_card: "statuses/{}/card" => Card,
-        (post) reblog: "statuses/{}/reblog" => Status,
-        (post) unreblog: "statuses/{}/unreblog" => Status,
-        (post) favourite: "statuses/{}/favourite" => Status,
-        (post) unfavourite: "statuses/{}/unfavourite" => Status,
-        (delete) delete_status: "statuses/{}" => Empty,
-        (get) get_filter: "filters/{}" => Filter,
-        (delete) delete_filter: "filters/{}" => Empty,
-        (delete) delete_from_suggestions: "suggestions/{}" => Empty,
-        (post) endorse_user: "accounts/{}/pin" => Relationship,
-        (post) unendorse_user: "accounts/{}/unpin" => Relationship,
+        (get) get_account[AccountId]: "accounts/{}" => Account,
+        (post) follow[AccountId]: "accounts/{}/follow" => Relationship,
+        (post) unfollow[AccountId]: "accounts/{}/unfollow" => Relationship,
+        (post) block[AccountId]: "accounts/{}/block" => Relationship,
+        (post) unblock[AccountId]: "accounts/{}/unblock" => Relationship,
+        (get) mute[AccountId]: "accounts/{}/mute" => Relationship,
+        (get) unmute[AccountId]: "accounts/{}/unmute" => Relationship,
+        (get) get_notification[NotificationId]: "notifications/{}" => Notification,
+        (get) get_status[StatusId]: "statuses/{}" => Status,
+        (get) get_context[StatusId]: "statuses/{}/context" => Context,
+        (get) get_card[StatusId]: "statuses/{}/card" => Card,
+        (post) reblog[StatusId]: "statuses/{}/reblog" => Status,
+        (post) unreblog[StatusId]: "statuses/{}/unreblog" => Status,
+        (post) favourite[StatusId]: "statuses/{}/favourite" => Status,
+        (post) unfavourite[StatusId]: "statuses/{}/unfavourite" => Status,
+        (delete) delete_status[StatusId]: "statuses/{}" => Empty,
+        (get) get_filter[FilterId]: "filters/{}" => Filter,
+        (delete) delete_filter[FilterId]: "filters/{}" => Empty,
+        (delete) delete_from_suggestions[AccountId]: "suggestions/{}" => Empty,
+        (post) endorse_user[AccountId]: "accounts/{}/pin" => Relationship,
+        (post) unendorse_user[AccountId]: "accounts/{}/unpin" => Relationship,
     }
 
     streaming! {
@@ -225,7 +225,7 @@ impl Mastodon {
     /// tokio_test::block_on(async {
     ///     let data = Data::default();
     ///     let client = Mastodon::from(data);
-    ///     let statuses = client.statuses("user-id", Default::default()).await.unwrap();
+    ///     let statuses = client.statuses(&AccountId::new("user-id"), Default::default()).await.unwrap();
     /// });
     /// ```
     ///
@@ -236,12 +236,12 @@ impl Mastodon {
     ///     let client = Mastodon::from(data);
     ///     let mut request = StatusesRequest::new();
     ///     request.only_media();
-    ///     let statuses = client.statuses("user-id", request).await.unwrap();
+    ///     let statuses = client.statuses(&AccountId::new("user-id"), request).await.unwrap();
     /// });
     /// ```
     pub async fn statuses<'a, 'b: 'a>(
         &'b self,
-        id: &'b str,
+        id: &'b AccountId,
         request: StatusesRequest<'a>,
     ) -> Result<Page<Status>> {
         let call_id = Uuid::new_v4();
@@ -257,17 +257,17 @@ impl Mastodon {
 
     /// Returns the client account's relationship to a list of other accounts.
     /// Such as whether they follow them or vice versa.
-    pub async fn relationships(&self, ids: &[&str]) -> Result<Page<Relationship>> {
+    pub async fn relationships(&self, ids: &[&AccountId]) -> Result<Page<Relationship>> {
         let call_id = Uuid::new_v4();
         let mut url = self.route("/api/v1/accounts/relationships?");
 
         if ids.len() == 1 {
             url += "id=";
-            url += ids[0];
+            url += ids[0].as_ref();
         } else {
             for id in ids {
                 url += "id[]=";
-                url += id;
+                url += id.as_ref();
                 url += "&";
             }
             url.pop();

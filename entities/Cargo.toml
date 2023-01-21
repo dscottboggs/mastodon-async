@@ -10,8 +10,20 @@ edition.workspace = true
 
 [dependencies]
 futures = "0.3.25"
-log = { version = "0.4", features = ["kv_unstable", "serde", "std", "kv_unstable_serde", "kv_unstable_std"] }
-serde = { version = "1", features = ["derive"] }
 thiserror = "1"
-time = { version = "0.3", features = ["parsing", "serde", "formatting"] }
 static_assertions = "1"
+
+[dependencies.log]
+version = "0.4"
+features = ["kv_unstable", "serde", "std", "kv_unstable_serde", "kv_unstable_std"]
+
+[dependencies.serde]
+version = "1"
+features = ["derive"]
+
+[dependencies.time]
+version = "0.3"
+features = ["parsing", "serde", "formatting"]
+
+[dev-dependencies]
+serde_json = "1.0.91"

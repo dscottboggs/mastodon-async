@@ -106,8 +106,7 @@ features = ["async_tokio"]
 version = "0.13"
 
 [features]
-all = ["toml", "json", "env"]
-# default = ["reqwest/default-tls"]
+all = ["toml", "json", "env", "mt"]
 default = ["reqwest/default-tls"]
 env = ["envy"]
 mt = ["tokio/rt-multi-thread"]
