@@ -47,4 +47,5 @@ define_ids!(
     RelationshipId,
     ReportId,
     StatusId,
+    RuleId,
 );
