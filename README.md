@@ -90,6 +90,10 @@ async fn register() -> Result<Mastodon> {
 
 It also supports the [Streaming API](https://docs.joinmastodon.org/api/streaming):
 
+> **Note**: this example compiles, but will not run. See the
+> [log_events](https://github.com/dscottboggs/mastodon-async/blob/main/examples/log_events.rs)
+> example for a more thorough example which does compile and run.
+
 ```rust,no_run
 use mastodon_async::{prelude::*, Result, entities::event::Event};
 use futures_util::TryStreamExt;
@@ -113,3 +117,4 @@ async fn main() -> Result<()> {
     Ok(())
 }
 ```
+
