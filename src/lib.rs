@@ -126,6 +126,7 @@ mod macros;
 /// Automatically import the things you need
 pub mod prelude {
     pub use crate::{
+        entities::prelude::*,
         scopes::Scopes,
         Data,
         Mastodon,
