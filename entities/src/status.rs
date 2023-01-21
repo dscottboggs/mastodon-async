@@ -100,6 +100,7 @@ static_assertions::assert_not_impl_any!(
     PartialEq<crate::relationship::RelationshipId>,
     PartialEq<crate::report::ReportId>,
     PartialEq<crate::list::ListId>,
+    PartialEq<crate::instance::RuleId>,
 );
 
 /// A mention of another user.
