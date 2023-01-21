@@ -44,6 +44,7 @@ futures-util = "0.3.25"
 static_assertions = "1.1.0"
 percent-encoding = "2.2.0"
 thiserror = "1.0.38"
+base64 = "0.21.0"
 
 [dependencies.parse_link_header]
 version = "0.3.3"
@@ -89,6 +90,10 @@ features = ["macros", "io-util", "time"]
 version = "0.7.4"
 features = ["io"]
 
+[dependencies.rand]
+version = "0.8.5"
+optional = true
+
 [dev-dependencies]
 tokio-test = "0.4.2"
 futures-util = "0.3.25"
@@ -106,10 +111,11 @@ features = ["async_tokio"]
 version = "0.13"
 
 [features]
-all = ["toml", "json", "env"]
+all = ["toml", "json", "env", "rand"]
 # default = ["reqwest/default-tls"]
-default = ["reqwest/default-tls"]
+default = ["rand", "reqwest/default-tls"]
 env = ["envy"]
 mt = ["tokio/rt-multi-thread"]
 json = []
 rustls-tls = ["reqwest/rustls-tls"]
+rand = ["dep:rand"]

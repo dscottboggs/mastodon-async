@@ -18,7 +18,8 @@ pub use mastodon_async_entities::visibility::Visibility;
 ///     .sensitive(true)
 ///     .spoiler_text("a CW")
 ///     .language(Language::Eng)
-///     .build().unwrap();
+///     .build()
+///     .unwrap();
 /// ```
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct StatusBuilder {
@@ -64,7 +65,7 @@ impl StatusBuilder {
     /// use mastodon_async::prelude::*;
     /// let status = StatusBuilder::new().status("awoooooo").build().unwrap();
     /// ```
-    pub fn status<I: Into<String>>(&mut self, status: I) -> &mut Self {
+    pub fn status<I: Into<String>>(mut self, status: I) -> Self {
         self.status = Some(status.into());
         self
     }
@@ -81,7 +82,7 @@ impl StatusBuilder {
     ///     .build()
     ///     .unwrap();
     /// ```
-    pub fn in_reply_to<I: Into<String>>(&mut self, id: I) -> &mut Self {
+    pub fn in_reply_to<I: Into<String>>(mut self, id: I) -> Self {
         self.in_reply_to_id = Some(id.into());
         self
     }
@@ -94,10 +95,7 @@ impl StatusBuilder {
     /// use mastodon_async::prelude::*;
     /// let status = StatusBuilder::new().media_ids(&["foo", "bar"]).build().unwrap();
     /// ```
-    pub fn media_ids<S: std::fmt::Display, I: IntoIterator<Item = S>>(
-        &mut self,
-        ids: I,
-    ) -> &mut Self {
+    pub fn media_ids<S: std::fmt::Display, I: IntoIterator<Item = S>>(mut self, ids: I) -> Self {
         self.media_ids = Some(ids.into_iter().map(|s| s.to_string()).collect::<Vec<_>>());
         self
     }
@@ -114,7 +112,7 @@ impl StatusBuilder {
     ///     .build()
     ///     .unwrap();
     /// ```
-    pub fn spoiler_text<I: Into<String>>(&mut self, spoiler_text: I) -> &mut Self {
+    pub fn spoiler_text<I: Into<String>>(mut self, spoiler_text: I) -> Self {
         self.spoiler_text = Some(spoiler_text.into());
         self
     }
@@ -141,7 +139,7 @@ impl StatusBuilder {
     ///     .build()
     ///     .unwrap();
     /// ```
-    pub fn content_type<I: Into<String>>(&mut self, content_type: I) -> &mut Self {
+    pub fn content_type<I: Into<String>>(mut self, content_type: I) -> Self {
         self.content_type = Some(content_type.into());
         self
     }
@@ -158,7 +156,7 @@ impl StatusBuilder {
     ///     .build()
     ///     .unwrap();
     /// ```
-    pub fn visibility(&mut self, visibility: Visibility) -> &mut Self {
+    pub fn visibility(mut self, visibility: Visibility) -> Self {
         self.visibility = Some(visibility);
         self
     }
@@ -175,7 +173,7 @@ impl StatusBuilder {
     ///     .build()
     ///     .unwrap();
     /// ```
-    pub fn language(&mut self, language: Language) -> &mut Self {
+    pub fn language(mut self, language: Language) -> Self {
         self.language = Some(language);
         self
     }
@@ -190,7 +188,7 @@ impl StatusBuilder {
     ///     .build()
     ///     .unwrap();
     /// ```
-    pub fn sensitive(&mut self, flag: bool) -> &mut Self {
+    pub fn sensitive(mut self, flag: bool) -> Self {
         self.sensitive = Some(flag);
         self
     }

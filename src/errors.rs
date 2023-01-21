@@ -102,6 +102,13 @@ pub enum Error {
     /// Error from mastodon-async-entities
     #[error(transparent)]
     Entities(#[from] mastodon_async_entities::error::Error),
+    /// Error decoding base64-encoded strings
+    #[error(transparent)]
+    Base64(#[from] base64::DecodeError),
+    /// Error from RNG
+    #[cfg(feature = "rand")]
+    #[error(transparent)]
+    Rand(#[from] rand::Error),
     /// Other errors
     #[error("other error: {0:?}")]
     Other(String),

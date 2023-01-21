@@ -283,7 +283,11 @@ impl Mastodon {
         Page::new(self.clone(), response, call_id).await
     }
 
-    /// Add a push notifications subscription
+    /// Add a Web Push API subscription to receive notifications. Each access
+    /// token can have one push subscription. If you create a new subscription,
+    /// the old subscription is deleted.
+    ///
+    /// See <https://docs.joinmastodon.org/methods/push/#create>.
     pub async fn add_push_subscription(&self, request: &AddPushRequest) -> Result<Subscription> {
         let call_id = Uuid::new_v4();
         let request = request.build()?;

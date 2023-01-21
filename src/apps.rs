@@ -39,9 +39,7 @@ impl App {
     /// ```
     /// use mastodon_async::{apps::App, scopes::Scopes};
     ///
-    /// let mut builder = App::builder();
-    /// builder.client_name("mastodon-async-test");
-    /// let app = builder.build().unwrap();
+    /// let app = App::builder().client_name("mastodon-async-test").build().unwrap();
     /// let scopes = app.scopes();
     /// assert_eq!(scopes, &Scopes::read_all());
     /// ```
@@ -54,9 +52,7 @@ impl App {
 /// ```
 /// use mastodon_async::{apps::App};
 ///
-/// let mut builder = App::builder();
-/// builder.client_name("mastodon-async_test");
-/// let app = builder.build().unwrap();
+/// let app = App::builder().client_name("mastodon-async_test").build().unwrap();
 /// ```
 #[derive(Clone, Debug, Default, PartialEq, Serialize)]
 pub struct AppBuilder<'a> {
@@ -76,7 +72,7 @@ impl<'a> AppBuilder<'a> {
     /// grant permission.
     ///
     /// In order to turn this builder into an App, this needs to be provided
-    pub fn client_name<I: Into<Cow<'a, str>>>(&mut self, name: I) -> &mut Self {
+    pub fn client_name<I: Into<Cow<'a, str>>>(mut self, name: I) -> Self {
         self.client_name = Some(name.into());
         self
     }
@@ -84,7 +80,7 @@ impl<'a> AppBuilder<'a> {
     /// Where the user should be redirected after authorization
     ///
     /// If none is specified, the default is `urn:ietf:wg:oauth:2.0:oob`
-    pub fn redirect_uris<I: Into<Cow<'a, str>>>(&mut self, uris: I) -> &mut Self {
+    pub fn redirect_uris<I: Into<Cow<'a, str>>>(mut self, uris: I) -> Self {
         self.redirect_uris = Some(uris.into());
         self
     }
@@ -92,13 +88,13 @@ impl<'a> AppBuilder<'a> {
     /// Permission scope of the application.
     ///
     /// IF none is specified, the default is Scopes::read_all()
-    pub fn scopes(&mut self, scopes: Scopes) -> &mut Self {
+    pub fn scopes(mut self, scopes: Scopes) -> Self {
         self.scopes = Some(scopes);
         self
     }
 
     /// URL to the homepage of your application.
-    pub fn website<I: Into<Cow<'a, str>>>(&mut self, website: I) -> &mut Self {
+    pub fn website<I: Into<Cow<'a, str>>>(mut self, website: I) -> Self {
         self.website = Some(website.into());
         self
     }
@@ -142,19 +138,18 @@ mod tests {
 
     #[test]
     fn test_app_scopes() {
-        let mut builder = App::builder();
-        builder.client_name("test").scopes(Scopes::all());
+        let builder = App::builder().client_name("test").scopes(Scopes::all());
         let app = builder.build().expect("Couldn't build App");
         assert_eq!(app.scopes(), &Scopes::all());
     }
 
     #[test]
     fn test_app_builder_all_methods() {
-        let mut builder = AppBuilder::new();
-        builder.client_name("foo-test");
-        builder.redirect_uris("http://example.com");
-        builder.scopes(Scopes::read_all() | Scopes::write_all());
-        builder.website("https://example.com");
+        let builder = AppBuilder::new()
+            .client_name("foo-test")
+            .redirect_uris("http://example.com")
+            .scopes(Scopes::read_all() | Scopes::write_all())
+            .website("https://example.com");
         let app = builder.build().expect("Couldn't build App");
         assert_eq!(
             app,
@@ -176,12 +171,12 @@ mod tests {
     #[test]
     #[should_panic]
     fn test_app_builder_build_fails_if_no_client_name_2() {
-        let mut builder = App::builder();
-        builder
+        App::builder()
             .website("https://example.com")
             .redirect_uris("https://example.com")
-            .scopes(Scopes::all());
-        builder.build().expect("no client-name");
+            .scopes(Scopes::all())
+            .build()
+            .expect("no client-name");
     }
 
     #[test]
@@ -200,8 +195,7 @@ mod tests {
 
     #[test]
     fn test_app_builder_try_into_app() {
-        let mut builder = App::builder();
-        builder
+        let builder = App::builder()
             .client_name("foo-test")
             .redirect_uris("http://example.com")
             .scopes(Scopes::all());

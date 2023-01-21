@@ -86,34 +86,34 @@ impl<'a> Registration<'a> {
     ///
     /// This is required, and if this isn't set then the AppBuilder::build
     /// method will fail
-    pub fn client_name<I: Into<Cow<'a, str>>>(&mut self, name: I) -> &mut Self {
-        self.app_builder.client_name(name.into());
+    pub fn client_name<I: Into<Cow<'a, str>>>(mut self, name: I) -> Self {
+        self.app_builder = self.app_builder.client_name(name.into());
         self
     }
 
     /// Sets the redirect uris that this app uses
-    pub fn redirect_uris<I: Into<Cow<'a, str>>>(&mut self, uris: I) -> &mut Self {
-        self.app_builder.redirect_uris(uris);
+    pub fn redirect_uris<I: Into<Cow<'a, str>>>(mut self, uris: I) -> Self {
+        self.app_builder = self.app_builder.redirect_uris(uris);
         self
     }
 
     /// Sets the scopes that this app requires
     ///
     /// The default for an app is Scopes::Read
-    pub fn scopes(&mut self, scopes: Scopes) -> &mut Self {
-        self.app_builder.scopes(scopes);
+    pub fn scopes(mut self, scopes: Scopes) -> Self {
+        self.app_builder = self.app_builder.scopes(scopes);
         self
     }
 
     /// Sets the optional "website" to register the app with
-    pub fn website<I: Into<Cow<'a, str>>>(&mut self, website: I) -> &mut Self {
-        self.app_builder.website(website);
+    pub fn website<I: Into<Cow<'a, str>>>(mut self, website: I) -> Self {
+        self.app_builder = self.app_builder.website(website);
         self
     }
 
     /// Forces the user to re-login (useful if you need to re-auth as a
     /// different user on the same instance
-    pub fn force_login(&mut self, force_login: bool) -> &mut Self {
+    pub fn force_login(mut self, force_login: bool) -> Self {
         self.force_login = force_login;
         self
     }
@@ -124,8 +124,7 @@ impl<'a> Registration<'a> {
     /// use mastodon_async::{apps::App, prelude::*};
     ///
     /// tokio_test::block_on(async {
-    ///     let mut app = App::builder();
-    ///     app.client_name("mastodon-async_test");
+    ///     let app = App::builder().client_name("mastodon-async_test");
     ///
     ///     let registration = Registration::new("https://botsin.space")
     ///         .register(app)
@@ -407,45 +406,38 @@ mod tests {
 
     #[test]
     fn test_set_client_name() {
-        let mut r = Registration::new("https://example.com");
-        r.client_name("foo-test");
+        let r = Registration::new("https://example.com").client_name("foo-test");
 
         assert_eq!(r.base, "https://example.com".to_string());
-        assert_eq!(
-            &mut r.app_builder,
-            AppBuilder::new().client_name("foo-test")
-        );
+        assert_eq!(r.app_builder, AppBuilder::new().client_name("foo-test"));
     }
 
     #[test]
     fn test_set_redirect_uris() {
-        let mut r = Registration::new("https://example.com");
-        r.redirect_uris("https://foo.com");
+        let r = Registration::new("https://example.com").redirect_uris("https://foo.com");
 
         assert_eq!(r.base, "https://example.com".to_string());
         assert_eq!(
-            &mut r.app_builder,
+            r.app_builder,
             AppBuilder::new().redirect_uris("https://foo.com")
         );
     }
 
     #[test]
     fn test_set_scopes() {
-        let mut r = Registration::new("https://example.com");
-        r.scopes(Scopes::all());
+        let r = Registration::new("https://example.com").scopes(Scopes::all());
 
         assert_eq!(r.base, "https://example.com".to_string());
-        assert_eq!(&mut r.app_builder, AppBuilder::new().scopes(Scopes::all()));
+        assert_eq!(r.app_builder, AppBuilder::new().scopes(Scopes::all()));
     }
 
     #[test]
     fn test_set_website() {
-        let mut r = Registration::new("https://example.com");
-        r.website("https://website.example.com");
+        let r = Registration::new("https://example.com").website("https://website.example.com");
 
         assert_eq!(r.base, "https://example.com".to_string());
         assert_eq!(
-            &mut r.app_builder,
+            r.app_builder,
             AppBuilder::new().website("https://website.example.com")
         );
     }
