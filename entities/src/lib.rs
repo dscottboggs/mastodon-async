@@ -12,6 +12,8 @@ pub mod attachment;
 pub mod card;
 /// Data structures for ser/de of contetx-related resources
 pub mod context;
+/// Module for converting values while serializing and deserializing.
+mod conversion;
 /// Data structures for ser/de of streaming events
 pub mod event;
 /// Data structures for ser/de of filter-related resources
