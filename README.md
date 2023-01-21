@@ -30,7 +30,7 @@ This library offers structured logging. To get better information about bugs or
 how something is working, I recommend adding the femme crate as a dependency,
 then adding this line to the beginning of your main() function:
 
-```rust
+```rust,ignore
 femme::with_level(log::LevelFilter::Trace);
 ```
 
@@ -49,8 +49,12 @@ In your `Cargo.toml`, make sure you enable the `toml` feature:
 ```toml
 [dependencies.mastodon-async]
 version = "1.0"
-features = ["toml"]
+features = ["toml", "mt"]
 ```
+
+The `"mt"` feature is for tokio multi-threaded. For single threaded, drop the
+`"mt"` feature and replace `#[tokio::main]` with
+`#[tokio::main(flavor = "current_thread")]`.
 
 ```rust,no_run
 // src/main.rs
@@ -59,7 +63,7 @@ use mastodon_async::prelude::*;
 use mastodon_async::helpers::toml; // requires `features = ["toml"]`
 use mastodon_async::{helpers::cli, Result};
 
-#[tokio::main]
+#[tokio::main] // requires `features = ["mt"]
 async fn main() -> Result<()> {
     let mastodon = if let Ok(data) = toml::from_file("mastodon-data.toml") {
         Mastodon::from(data)

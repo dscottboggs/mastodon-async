@@ -151,7 +151,7 @@ impl<T: Clone + for<'de> Deserialize<'de> + Serialize> Page<T> {
     /// let req = StatusesRequest::new();
     ///
     /// tokio_test::block_on(async {
-    ///     let resp = mastodon.statuses("some-id", req).await.unwrap();
+    ///     let resp = mastodon.statuses(&AccountId::new("some-id"), req).await.unwrap();
     ///     resp.items_iter().for_each(|status| async move {
     ///         // do something with status
     ///     }).await;

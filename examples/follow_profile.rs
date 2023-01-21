@@ -5,9 +5,11 @@ use mastodon_async::Result;
 
 #[cfg(feature = "toml")]
 async fn run() -> Result<()> {
+    use mastodon_async::entities::account::AccountId;
     let mastodon = register::get_mastodon_data().await?;
     let input = register::read_line("Enter the account id you'd like to follow: ")?;
-    let new_follow = mastodon.follow(input.trim()).await?;
+    let account = AccountId::new(input.trim());
+    let new_follow = mastodon.follow(&account).await?;
 
     println!("{:#?}", new_follow);
     Ok(())
