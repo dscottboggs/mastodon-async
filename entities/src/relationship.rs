@@ -1,6 +1,8 @@
 //! module containing everything relating to a relationship with
 //! another account.
 
+use std::fmt::Display;
+
 use serde::{Deserialize, Serialize};
 
 /// A struct containing information about a relationship with another account.
@@ -46,6 +48,11 @@ impl AsRef<str> for RelationshipId {
 impl RelationshipId {
     pub fn new(value: impl Into<String>) -> Self {
         Self(value.into())
+    }
+}
+impl Display for RelationshipId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
     }
 }
 

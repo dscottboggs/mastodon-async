@@ -1,5 +1,7 @@
 //! Module containing all info relating to a status.
 
+use std::fmt::Display;
+
 use super::prelude::*;
 use crate::{card::Card, visibility::Visibility};
 use serde::{Deserialize, Serialize};
@@ -79,6 +81,12 @@ impl AsRef<str> for StatusId {
 impl StatusId {
     pub fn new(value: impl Into<String>) -> Self {
         Self(value.into())
+    }
+}
+
+impl Display for StatusId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
     }
 }
 

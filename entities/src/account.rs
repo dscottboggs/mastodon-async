@@ -4,7 +4,7 @@ use serde::{
     de::{self, Deserializer, Unexpected},
     Deserialize, Serialize,
 };
-use std::path::PathBuf;
+use std::{fmt::Display, path::PathBuf};
 use time::{serde::iso8601, OffsetDateTime};
 
 /// A struct representing an Account.
@@ -68,6 +68,12 @@ impl AsRef<str> for AccountId {
 impl AccountId {
     pub fn new(value: impl Into<String>) -> Self {
         Self(value.into())
+    }
+}
+
+impl Display for AccountId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
     }
 }
 

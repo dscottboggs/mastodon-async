@@ -1,5 +1,7 @@
 //! module containing information about a finished report of a user.
 
+use std::fmt::Display;
+
 use serde::{Deserialize, Serialize};
 
 /// A struct containing info about a report.
@@ -25,6 +27,12 @@ impl AsRef<str> for ReportId {
 impl ReportId {
     pub fn new(value: impl Into<String>) -> Self {
         Self(value.into())
+    }
+}
+
+impl Display for ReportId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
     }
 }
 
