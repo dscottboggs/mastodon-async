@@ -1,5 +1,7 @@
 //! Module containing all info about notifications.
 
+use std::fmt::Display;
+
 use super::{account::Account, status::Status};
 use serde::{Deserialize, Serialize};
 use time::{serde::iso8601, OffsetDateTime};
@@ -36,6 +38,12 @@ impl AsRef<str> for NotificationId {
 impl NotificationId {
     pub fn new(value: impl Into<String>) -> Self {
         Self(value.into())
+    }
+}
+
+impl Display for NotificationId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
     }
 }
 

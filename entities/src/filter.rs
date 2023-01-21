@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use serde::{de::Visitor, Deserialize, Deserializer, Serialize};
 use time::{serde::iso8601, OffsetDateTime};
 
@@ -65,6 +67,12 @@ impl AsRef<str> for FilterId {
 impl FilterId {
     pub fn new(value: impl Into<String>) -> Self {
         Self(value.into())
+    }
+}
+
+impl Display for FilterId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
     }
 }
 

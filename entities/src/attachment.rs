@@ -1,5 +1,7 @@
 //! Module containing everything related to media attachements.
 
+use std::fmt::Display;
+
 use serde::{Deserialize, Serialize};
 
 /// A struct representing a media attachment.
@@ -38,6 +40,12 @@ impl AsRef<str> for AttachmentId {
 impl AttachmentId {
     pub fn new(value: impl Into<String>) -> Self {
         Self(value.into())
+    }
+}
+
+impl Display for AttachmentId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
     }
 }
 
