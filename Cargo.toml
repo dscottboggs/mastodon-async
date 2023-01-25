@@ -49,7 +49,10 @@ percent-encoding = "2.2.0"
 thiserror = "1.0.38"
 derive_deref = "1.1.1"
 is_variant = "1.0.0"
-derive_builder = "0.12.0"
+
+[dependencies.derive_builder]
+version = "0.12.0"
+features = ["clippy"]
 
 [dependencies.parse_link_header]
 version = "0.3.3"

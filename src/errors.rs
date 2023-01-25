@@ -57,6 +57,7 @@ pub enum Error {
     AccessTokenRequired,
     /// MastodonBuilder & AppBuilder error
     #[error("builder required field {0:?} to be constructed")]
+    #[deprecated = "use [`Error::Builder`] instead"]
     MissingField(&'static str),
     #[cfg(feature = "toml")]
     /// Error serializing to toml
