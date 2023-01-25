@@ -5,4 +5,6 @@ use derive_is_enum_variant::is_enum_variant;
 pub enum Error {
     #[error("unrecognized visibility '{invalid}'")]
     VisibilityParsingError { invalid: String },
+    #[error(transparent)]
+    Builder(#[from] derive_builder::UninitializedFieldError),
 }
