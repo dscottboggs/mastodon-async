@@ -60,7 +60,6 @@ fn test_compile_imports() {
     use mastodon_async::requests::AddPushRequest as _;
     use mastodon_async::requests::Keys as _;
     use mastodon_async::requests::StatusesRequest as _;
-    use mastodon_async::requests::UpdateCredsRequest as _;
     use mastodon_async::requests::UpdatePushRequest as _;
     use mastodon_async::scopes::Read as _;
     use mastodon_async::scopes::Scopes as _;
@@ -81,7 +80,6 @@ fn test_compile_imports() {
     use mastodon_async::Result as _;
     use mastodon_async::StatusBuilder as _;
     use mastodon_async::StatusesRequest as _;
-    use mastodon_async::UpdateCredsRequest as _;
     use mastodon_async::UpdatePushRequest as _;
     use mastodon_async::Visibility as _;
 }
