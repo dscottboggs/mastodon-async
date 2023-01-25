@@ -94,9 +94,7 @@ pub use mastodon::{Mastodon, MastodonUnauthenticated};
 // pub use mastodon_client::{MastodonClient, MastodonUnauthenticated};
 pub use mastodon_async_entities::visibility::Visibility;
 pub use registration::Registration;
-pub use requests::{
-    AddFilterRequest, AddPushRequest, StatusesRequest, UpdateCredsRequest, UpdatePushRequest,
-};
+pub use requests::{AddFilterRequest, AddPushRequest, StatusesRequest, UpdatePushRequest};
 pub use status_builder::{NewStatus, StatusBuilder};
 
 /// Registering your App

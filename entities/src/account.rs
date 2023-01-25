@@ -233,16 +233,20 @@ fn string_or_bool<'de, D: Deserializer<'de>>(val: D) -> ::std::result::Result<bo
 }
 
 /// Defaults for new posts
-#[derive(Debug, Default, Clone, Serialize, PartialEq, Eq)]
+#[derive(Builder, Debug, Default, Clone, Serialize, PartialEq, Eq)]
+#[builder(build_fn(error = "crate::error::Error"))]
 pub struct UpdateSource {
     /// Default post privacy for authored statuses.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(setter(strip_option), default)]
     pub privacy: Option<crate::visibility::Visibility>,
     /// Whether to mark authored statuses as sensitive by default.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(setter(strip_option), default)]
     pub sensitive: Option<bool>,
     /// Default language to use for authored statuses
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(setter(strip_option), default)]
     pub language: Option<Language>,
 }
 
@@ -250,6 +254,7 @@ pub struct UpdateSource {
 ///
 /// See also [the API reference](https://docs.joinmastodon.org/methods/accounts/#form-data-parameters-1).
 #[derive(Debug, Builder, Default, Serialize, PartialEq, Eq)]
+#[builder(build_fn(error = "crate::error::Error"))]
 pub struct Credentials {
     /// The display name to use for the profile.
     #[serde(skip_serializing_if = "Option::is_none")]
