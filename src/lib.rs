@@ -123,6 +123,8 @@ pub mod scopes;
 pub mod status_builder;
 #[macro_use]
 mod macros;
+/// How much time to wait before checking an endpoint again.
+pub mod polling_time;
 /// Automatically import the things you need
 pub mod prelude {
     pub use crate::{

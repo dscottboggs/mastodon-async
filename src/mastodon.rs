@@ -11,11 +11,14 @@ use crate::{
     errors::{Error, Result},
     event_stream::event_stream,
     helpers::read_response::read_response,
-    log_serde, AddFilterRequest, AddPushRequest, Data, NewStatus, Page, StatusesRequest,
-    UpdateCredsRequest, UpdatePushRequest,
+    log_serde,
+    polling_time::PollingTime,
+    AddFilterRequest, AddPushRequest, Data, NewStatus, Page, StatusesRequest, UpdateCredsRequest,
+    UpdatePushRequest,
 };
 use futures::TryStream;
 use log::{as_debug, as_serde, debug, error, trace};
+use mastodon_async_entities::attachment::ProcessedAttachment;
 use reqwest::{multipart::Part, Client, RequestBuilder};
 use url::Url;
 use uuid::Uuid;
@@ -119,6 +122,7 @@ impl Mastodon {
         (delete) delete_from_suggestions[AccountId]: "suggestions/{}" => Empty,
         (post) endorse_user[AccountId]: "accounts/{}/pin" => Relationship,
         (post) unendorse_user[AccountId]: "accounts/{}/unpin" => Relationship,
+        (get) attachment[AttachmentId]: "media/{}" => Attachment,
     }
 
     streaming! {
@@ -324,6 +328,46 @@ impl Mastodon {
     pub async fn followed_by_me(&self) -> Result<Page<Account>> {
         let me = self.verify_credentials().await?;
         self.following(&me.id).await
+    }
+
+    /// Wait for the media to be done processing and return it with the URL.
+    ///
+    /// `Default::default()` may be passed as the polling time to select a
+    /// polling time of 500ms.
+    ///
+    /// ## Example
+    /// ```rust,no_run
+    /// use mastodon_async::prelude::*;
+    /// let mastodon = Mastodon::from(Data::default());
+    /// tokio_test::block_on(async {
+    ///     let attachment = mastodon.media("/path/to/some/file.jpg", None).await.expect("upload");
+    ///     let attachment = mastodon.wait_for_processing(attachment, Default::default()).await.expect("processing");
+    ///     println!("{}", attachment.url);
+    /// });
+    /// ```
+    pub async fn wait_for_processing(
+        &self,
+        mut attachment: Attachment,
+        polling_time: PollingTime,
+    ) -> Result<ProcessedAttachment> {
+        let id = attachment.id;
+        loop {
+            if let Some(url) = attachment.url {
+                return Ok(ProcessedAttachment {
+                    id,
+                    media_type: attachment.media_type,
+                    url,
+                    remote_url: attachment.remote_url,
+                    preview_url: attachment.preview_url,
+                    text_url: attachment.text_url,
+                    meta: attachment.meta,
+                    description: attachment.description,
+                });
+            } else {
+                attachment = self.attachment(&id).await?;
+                tokio::time::sleep(*polling_time).await;
+            }
+        }
     }
 
     /// Set the bearer authentication token

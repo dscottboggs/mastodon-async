@@ -26,6 +26,7 @@ pub struct Attachment {
     /// Noop will be removed.
     pub description: Option<String>,
 }
+
 /// Wrapper type for a attachment ID string
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(transparent)]
@@ -98,4 +99,27 @@ pub enum MediaType {
     /// Unknown format.
     #[serde(rename = "unknown")]
     Unknown,
+}
+
+/// A media attachment which has been processed and has a URL.
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
+pub struct ProcessedAttachment {
+    /// ID of the attachment.
+    pub id: AttachmentId,
+    /// The media type of an attachment.
+    #[serde(rename = "type")]
+    pub media_type: MediaType,
+    /// URL of the locally hosted version of the image.
+    pub url: String,
+    /// For remote images, the remote URL of the original image.
+    pub remote_url: Option<String>,
+    /// URL of the preview image.
+    pub preview_url: String,
+    /// Shorter URL for the image, for insertion into text
+    /// (only present on local images)
+    pub text_url: Option<String>,
+    /// Meta information about the attachment.
+    pub meta: Option<Meta>,
+    /// Noop will be removed.
+    pub description: Option<String>,
 }
