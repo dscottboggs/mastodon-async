@@ -6,6 +6,8 @@ pub mod error;
 
 /// Data structures for ser/de of account-related resources
 pub mod account;
+/// Data structures for ser/de of admin-related resources
+pub mod admin;
 /// Data structures for ser/de of attachment-related resources
 pub mod attachment;
 /// Data structures for ser/de of card-related resources
