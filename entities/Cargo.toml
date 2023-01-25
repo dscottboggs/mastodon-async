@@ -15,6 +15,14 @@ thiserror = "1"
 static_assertions = "1"
 derive_is_enum_variant = "0.1.1"
 
+[dependencies.derive_builder]
+version = "0.12.0"
+features = ["clippy"]
+
+[dependencies.log]
+version = "0.4"
+features = ["kv_unstable", "serde", "std", "kv_unstable_serde", "kv_unstable_std"]
+
 [dependencies.serde]
 version = "1"
 features = ["derive"]
