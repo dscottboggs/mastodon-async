@@ -1,5 +1,6 @@
 //! A module containing everything relating to a account returned from the api.
 
+use derive_builder::Builder;
 use isolang::Language;
 use serde::{
     de::{self, Deserializer, Unexpected, Visitor},
@@ -248,19 +249,23 @@ pub struct UpdateSource {
 /// Form data for [`Mastodon::update_credentials()`](https://docs.rs/mastodon-async/latest/mastodon_async/mastodon/struct.Mastodon.html#method.update_credentials).
 ///
 /// See also [the API reference](https://docs.joinmastodon.org/methods/accounts/#form-data-parameters-1).
-#[derive(Debug, Default, Serialize, PartialEq, Eq)]
+#[derive(Debug, Builder, Default, Serialize, PartialEq, Eq)]
 pub struct Credentials {
     /// The display name to use for the profile.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(setter(into, strip_option))]
     pub display_name: Option<String>,
     /// The account bio.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(setter(into, strip_option))]
     pub note: Option<String>,
     /// Avatar image
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(setter(into, strip_option))]
     pub avatar: Option<PathBuf>,
     /// Header image
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(setter(into, strip_option))]
     pub header: Option<PathBuf>,
     /// Whether manual approval of follow requests is required.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -273,10 +278,29 @@ pub struct Credentials {
     pub discoverable: Option<bool>,
     /// Defaults for new posts
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(setter(into, strip_option))]
     pub source: Option<UpdateSource>,
     ///  The profile fields to be set
     #[serde(serialize_with = "fields_attributes_ser::ser")]
+    #[builder(setter(custom), default)]
     pub fields_attributes: Vec<MetadataField>,
+}
+
+impl CredentialsBuilder {
+    /// Set an account attribute.
+    pub fn fields_attribute(
+        &mut self,
+        field: impl Into<String>,
+        value: impl Into<String>,
+    ) -> &mut Self {
+        self.fields_attributes
+            .get_or_insert_with(Default::default)
+            .push(MetadataField {
+                name: field.into(),
+                value: value.into(),
+            });
+        self
+    }
 }
 
 /// Represents a custom user role that grants permissions.
