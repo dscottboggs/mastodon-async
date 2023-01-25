@@ -7,6 +7,7 @@ use crate::{
     entities::account::{Credentials, MetadataField, UpdateSource},
     errors::Result,
 };
+use isolang::Language;
 use mastodon_async_entities::visibility::Visibility;
 
 /// Builder to pass to the Mastodon::update_credentials method
@@ -33,10 +34,14 @@ pub struct UpdateCredsRequest {
     avatar: Option<PathBuf>,
     header: Option<PathBuf>,
     field_attributes: Vec<MetadataField>,
+    bot: Option<bool>,
+    locked: Option<bool>,
+    discoverable: Option<bool>,
 
     // UpdateSource fields
     privacy: Option<Visibility>,
     sensitive: Option<bool>,
+    language: Option<Language>,
 }
 
 impl UpdateCredsRequest {
@@ -153,6 +158,22 @@ impl UpdateCredsRequest {
         self
     }
 
+    /// The default language to use for new statuses.
+    ///
+    /// ## Example
+    /// ```
+    /// use mastodon_async::UpdateCredsRequest;
+    /// use isolang::Language;
+    ///
+    /// let mut builder = UpdateCredsRequest::new();
+    ///
+    /// builder.language(Language::Eng);
+    /// ```
+    pub fn language(&mut self, language: Language) -> &mut Self {
+        self.language = Some(language);
+        self
+    }
+
     /// Add a metadata field
     ///
     /// // Example
@@ -169,17 +190,36 @@ impl UpdateCredsRequest {
         self
     }
 
+    /// Whether or not the account is a bot
+    pub fn bot(&mut self, value: bool) -> &mut Self {
+        self.bot = Some(value);
+        self
+    }
+    /// Whether or not the account is locked
+    pub fn locked(&mut self, value: bool) -> &mut Self {
+        self.locked = Some(value);
+        self
+    }
+    /// Whether or not the account is discoverable
+    pub fn discoverable(&mut self, value: bool) -> &mut Self {
+        self.discoverable = Some(value);
+        self
+    }
     pub(crate) fn build(&mut self) -> Result<Credentials> {
         Ok(Credentials {
             display_name: self.display_name.clone(),
             note: self.note.clone(),
             avatar: self.avatar.clone(),
             header: self.avatar.clone(),
+            bot: self.bot,
             source: Some(UpdateSource {
                 privacy: self.privacy,
                 sensitive: self.sensitive,
+                language: self.language,
             }),
             fields_attributes: self.field_attributes.clone(),
+            locked: self.locked,
+            discoverable: self.discoverable,
         })
     }
 }
