@@ -1,20 +1,27 @@
-use std::borrow::Cow;
-
+use derive_builder::Builder;
 use serde::Serialize;
 // use try_from::TryInto;
 
-use crate::{
-    errors::{Error, Result},
-    scopes::Scopes,
-};
+use crate::scopes::Scopes;
 
 /// Represents an application that can be registered with a mastodon instance
-#[derive(Clone, Debug, Default, Serialize, PartialEq)]
+#[derive(Clone, Builder, Debug, Default, Serialize, PartialEq)]
+#[builder(derive(Debug, PartialEq), build_fn(error = "crate::Error"))]
 pub struct App {
+    /// The name the client will identify itself with
+    #[builder(setter(into))]
     client_name: String,
+    /// Where the user should be redirected after authorization. To display the
+    /// authorization code to the user instead of redirecting to a web page, use
+    /// `"urn:ietf:wg:oauth:2.0:oob"` in this parameter.
+    #[builder(setter(into), default = r#""urn:ietf:wg:oauth:2.0:oob".into()"#)]
     redirect_uris: String,
+    /// Scopes the application is requesting access to.
+    #[builder(default = "Scopes::read_all()")]
     scopes: Scopes,
+    /// A URL to the homepage of your app
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(into, strip_option))]
     website: Option<String>,
 }
 
@@ -28,8 +35,8 @@ impl App {
     ///
     /// let mut builder = App::builder();
     /// ```
-    pub fn builder<'a>() -> AppBuilder<'a> {
-        AppBuilder::new()
+    pub fn builder() -> AppBuilder {
+        AppBuilder::default()
     }
 
     /// Retrieve the list of scopes that apply to this App
@@ -50,83 +57,11 @@ impl App {
     }
 }
 
-/// Builder struct for defining your application.
-/// ```
-/// use mastodon_async::{apps::App};
-///
-/// let mut builder = App::builder();
-/// builder.client_name("mastodon-async_test");
-/// let app = builder.build().unwrap();
-/// ```
-#[derive(Clone, Debug, Default, PartialEq, Serialize)]
-pub struct AppBuilder<'a> {
-    client_name: Option<Cow<'a, str>>,
-    redirect_uris: Option<Cow<'a, str>>,
-    scopes: Option<Scopes>,
-    website: Option<Cow<'a, str>>,
-}
+impl TryFrom<AppBuilder> for App {
+    type Error = crate::Error;
 
-impl<'a> AppBuilder<'a> {
-    /// Creates a new AppBuilder object
-    pub fn new() -> Self {
-        Default::default()
-    }
-
-    /// Name of the application. Will be displayed when the user is deciding to
-    /// grant permission.
-    ///
-    /// In order to turn this builder into an App, this needs to be provided
-    pub fn client_name<I: Into<Cow<'a, str>>>(&mut self, name: I) -> &mut Self {
-        self.client_name = Some(name.into());
-        self
-    }
-
-    /// Where the user should be redirected after authorization
-    ///
-    /// If none is specified, the default is `urn:ietf:wg:oauth:2.0:oob`
-    pub fn redirect_uris<I: Into<Cow<'a, str>>>(&mut self, uris: I) -> &mut Self {
-        self.redirect_uris = Some(uris.into());
-        self
-    }
-
-    /// Permission scope of the application.
-    ///
-    /// IF none is specified, the default is Scopes::read_all()
-    pub fn scopes(&mut self, scopes: Scopes) -> &mut Self {
-        self.scopes = Some(scopes);
-        self
-    }
-
-    /// URL to the homepage of your application.
-    pub fn website<I: Into<Cow<'a, str>>>(&mut self, website: I) -> &mut Self {
-        self.website = Some(website.into());
-        self
-    }
-
-    /// Attempts to convert this build into an `App`
-    ///
-    /// Will fail if no `client_name` was provided
-    pub fn build(self) -> Result<App> {
-        Ok(App {
-            client_name: self
-                .client_name
-                .ok_or(Error::MissingField("client_name"))?
-                .into(),
-            redirect_uris: self
-                .redirect_uris
-                .unwrap_or_else(|| "urn:ietf:wg:oauth:2.0:oob".into())
-                .into(),
-            scopes: self.scopes.unwrap_or_else(Scopes::read_all),
-            website: self.website.map(|s| s.into()),
-        })
-    }
-}
-
-impl<'a> TryInto<App> for AppBuilder<'a> {
-    type Error = Error;
-
-    fn try_into(self) -> Result<App> {
-        self.build()
+    fn try_from(value: AppBuilder) -> Result<Self, Self::Error> {
+        value.build()
     }
 }
 
@@ -137,7 +72,7 @@ mod tests {
     #[test]
     fn test_app_builder() {
         let builder = App::builder();
-        assert_eq!(builder, AppBuilder::new());
+        assert_eq!(builder, AppBuilder::default());
     }
 
     #[test]
@@ -150,7 +85,7 @@ mod tests {
 
     #[test]
     fn test_app_builder_all_methods() {
-        let mut builder = AppBuilder::new();
+        let mut builder = AppBuilder::default();
         builder.client_name("foo-test");
         builder.redirect_uris("http://example.com");
         builder.scopes(Scopes::read_all() | Scopes::write_all());
