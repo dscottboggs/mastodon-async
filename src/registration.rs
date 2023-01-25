@@ -1,5 +1,3 @@
-use std::borrow::Cow;
-
 use log::{debug, error, trace};
 use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
 use reqwest::Client;
@@ -17,10 +15,10 @@ const DEFAULT_REDIRECT_URI: &str = "urn:ietf:wg:oauth:2.0:oob";
 /// Handles registering your mastodon app to your instance. It is recommended
 /// you cache your data struct to avoid registering on every run.
 #[derive(Debug, Clone)]
-pub struct Registration<'a> {
+pub struct Registration {
     base: String,
     client: Client,
-    app_builder: AppBuilder<'a>,
+    app_builder: AppBuilder,
     force_login: bool,
 }
 
@@ -41,7 +39,7 @@ struct AccessToken {
     access_token: String,
 }
 
-impl<'a> Registration<'a> {
+impl Registration {
     /// Construct a new registration process to the instance of the `base` url.
     /// ```
     /// use mastodon_async::prelude::*;
@@ -64,19 +62,19 @@ impl<'a> Registration<'a> {
         Registration {
             base: base.into(),
             client,
-            app_builder: AppBuilder::new(),
+            app_builder: AppBuilder::default(),
             force_login: false,
         }
     }
 }
 
-impl<'a> Registration<'a> {
+impl Registration {
     #[allow(dead_code)]
     pub(crate) fn with_sender<I: Into<String>>(base: I) -> Self {
         Registration {
             base: base.into(),
             client: Client::new(),
-            app_builder: AppBuilder::new(),
+            app_builder: AppBuilder::default(),
             force_login: false,
         }
     }
@@ -85,13 +83,13 @@ impl<'a> Registration<'a> {
     ///
     /// This is required, and if this isn't set then the AppBuilder::build
     /// method will fail
-    pub fn client_name<I: Into<Cow<'a, str>>>(&mut self, name: I) -> &mut Self {
-        self.app_builder.client_name(name.into());
+    pub fn client_name(&mut self, name: impl Into<String>) -> &mut Self {
+        self.app_builder.client_name(name);
         self
     }
 
     /// Sets the redirect uris that this app uses
-    pub fn redirect_uris<I: Into<Cow<'a, str>>>(&mut self, uris: I) -> &mut Self {
+    pub fn redirect_uris(&mut self, uris: impl Into<String>) -> &mut Self {
         self.app_builder.redirect_uris(uris);
         self
     }
@@ -105,7 +103,7 @@ impl<'a> Registration<'a> {
     }
 
     /// Sets the optional "website" to register the app with
-    pub fn website<I: Into<Cow<'a, str>>>(&mut self, website: I) -> &mut Self {
+    pub fn website(&mut self, website: impl Into<String>) -> &mut Self {
         self.app_builder.website(website);
         self
     }
@@ -394,14 +392,14 @@ mod tests {
     fn test_registration_new() {
         let r = Registration::new("https://example.com");
         assert_eq!(r.base, "https://example.com".to_string());
-        assert_eq!(r.app_builder, AppBuilder::new());
+        assert_eq!(r.app_builder, AppBuilder::default());
     }
 
     #[test]
     fn test_registration_with_sender() {
         let r = Registration::with_sender("https://example.com");
         assert_eq!(r.base, "https://example.com".to_string());
-        assert_eq!(r.app_builder, AppBuilder::new());
+        assert_eq!(r.app_builder, AppBuilder::default());
     }
 
     #[test]
@@ -412,7 +410,7 @@ mod tests {
         assert_eq!(r.base, "https://example.com".to_string());
         assert_eq!(
             &mut r.app_builder,
-            AppBuilder::new().client_name("foo-test")
+            AppBuilder::default().client_name("foo-test")
         );
     }
 
@@ -424,7 +422,7 @@ mod tests {
         assert_eq!(r.base, "https://example.com".to_string());
         assert_eq!(
             &mut r.app_builder,
-            AppBuilder::new().redirect_uris("https://foo.com")
+            AppBuilder::default().redirect_uris("https://foo.com")
         );
     }
 
@@ -434,7 +432,10 @@ mod tests {
         r.scopes(Scopes::all());
 
         assert_eq!(r.base, "https://example.com".to_string());
-        assert_eq!(&mut r.app_builder, AppBuilder::new().scopes(Scopes::all()));
+        assert_eq!(
+            &mut r.app_builder,
+            AppBuilder::default().scopes(Scopes::all())
+        );
     }
 
     #[test]
@@ -445,7 +446,7 @@ mod tests {
         assert_eq!(r.base, "https://example.com".to_string());
         assert_eq!(
             &mut r.app_builder,
-            AppBuilder::new().website("https://website.example.com")
+            AppBuilder::default().website("https://website.example.com")
         );
     }
 

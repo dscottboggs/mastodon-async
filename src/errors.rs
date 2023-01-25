@@ -2,6 +2,7 @@ use std::string::FromUtf8Error;
 use std::{error, fmt, io::Error as IoError, num::TryFromIntError};
 
 use derive_is_enum_variant::is_enum_variant;
+use derive_builder::UninitializedFieldError;
 #[cfg(feature = "env")]
 use envy::Error as EnvyError;
 use reqwest::{header::ToStrError as HeaderStrError, Error as HttpError, StatusCode};
@@ -103,6 +104,9 @@ pub enum Error {
     /// Error parsing UTF-8 string from bytes
     #[error(transparent)]
     FromUtf8(#[from] FromUtf8Error),
+    /// Error constructing type from its builder
+    #[error(transparent)]
+    Builder(#[from] UninitializedFieldError),
     /// Other errors
     #[error("other error: {0:?}")]
     Other(String),
