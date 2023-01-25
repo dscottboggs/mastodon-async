@@ -47,6 +47,7 @@ percent-encoding = "2.2.0"
 thiserror = "1.0.38"
 derive_deref = "1.1.1"
 derive_is_enum_variant = "0.1.1"
+derive_builder = "0.12.0"
 
 [dependencies.parse_link_header]
 version = "0.3.3"
