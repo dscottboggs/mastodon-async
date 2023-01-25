@@ -12,10 +12,11 @@ use crate::{
     event_stream::event_stream,
     helpers::read_response::read_response,
     log_serde, AddFilterRequest, AddPushRequest, Data, NewStatus, Page, StatusesRequest,
-    UpdateCredsRequest, UpdatePushRequest,
+    UpdatePushRequest,
 };
 use futures::TryStream;
 use log::{as_debug, as_serde, debug, error, trace};
+use mastodon_async_entities::account::CredentialsBuilder;
 use reqwest::{multipart::Part, Client, RequestBuilder};
 use url::Url;
 use uuid::Uuid;
@@ -182,10 +183,14 @@ impl Mastodon {
     }
 
     /// Update the user credentials
-    pub async fn update_credentials(&self, builder: &mut UpdateCredsRequest) -> Result<Account> {
-        let changes = builder.build()?;
+    pub async fn update_credentials(&self, changes: CredentialsBuilder) -> Result<Account> {
         let url = self.route("/api/v1/accounts/update_credentials");
-        let response = self.client.patch(&url).json(&changes).send().await?;
+        let response = self
+            .client
+            .patch(&url)
+            .json(&changes.build()?)
+            .send()
+            .await?;
 
         read_response(response).await
     }
