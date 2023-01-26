@@ -7,7 +7,7 @@ use mastodon_async::{Language, Result, StatusBuilder, Visibility};
 #[cfg(feature = "toml")]
 async fn run() -> Result<()> {
     let mastodon = register::get_mastodon_data().await?;
-    let status = StatusBuilder::new()
+    let status = StatusBuilder::default()
         .status(register::read_line(
             "Enter a status to post privately (enter to send): ",
         )?)
