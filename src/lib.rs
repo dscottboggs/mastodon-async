@@ -92,10 +92,11 @@ pub use errors::{ApiError, Error, Result};
 pub use isolang::Language;
 pub use mastodon::{Mastodon, MastodonUnauthenticated};
 // pub use mastodon_client::{MastodonClient, MastodonUnauthenticated};
-pub use mastodon_async_entities::visibility::Visibility;
+pub use mastodon_async_entities::{
+    status::NewStatus, status::NewStatusBuilder, visibility::Visibility,
+};
 pub use registration::Registration;
 pub use requests::{AddFilterRequest, AddPushRequest, StatusesRequest, UpdatePushRequest};
-pub use status_builder::{NewStatus, StatusBuilder};
 
 /// Registering your App
 pub mod apps;
@@ -117,8 +118,7 @@ pub mod registration;
 pub mod requests;
 /// OAuth Scopes
 pub mod scopes;
-/// Constructing a status
-pub mod status_builder;
+
 #[macro_use]
 mod macros;
 /// How much time to wait before checking an endpoint again.
@@ -126,17 +126,20 @@ pub mod polling_time;
 /// Automatically import the things you need
 pub mod prelude {
     pub use crate::{
-        entities::prelude::*,
-        scopes::Scopes,
-        Data,
-        Mastodon,
-        // MastodonClient,
-        NewStatus,
-        Registration,
-        StatusBuilder,
-        StatusesRequest,
-        Visibility,
+        entities::prelude::*, scopes::Scopes, Data, Mastodon, NewStatus, NewStatusBuilder,
+        Registration, StatusesRequest, Visibility,
     };
+    // Legacy alias; TODO remove for 2.0
+    pub use super::entities::status::NewStatusBuilder as StatusBuilder;
 }
 /// The mastodon client
 pub mod mastodon;
+
+/// Legacy aliases. TODO remove for 2.0
+pub mod status_builder {
+    pub use super::entities::{
+        status::{NewStatus, NewStatusBuilder as StatusBuilder},
+        visibility::Visibility,
+    };
+}
+pub use status_builder::*;
