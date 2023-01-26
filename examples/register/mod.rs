@@ -54,7 +54,10 @@ pub async fn register() -> Result<Mastodon> {
 
 #[cfg(feature = "toml")]
 pub fn read_line(message: impl AsRef<str>) -> Result<String> {
-    println!("{}", message.as_ref());
+    use std::io::Write;
+
+    print!("{}", message.as_ref());
+    io::stdout().flush()?;
 
     let mut input = String::new();
     io::stdin().read_line(&mut input)?;
@@ -63,6 +66,7 @@ pub fn read_line(message: impl AsRef<str>) -> Result<String> {
 }
 
 #[cfg(feature = "toml")]
+#[allow(dead_code)]
 pub fn bool_input(message: impl AsRef<str>, default: bool) -> Result<bool> {
     let input = read_line(message.as_ref())?;
     if let Some(first_char) = input.chars().next() {
