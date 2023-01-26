@@ -27,6 +27,18 @@ pub struct Attachment {
     pub description: Option<String>,
 }
 
+impl Attachment {
+    /// If this is an attachment which was either processed synchronously or
+    /// in some other way has finished processing before being deserialized,
+    /// `url` will be present. This is a convenience method to indicate that
+    /// state.
+    ///
+    /// If possible, it's recommended instead to use
+    /// [`Mastodon::wait_for_processing()`](https://docs.rs/mastodon-async/latest/mastodon_async/mastodon/struct.Mastodon.html#method.wait_for_processing).
+    pub fn is_done_processing(&self) -> bool {
+        self.url.is_some()
+    }
+}
 /// Wrapper type for a attachment ID string
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(transparent)]
