@@ -390,24 +390,24 @@ impl MastodonUnauthenticated {
     }
 
     /// GET /api/v1/statuses/:id
-    pub async fn get_status(&self, id: &str) -> Result<Status> {
+    pub async fn get_status(&self, id: &StatusId) -> Result<Status> {
         let route = self.route("/api/v1/statuses")?;
-        let route = route.join(id)?;
+        let route = route.join(id.as_ref())?;
         self.get(route.as_str()).await
     }
 
     /// GET /api/v1/statuses/:id/context
-    pub async fn get_context(&self, id: &str) -> Result<Context> {
+    pub async fn get_context(&self, id: &StatusId) -> Result<Context> {
         let route = self.route("/api/v1/statuses")?;
-        let route = route.join(id)?;
+        let route = route.join(id.as_ref())?;
         let route = route.join("context")?;
         self.get(route.as_str()).await
     }
 
     /// GET /api/v1/statuses/:id/card
-    pub async fn get_card(&self, id: &str) -> Result<Card> {
+    pub async fn get_card(&self, id: &StatusId) -> Result<Card> {
         let route = self.route("/api/v1/statuses")?;
-        let route = route.join(id)?;
+        let route = route.join(id.as_ref())?;
         let route = route.join("card")?;
         self.get(route.as_str()).await
     }
