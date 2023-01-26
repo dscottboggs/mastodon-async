@@ -6,7 +6,7 @@ use mastodon_async::{Result, StatusBuilder, Visibility};
 #[cfg(feature = "toml")]
 async fn run() -> Result<()> {
     use register::bool_input;
-    femme::with_level(femme::LevelFilter::Trace);
+    femme::with_level(femme::LevelFilter::Info);
     let mastodon = register::get_mastodon_data().await?;
     let input = register::read_line("Enter the path to the photo you'd like to post: ")?;
     let description = register::read_line("describe the media?  ")?;
@@ -17,6 +17,10 @@ async fn run() -> Result<()> {
     };
 
     let media = mastodon.media(input, description).await?;
+    let media = mastodon
+        .wait_for_processing(media, Default::default())
+        .await?;
+    println!("media upload available at: {}", media.url);
     let status = StatusBuilder::new()
         .status("Mastodon-async photo upload example/demo (automated post)")
         .media_ids([media.id])
