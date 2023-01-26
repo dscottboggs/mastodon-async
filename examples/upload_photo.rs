@@ -21,9 +21,9 @@ async fn run() -> Result<()> {
         .wait_for_processing(media, Default::default())
         .await?;
     println!("media upload available at: {}", media.url);
-    let status = StatusBuilder::new()
+    let status = StatusBuilder::default()
         .status("Mastodon-async photo upload example/demo (automated post)")
-        .media_ids([media.id])
+        .media_ids(vec![media.id])
         .visibility(Visibility::Private)
         .build()?;
     let status = mastodon.new_status(status).await?;
