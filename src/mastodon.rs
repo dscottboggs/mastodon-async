@@ -345,6 +345,21 @@ impl Mastodon {
     ///     println!("{}", attachment.url);
     /// });
     /// ```
+    ///
+    /// For a different polling time, use `.into()` on a `std::time::Duration`.
+    /// ```rust,no_run
+    /// use mastodon_async::prelude::*;
+    /// use std::time::Duration;
+    /// let mastodon = Mastodon::from(Data::default());
+    /// tokio_test::block_on(async {
+    ///     let attachment = mastodon.media("/path/to/some/file.jpg", None).await.expect("upload");
+    ///     let attachment = mastodon.wait_for_processing(
+    ///         attachment,
+    ///         Duration::from_secs(1).into(),
+    ///     ).await.expect("processing");
+    ///     println!("{}", attachment.url);
+    /// });
+    /// ```
     pub async fn wait_for_processing(
         &self,
         mut attachment: Attachment,
