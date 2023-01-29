@@ -16,6 +16,9 @@ pub mod context;
 pub mod event;
 /// Data structures for ser/de of filter-related resources
 pub mod filter;
+/// Type-safe ID values
+pub mod ids;
+pub use ids::*;
 /// Data structures for ser/de of instance-related resources
 pub mod instance;
 /// Data structures for ser/de of list-related resources
@@ -46,21 +49,23 @@ pub struct Empty {}
 /// modules:
 pub mod prelude {
     pub use super::{
-        account::{Account, AccountId, Source},
-        attachment::{Attachment, AttachmentId, MediaType},
+        account::{Account, Source},
+        attachment::{Attachment, MediaType},
         card::Card,
         context::Context,
         event::Event,
-        filter::{Filter, FilterContext, FilterId},
+        filter::{Filter, FilterContext},
+        ids::*,
         instance::*,
-        list::{List, ListId},
-        mention::{Mention, MentionId},
-        notification::{Notification, NotificationId},
-        push::{Subscription, SubscriptionId},
-        relationship::{Relationship, RelationshipId},
-        report::{Report, ReportId},
+        list::List,
+        mention::Mention,
+        notification::Notification,
+        push::Subscription,
+        relationship::Relationship,
+        report::Report,
         search_result::SearchResult,
-        status::{Application, Emoji, Status, StatusId},
+        status::{Application, Emoji, Status},
+        visibility::Visibility,
         Empty,
     };
 }

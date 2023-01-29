@@ -1,6 +1,6 @@
 //! Module containing all info about notifications.
 
-use std::fmt::Display;
+use crate::NotificationId;
 
 use super::{account::Account, status::Status};
 use serde::{Deserialize, Serialize};
@@ -23,41 +23,6 @@ pub struct Notification {
     /// The Status associated with the notification, if applicable.
     pub status: Option<Status>,
 }
-
-/// Wrapper type for a notification ID string
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-#[serde(transparent)]
-pub struct NotificationId(String);
-
-impl AsRef<str> for NotificationId {
-    fn as_ref(&self) -> &str {
-        &self.0
-    }
-}
-
-impl NotificationId {
-    pub fn new(value: impl Into<String>) -> Self {
-        Self(value.into())
-    }
-}
-
-impl Display for NotificationId {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
-static_assertions::assert_not_impl_any!(
-    NotificationId: PartialEq<crate::account::AccountId>,
-    PartialEq<crate::attachment::AttachmentId>,
-    PartialEq<crate::filter::FilterId>,
-    PartialEq<crate::mention::MentionId>,
-    PartialEq<crate::list::ListId>,
-    PartialEq<crate::push::SubscriptionId>,
-    PartialEq<crate::relationship::RelationshipId>,
-    PartialEq<crate::report::ReportId>,
-    PartialEq<crate::status::StatusId>,
-);
 
 /// The type of notification.
 #[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq)]
