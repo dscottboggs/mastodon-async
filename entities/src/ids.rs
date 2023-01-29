@@ -49,4 +49,6 @@ define_ids!(
     StatusId,
     RuleId,
     CanonicalEmailBlockId,
+    DimensionKey,
+    DimensionDataKey,
 );
