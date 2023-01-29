@@ -48,4 +48,5 @@ define_ids!(
     ReportId,
     StatusId,
     RuleId,
+    CanonicalEmailBlockId,
 );
