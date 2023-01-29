@@ -10,9 +10,7 @@ use std::{num::ParseIntError, path::PathBuf, str::FromStr};
 use time::{serde::iso8601, OffsetDateTime};
 use url::Url;
 
-use crate::custom_emoji::CustomEmoji;
-
-use crate::AccountId;
+use crate::{custom_emoji::CustomEmoji, AccountId};
 
 /// A struct representing an Account.
 ///

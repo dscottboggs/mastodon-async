@@ -48,4 +48,11 @@ define_ids!(
     ReportId,
     StatusId,
     RuleId,
+    CanonicalEmailBlockId,
+    DimensionKey,
+    DimensionDataKey,
+    AllowDomainId,
+    DomainBlockId,
+    EmailDomainBlockId,
+    MeasureKey,
 );
