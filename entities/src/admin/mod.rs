@@ -2,7 +2,7 @@ pub mod account;
 pub mod canonical_email_block;
 pub mod cohort;
 pub mod dimension;
-pub mod domain_allow;
+pub mod domain;
 
 pub use account::*;
 pub use canonical_email_block::*;
