@@ -1,5 +1,6 @@
 [package]
 name = "mastodon-async-entities"
+description = "Types for (de)serializing entities from the Mastodon API; part of mastodon-async"
 
 version.workspace = true
 license.workspace = true
