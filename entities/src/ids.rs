@@ -51,5 +51,7 @@ define_ids!(
     CanonicalEmailBlockId,
     DimensionKey,
     DimensionDataKey,
-    DomainId,
+    AllowDomainId,
+    DomainBlockId,
+    EmailDomainBlockId,
 );

@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use time::{serde::iso8601, OffsetDateTime};
 
-use crate::{conversion, DomainId};
+use crate::{conversion, EmailDomainBlockId};
 
 /// Represents an email domain that cannot be used to sign up.
 ///
@@ -9,7 +9,7 @@ use crate::{conversion, DomainId};
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct EmailDomainBlock {
     /// The ID of the domain in the database
-    pub id: DomainId,
+    pub id: EmailDomainBlockId,
     /// The email domain that is not allowed to be used for signups.
     pub domain: String,
     /// When the email domain was disallowed from signups.

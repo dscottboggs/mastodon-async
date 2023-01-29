@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use time::{serde::iso8601, OffsetDateTime};
 
-use crate::DomainId;
+use crate::{AllowDomainId, DomainBlockId};
 
 /// Represents a domain allowed to federate.
 ///
@@ -9,7 +9,7 @@ use crate::DomainId;
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Allow {
     /// The ID of the DomainAllow in the database.
-    pub id: DomainId,
+    pub id: AllowDomainId,
     /// The domain that is allowed to federate.
     pub domain: String,
     /// When the domain was allowed to federate.
@@ -23,7 +23,7 @@ pub struct Allow {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Block {
     /// The ID of the DomainBlock in the database.
-    pub id: DomainId,
+    pub id: DomainBlockId,
     /// The domain that is not allowed to federate.
     pub domain: String,
     /// When the domain was blocked from federating.
