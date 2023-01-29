@@ -51,7 +51,7 @@ pub struct Account {
 }
 
 /// Represents an IP address associated with a user.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Ip {
     /// The IP address.
     pub ip: IpAddr,

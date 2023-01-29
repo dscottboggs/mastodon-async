@@ -5,7 +5,7 @@ use crate::{DimensionDataKey, DimensionKey};
 /// Represents qualitative data about the server.
 ///
 /// See also [the API documentation](https://docs.joinmastodon.org/entities/Admin_Dimension/)
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Dimension {
     /// The unique keystring for the requested dimension.
     pub key: DimensionKey,
@@ -14,7 +14,7 @@ pub struct Dimension {
 }
 
 /// An entry of data on a particular dimension of server metrics.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Data {
     /// The unique keystring for this data item.
     pub key: DimensionDataKey,

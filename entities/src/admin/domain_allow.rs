@@ -6,7 +6,7 @@ use crate::AllowedDomainId;
 /// Represents a domain allowed to federate.
 ///
 /// See also [the API documentation](https://docs.joinmastodon.org/entities/Admin_DomainAllow/)
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct DomainAllow {
     /// The ID of the DomainAllow in the database.
     pub id: AllowedDomainId,
