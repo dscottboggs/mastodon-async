@@ -1,9 +1,6 @@
 //! Module containing all info relating to a status.
 
-use std::fmt::Display;
-
 use super::prelude::*;
-use crate::{card::Card, visibility::Visibility};
 use serde::{Deserialize, Serialize};
 use time::{serde::iso8601, OffsetDateTime};
 
@@ -66,41 +63,6 @@ pub struct Status {
     /// Whether this is the pinned status for the account that posted it.
     pub pinned: Option<bool>,
 }
-
-/// Wrapper type for a status ID string
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-#[serde(transparent)]
-pub struct StatusId(String);
-
-impl AsRef<str> for StatusId {
-    fn as_ref(&self) -> &str {
-        &self.0
-    }
-}
-
-impl StatusId {
-    pub fn new(value: impl Into<String>) -> Self {
-        Self(value.into())
-    }
-}
-
-impl Display for StatusId {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
-static_assertions::assert_not_impl_any!(
-    StatusId: PartialEq<crate::account::AccountId>,
-    PartialEq<crate::attachment::AttachmentId>,
-    PartialEq<crate::filter::FilterId>,
-    PartialEq<crate::push::SubscriptionId>,
-    PartialEq<crate::mention::MentionId>,
-    PartialEq<crate::notification::NotificationId>,
-    PartialEq<crate::relationship::RelationshipId>,
-    PartialEq<crate::report::ReportId>,
-    PartialEq<crate::list::ListId>,
-);
 
 /// A mention of another user.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]

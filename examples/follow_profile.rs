@@ -5,7 +5,7 @@ use mastodon_async::Result;
 
 #[cfg(feature = "toml")]
 async fn run() -> Result<()> {
-    use mastodon_async::entities::account::AccountId;
+    use mastodon_async::entities::AccountId;
     let mastodon = register::get_mastodon_data().await?;
     let input = register::read_line("Enter the account id you'd like to follow: ")?;
     let account = AccountId::new(input.trim());

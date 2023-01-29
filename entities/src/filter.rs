@@ -1,7 +1,7 @@
-use std::fmt::Display;
-
 use serde::{de::Visitor, Deserialize, Deserializer, Serialize};
 use time::{serde::iso8601, OffsetDateTime};
+
+use crate::FilterId;
 
 /// Represents a user-defined filter for determining which statuses should not
 /// be shown to the user.
@@ -52,41 +52,6 @@ pub struct Filter {
     /// The statuses grouped under this filter.
     pub statuses: Vec<Status>,
 }
-
-/// Wrapper type for a filter ID string
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-#[serde(transparent)]
-pub struct FilterId(String);
-
-impl AsRef<str> for FilterId {
-    fn as_ref(&self) -> &str {
-        &self.0
-    }
-}
-
-impl FilterId {
-    pub fn new(value: impl Into<String>) -> Self {
-        Self(value.into())
-    }
-}
-
-impl Display for FilterId {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
-static_assertions::assert_not_impl_any!(
-    FilterId: PartialEq<crate::account::AccountId>,
-    PartialEq<crate::attachment::AttachmentId>,
-    PartialEq<crate::list::ListId>,
-    PartialEq<crate::mention::MentionId>,
-    PartialEq<crate::notification::NotificationId>,
-    PartialEq<crate::relationship::RelationshipId>,
-    PartialEq<crate::push::SubscriptionId>,
-    PartialEq<crate::report::ReportId>,
-    PartialEq<crate::status::StatusId>,
-);
 
 /// Represents the various types of Filter contexts
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]

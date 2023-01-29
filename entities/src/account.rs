@@ -4,8 +4,10 @@ use serde::{
     de::{self, Deserializer, Unexpected},
     Deserialize, Serialize,
 };
-use std::{fmt::Display, path::PathBuf};
+use std::path::PathBuf;
 use time::{serde::iso8601, OffsetDateTime};
+
+use crate::AccountId;
 
 /// A struct representing an Account.
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
@@ -53,41 +55,6 @@ pub struct Account {
     /// Boolean indicating whether this account is a bot or not
     pub bot: Option<bool>,
 }
-
-/// Wrapper type for a account ID string
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-#[serde(transparent)]
-pub struct AccountId(String);
-
-impl AsRef<str> for AccountId {
-    fn as_ref(&self) -> &str {
-        &self.0
-    }
-}
-
-impl AccountId {
-    pub fn new(value: impl Into<String>) -> Self {
-        Self(value.into())
-    }
-}
-
-impl Display for AccountId {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
-static_assertions::assert_not_impl_any!(
-    AccountId: PartialEq<crate::attachment::AttachmentId>,
-    PartialEq<crate::filter::FilterId>,
-    PartialEq<crate::list::ListId>,
-    PartialEq<crate::mention::MentionId>,
-    PartialEq<crate::notification::NotificationId>,
-    PartialEq<crate::relationship::RelationshipId>,
-    PartialEq<crate::push::SubscriptionId>,
-    PartialEq<crate::report::ReportId>,
-    PartialEq<crate::status::StatusId>,
-);
 
 /// A single name: value pair from a user's profile
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
