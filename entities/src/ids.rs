@@ -54,4 +54,5 @@ define_ids!(
     AllowDomainId,
     DomainBlockId,
     EmailDomainBlockId,
+    MeasureKey,
 );
