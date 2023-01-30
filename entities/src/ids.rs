@@ -58,4 +58,5 @@ define_ids!(
     "a measurement key" as MeasureKey,
     "an announcement ID" as AnnouncementId,
     "a Vapid key for push streaming API" as VapidKey,
+    "a conversation ID" as ConversationId,
 );
