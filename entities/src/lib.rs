@@ -19,6 +19,8 @@ pub mod attachment;
 pub mod card;
 /// Data structures for ser/de of context-related resources
 pub mod context;
+/// Data structures for ser/de of conversation-related resources
+pub mod conversation;
 /// Module for converting values while serializing and deserializing.
 mod conversion;
 /// Data structures for ser/de of custom emoji
