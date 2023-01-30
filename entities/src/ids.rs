@@ -57,4 +57,5 @@ define_ids!(
     "an ID of an email domain block" as EmailDomainBlockId,
     "a measurement key" as MeasureKey,
     "an announcement ID" as AnnouncementId,
+    "a Vapid key for push streaming API" as VapidKey,
 );
