@@ -2,15 +2,16 @@ use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 
 macro_rules! define_ids {
-    ($name:ident, $($rest:ident,)+) => {
-        define_ids!($name,);
+    ($doc:literal as $name:ident, $($rest_doc:literal as $rest_name:ident,)+) => {
+        define_ids!($doc as $name,);
         static_assertions::assert_not_impl_any!(
-            $name: $(PartialEq<$rest>,)+
+            $name: $(PartialEq<$rest_name>,)+
         );
-        define_ids!($($rest,)+);
+        define_ids!($($rest_doc as $rest_name,)+);
     };
-    ($name:ident,) => {
+    ($doc:literal as $name:ident,) => {
         /// Wrapper type for a account ID string
+        #[doc = concat!("Wrapper type for ", $doc)]
         #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
         #[serde(transparent)]
         pub struct $name(String);
@@ -37,22 +38,22 @@ macro_rules! define_ids {
 }
 
 define_ids!(
-    AccountId,
-    AttachmentId,
-    FilterId,
-    ListId,
-    MentionId,
-    NotificationId,
-    SubscriptionId,
-    RelationshipId,
-    ReportId,
-    StatusId,
-    RuleId,
-    CanonicalEmailBlockId,
-    DimensionKey,
-    DimensionDataKey,
-    AllowDomainId,
-    DomainBlockId,
-    EmailDomainBlockId,
-    MeasureKey,
+    "an account ID" as AccountId,
+    "an attachment ID" as AttachmentId,
+    "a filter ID" as FilterId,
+    "a list ID" as ListId,
+    "a mention ID" as MentionId,
+    "a notification ID" as NotificationId,
+    "a subscription ID" as SubscriptionId,
+    "a relationship ID" as RelationshipId,
+    "a report ID" as ReportId,
+    "a status ID" as StatusId,
+    "a rule ID" as RuleId,
+    "a canonical email block ID" as CanonicalEmailBlockId,
+    "a dimension key" as DimensionKey,
+    "a dimension data element key" as DimensionDataKey,
+    "an ID of a domain allow rule" as AllowDomainId,
+    "an ID of a domain block" as DomainBlockId,
+    "an ID of an email domain block" as EmailDomainBlockId,
+    "a measurement key" as MeasureKey,
 );
