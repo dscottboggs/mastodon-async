@@ -11,6 +11,8 @@ pub mod account;
 pub mod admin;
 /// Data structures for ser/de of announcement-related resources
 pub mod announcement;
+/// Data structures for ser/de of application-related resources
+pub mod application;
 /// Data structures for ser/de of attachment-related resources
 pub mod attachment;
 /// Data structures for ser/de of card-related resources
