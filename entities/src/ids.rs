@@ -56,4 +56,5 @@ define_ids!(
     "an ID of a domain block" as DomainBlockId,
     "an ID of an email domain block" as EmailDomainBlockId,
     "a measurement key" as MeasureKey,
+    "an announcement ID" as AnnouncementId,
 );
