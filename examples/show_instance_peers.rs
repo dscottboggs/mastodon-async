@@ -6,7 +6,7 @@ use futures_util::StreamExt;
 use mastodon_async::Result;
 use std::{
     io::Write,
-    process::{exit, Command, Stdio},
+    process::{Command, Stdio},
 };
 
 #[cfg(feature = "toml")]
