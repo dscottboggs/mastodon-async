@@ -5,7 +5,7 @@ use time::{serde::iso8601, OffsetDateTime};
 /// Admin-level information about a filed report.
 ///
 /// See also [the API documentation](https://docs.joinmastodon.org/entities/Admin_Report/)
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Report {
     /// The ID of the report in the database.
     pub id: ReportId,
