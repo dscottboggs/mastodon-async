@@ -8,7 +8,7 @@ use crate::{account::Role, prelude::AccountId};
 /// Admin-level information about a given account.
 ///
 /// See also [the API documentation](https://docs.joinmastodon.org/entities/Admin_Account/)
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Account {
     /// The ID of the account in the database.
     pub id: AccountId,
