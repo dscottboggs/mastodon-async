@@ -93,7 +93,7 @@ features = ["io"]
 [dev-dependencies]
 tokio-test = "0.4.2"
 futures-util = "0.3.25"
-indoc = "1.0"
+indoc = "2.0"
 skeptic = "0.13"
 tempfile = "3"
 # for examples:
