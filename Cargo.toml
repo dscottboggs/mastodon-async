@@ -78,7 +78,7 @@ version = "1"
 features = ["derive"]
 
 [dependencies.toml]
-version = "0.5"
+version = "0.7"
 optional = true
 
 [dependencies.tokio]
