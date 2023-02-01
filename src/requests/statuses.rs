@@ -1,6 +1,5 @@
 use crate::errors::Error;
 use serde::Serialize;
-use serde_qs;
 use std::{borrow::Cow, convert::Into};
 
 mod bool_qs_serialize {
@@ -206,7 +205,7 @@ impl<'a> StatusesRequest<'a> {
 
     /// Serialize into a query string
     pub fn to_query_string(&self) -> Result<String, Error> {
-        Ok(format!("?{}", serde_qs::to_string(&self)?))
+        Ok(format!("?{}", serde_urlencoded::to_string(self)?))
     }
 }
 
