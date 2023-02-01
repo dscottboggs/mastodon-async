@@ -1,3 +1,4 @@
+use std::string::FromUtf8Error;
 use std::{error, fmt, io::Error as IoError, num::TryFromIntError};
 
 #[cfg(feature = "env")]
@@ -98,6 +99,9 @@ pub enum Error {
     /// Error from mastodon-async-entities
     #[error(transparent)]
     Entities(#[from] mastodon_async_entities::error::Error),
+    /// Error parsing UTF-8 string from bytes
+    #[error(transparent)]
+    FromUtf8(#[from] FromUtf8Error),
     /// Other errors
     #[error("other error: {0:?}")]
     Other(String),
@@ -177,14 +181,6 @@ mod tests {
         let err: UrlError = UrlError::EmptyHost;
         let err: Error = Error::from(err);
         assert_is!(err, Error::Url(..));
-    }
-
-    #[cfg(feature = "toml")]
-    #[test]
-    fn from_toml_ser_error() {
-        let err: TomlSerError = TomlSerError::DateInvalid;
-        let err: Error = Error::from(err);
-        assert_is!(err, Error::TomlSer(..));
     }
 
     #[cfg(feature = "toml")]

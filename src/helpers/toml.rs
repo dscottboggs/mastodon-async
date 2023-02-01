@@ -1,6 +1,6 @@
 use std::{
     fs::{File, OpenOptions},
-    io::{BufWriter, Read, Write},
+    io::{Read, Write},
     path::Path,
 };
 
@@ -15,7 +15,7 @@ pub fn from_str(s: &str) -> Result<Data> {
 
 /// Attempts to deserialize a Data struct from a slice of bytes
 pub fn from_slice(s: &[u8]) -> Result<Data> {
-    Ok(tomlcrate::from_slice(s)?)
+    from_str(&String::from_utf8(s.into())?)
 }
 
 /// Attempts to deserialize a Data struct from something that implements
@@ -40,19 +40,14 @@ pub fn to_string(data: &Data) -> Result<String> {
 
 /// Attempts to serialize a Data struct to a Vec of bytes
 pub fn to_vec(data: &Data) -> Result<Vec<u8>> {
-    Ok(tomlcrate::to_vec(data)?)
+    Ok(tomlcrate::to_string(data)?.as_bytes().into())
 }
 
 /// Attempts to serialize a Data struct to something that implements the
 /// std::io::Write trait
-pub fn to_writer<W: Write>(data: &Data, writer: W) -> Result<()> {
-    let mut buf_writer = BufWriter::new(writer);
-    let vec = to_vec(data)?;
-    if vec.len() != buf_writer.write(&vec)? {
-        Err(crate::Error::NotAllBytesWritten)
-    } else {
-        Ok(())
-    }
+pub fn to_writer<W: Write>(data: &Data, mut writer: W) -> Result<()> {
+    writer.write_all(tomlcrate::to_string(data)?.as_bytes())?;
+    Ok(())
 }
 
 /// Attempts to serialize a Data struct to a file
