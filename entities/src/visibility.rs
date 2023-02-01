@@ -1,8 +1,9 @@
+use is_variant::IsVariant;
 use serde::Deserialize;
 use serde::Serialize;
 
 /// The visibility of a status.
-#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq, IsVariant)]
 #[serde(rename_all = "lowercase")]
 pub enum Visibility {
     /// A Direct message to a user
@@ -34,5 +35,19 @@ impl std::str::FromStr for Visibility {
                 invalid: invalid.to_string(),
             }),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::str::FromStr;
+
+    use super::*;
+
+    #[test]
+    fn test_from_str() {
+        assert!(Visibility::from_str("invalid")
+            .expect_err("parsed invalid?")
+            .is_visibility_parsing_error());
     }
 }

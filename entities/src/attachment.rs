@@ -1,6 +1,7 @@
 //! Module containing everything related to media attachements.
 
 use crate::AttachmentId;
+use is_variant::IsVariant;
 use serde::{Deserialize, Serialize};
 
 /// A struct representing a media attachment.
@@ -62,7 +63,7 @@ pub struct ImageDetails {
 }
 
 /// The type of media attachment.
-#[derive(Debug, Deserialize, Serialize, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Deserialize, Serialize, Clone, Copy, PartialEq, Eq, IsVariant)]
 pub enum MediaType {
     /// An image.
     #[serde(rename = "image")]

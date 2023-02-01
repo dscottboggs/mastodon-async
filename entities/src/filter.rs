@@ -1,3 +1,4 @@
+use is_variant::IsVariant;
 use serde::{de::Visitor, Deserialize, Deserializer, Serialize};
 use time::{serde::iso8601, OffsetDateTime};
 
@@ -54,7 +55,7 @@ pub struct Filter {
 }
 
 /// Represents the various types of Filter contexts
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, IsVariant)]
 #[serde(rename_all = "lowercase")]
 pub enum FilterContext {
     /// Represents the "home" context
@@ -73,7 +74,7 @@ pub enum FilterContext {
 ///
 /// Please note that the spec requests that any unknown value be interpreted
 /// as "warn".
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, IsVariant)]
 #[serde(rename_all = "lowercase")]
 pub enum Action {
     /// Indicates filtered toots should show up, but with a warning
