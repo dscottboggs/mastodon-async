@@ -5,7 +5,6 @@ use envy::Error as EnvyError;
 use reqwest::{header::ToStrError as HeaderStrError, Error as HttpError, StatusCode};
 use serde::Deserialize;
 use serde_json::Error as SerdeError;
-use serde_qs::Error as SerdeQsError;
 use serde_urlencoded::ser::Error as UrlEncodedError;
 #[cfg(feature = "toml")]
 use tomlcrate::de::Error as TomlDeError;
@@ -89,9 +88,6 @@ pub enum Error {
     /// Error deserializing config from the environment
     #[error("Error deserializing config from the environment")]
     Envy(#[from] EnvyError),
-    /// Error serializing to a query string
-    #[error("Error serializing to a query string")]
-    SerdeQs(#[from] SerdeQsError),
     /// An integer conversion was attempted, but the value didn't fit into the
     /// target type.
     ///
