@@ -6,6 +6,7 @@ use std::{
     str::FromStr,
 };
 
+use is_variant::IsVariant;
 use serde::ser::{Serialize, Serializer};
 
 use crate::errors::Error;
@@ -257,19 +258,16 @@ impl fmt::Display for Scopes {
 /// Permission scope of the application.
 /// [Details on what each permission provides][1]
 /// [1]: https://github.com/tootsuite/documentation/blob/master/Using-the-API/OAuth-details.md)
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
-enum Scope {
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, IsVariant)]
+#[serde(rename_all = "lowercase")]
+pub enum Scope {
     /// Read only permissions.
-    #[serde(rename = "read")]
     Read(Option<Read>),
     /// Write only permissions.
-    #[serde(rename = "write")]
     Write(Option<Write>),
     /// Only permission to add and remove followers.
-    #[serde(rename = "follow")]
     Follow,
     /// Push permissions
-    #[serde(rename = "push")]
     Push,
 }
 
@@ -355,7 +353,7 @@ impl Default for Scope {
 }
 
 /// Represents the granular "read:___" oauth scopes
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, IsVariant)]
 pub enum Read {
     /// Accounts
     #[serde(rename = "accounts")]
@@ -450,7 +448,7 @@ impl fmt::Display for Read {
 }
 
 /// Represents the granular "write:___" oauth scopes
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, IsVariant)]
 pub enum Write {
     /// Accounts
     #[serde(rename = "accounts")]
