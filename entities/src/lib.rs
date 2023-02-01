@@ -40,6 +40,8 @@ pub mod list;
 pub mod mention;
 /// Data structures for ser/de of notification-related resources
 pub mod notification;
+/// Data structures for working with user preferences.
+pub mod preferences;
 /// Data structures for ser/de of push-subscription-related resources
 pub mod push;
 /// Data structures for ser/de of relationship-related resources
