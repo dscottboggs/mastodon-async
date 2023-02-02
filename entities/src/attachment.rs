@@ -87,7 +87,7 @@ pub struct Meta {
 /// The type of media attachment.
 ///
 /// See also [the API documentation](https://docs.joinmastodon.org/entities/MediaAttachment/#type)
-#[derive(Debug, Deserialize, Serialize, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Deserialize, Serialize, Clone, Copy, PartialEq, Eq, IsVariant)]
 #[serde(rename_all = "lowercase")]
 pub enum MediaType {
     /// Audio track
