@@ -1,13 +1,7 @@
 use std::{borrow::Cow, ops::Deref, path::Path, sync::Arc};
 
 use crate::{
-    entities::{
-        account::Account,
-        prelude::*,
-        report::Report,
-        status::{Emoji, Status},
-        Empty,
-    },
+    entities::{account::Account, prelude::*, report::Report, status::Status, Empty},
     errors::{Error, Result},
     helpers::read_response::read_response,
     polling_time::PollingTime,
@@ -60,7 +54,7 @@ impl Mastodon {
         (get) instance_domain_blocks: "instance/domain_blocks" => DomainBlock,
         (get) follow_requests: "follow_requests" => Account,
         (get) get_home_timeline: "timelines/home" => Status,
-        (get) get_emojis: "custom_emojis" => Emoji,
+        (get) get_emojis: "custom_emojis" => CustomEmoji,
         (get) mutes: "mutes" => Account,
         (get) notifications: "notifications" => Notification,
         (get) instance_peers: "instance/peers" => String,

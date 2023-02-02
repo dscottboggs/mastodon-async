@@ -34,7 +34,7 @@ pub struct Status {
     #[serde(with = "iso8601")]
     pub created_at: OffsetDateTime,
     /// An array of Emoji
-    pub emojis: Vec<Emoji>,
+    pub emojis: Vec<CustomEmoji>,
     /// The numbef or replies to this status.
     pub replies_count: Option<u64>,
     /// The number of reblogs for the status.
@@ -79,17 +79,6 @@ pub struct Mention {
     pub acct: String,
     /// Account ID.
     pub id: String,
-}
-
-/// Struct representing an emoji within text.
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
-pub struct Emoji {
-    /// The shortcode of the emoji
-    pub shortcode: String,
-    /// URL to the emoji static image
-    pub static_url: String,
-    /// URL to the emoji image
-    pub url: String,
 }
 
 /// Hashtags in the status. This functions both as a
