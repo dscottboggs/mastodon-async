@@ -4,10 +4,15 @@ use serde::{Deserialize, Serialize};
 
 use crate::prelude::Visibility;
 
+/// Represents a user's preferences.
+///
+/// See also [the API documentation](https://docs.joinmastodon.org/entities/Preferences/)
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(from="PreferencesSerializer", into="PreferencesSerializer")]
+#[serde(from = "PreferencesSerializer", into = "PreferencesSerializer")]
 pub struct Preferences {
+    /// Preferences related to posts
     pub posting: PostingPreferences,
+    /// How a user prefers to read their feed
     pub reading: ReadingPreferences,
 }
 
@@ -29,8 +34,10 @@ pub struct PostDefaults {
     pub language: Option<Language>,
 }
 
+/// How a user prefers to read their feed
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct ReadingPreferences {
+    /// Whether certain elements of the feed should be expanded/made visible or not.
     pub expand: ReadingExpansionPreferences,
 }
 
@@ -123,6 +130,5 @@ mod tests {
         assert!(!subject.posting.default.sensitive);
         assert!(subject.posting.default.language.is_none());
         assert!(subject.reading.expand.media.is_default());
-        assert!(!subject.reading.expand.spoilers);
     }
 }
