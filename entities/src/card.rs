@@ -1,30 +1,141 @@
 //! Module representing cards of statuses.
 
+use crate::conversion;
+use is_variant::IsVariant;
 use serde::{Deserialize, Serialize};
+use url::Url;
 
-/// A card of a status.
+/// Represents a rich preview card that is generated using OpenGraph tags from a URL.
+///
+/// See also [the API documentation](https://docs.joinmastodon.org/entities/PreviewCard/)
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
 pub struct Card {
-    /// The url associated with the card.
-    pub url: String,
-    /// The title of the card.
+    /// Location of linked resource.
+    pub url: Url,
+    /// Title of linked resource.
     pub title: String,
-    /// The card description.
+    /// Description of preview.
     pub description: String,
-    /// The image associated with the card, if any.
+    /// The type of the preview card.
+    #[serde(rename = "type")]
+    pub card_type: CardType,
+    /// Preview thumbnail.
     pub image: Option<String>,
-    /// OEmbed data
-    author_name: Option<String>,
-    /// OEmbed data
-    author_url: Option<String>,
-    /// OEmbed data
-    provider_name: Option<String>,
-    /// OEmbed data
-    provider_url: Option<String>,
-    /// OEmbed data
-    html: Option<String>,
-    /// OEmbed data
-    width: Option<u64>,
-    /// OEmbed data
-    height: Option<u64>,
+    /// The author of the original resource.
+    pub author_name: String,
+    /// A link to the author of the original resource.
+    pub author_url: String,
+    /// The provider of the original resource.
+    pub provider_name: String,
+    /// A link to the provider of the original resource.
+    pub provider_url: String,
+    /// HTML to be used for generating the preview card.
+    pub html: String,
+    /// Width of preview, in pixels. When [`card_type`] is `Link`, this is `0`.
+    pub width: u64,
+    /// Height of preview, in pixels. When [`card_type`] is `Link`, this is `0`.
+    pub height: u64,
+    /// Used for photo embeds, instead of custom html.
+    #[serde(with = "conversion::maybe_empty_url")]
+    pub embed_url: Option<Url>,
+    /// A hash computed by [the BlurHash algorithm](https://github.com/woltapp/blurhash),
+    /// for generating colorful preview thumbnails when media has not been
+    /// downloaded yet.
+    pub blurhash: Option<String>,
+}
+
+/// The type of the preview card.
+#[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq, IsVariant)]
+#[serde(rename_all = "lowercase")]
+pub enum CardType {
+    /// Link OEmbed
+    Link,
+    /// Photo OEmbed
+    Photo,
+    /// Video OEmbed
+    Video,
+    /// iframe OEmbed. Not currently accepted, so won’t show up in practice.
+    Rich,
+}
+
+#[cfg(test)]
+mod tests {
+    use serde_json::Value;
+
+    use super::*;
+
+    #[test]
+    fn test_video() {
+        let example = r#"{
+          "url": "https://www.youtube.com/watch?v=OMv_EPMED8Y",
+          "title": "♪ Brand New Friend (Christmas Song!)",
+          "description": "",
+          "type": "video",
+          "author_name": "YOGSCAST Lewis & Simon",
+          "author_url": "https://www.youtube.com/user/BlueXephos",
+          "provider_name": "YouTube",
+          "provider_url": "https://www.youtube.com/",
+          "html": "<iframe width=\"480\" height=\"270\" src=\"https://www.youtube.com/embed/OMv_EPMED8Y?feature=oembed\" frameborder=\"0\" allowfullscreen=\"\"></iframe>",
+          "width": 480,
+          "height": 270,
+          "image": "https://files.mastodon.social/preview_cards/images/014/179/145/original/9cf4b7cf5567b569.jpeg",
+          "embed_url": "",
+          "blurhash": "UvK0HNkV,:s9xBR%njog0fo2W=WBS5ozofV@"
+        }"#;
+        let subject: Card = serde_json::from_str(example).expect("deserialize");
+        assert_eq!(
+            serde_json::to_value(subject).expect("value convert"),
+            serde_json::from_str::<Value>(example).expect("deserialize 2")
+        );
+    }
+
+    #[test]
+    fn test_photo() {
+        let example = r#"{
+            "url": "https://www.flickr.com/photos/tomfenskephotography/49088768431/",
+            "title": "Oregon",
+            "description": "",
+            "type": "photo",
+            "author_name": "Tom Fenske Photography",
+            "author_url": "https://www.flickr.com/photos/tomfenskephotography/",
+            "provider_name": "Flickr",
+            "provider_url": "https://www.flickr.com/",
+            "html": "",
+            "width": 1024,
+            "height": 427,
+            "image": "https://files.mastodon.social/preview_cards/images/014/287/139/original/651b1c6976817824.jpeg",
+            "embed_url": "https://live.staticflickr.com/65535/49088768431_6a4322b3bb_b.jpg",
+            "blurhash": "UnE{@jt6M_oIAhjYs+ayT2WBf9ayRkkDXAj["
+        }"#;
+        let subject: Card = serde_json::from_str(example).expect("deserialize");
+        assert_eq!(
+            serde_json::to_value(subject).expect("value convert"),
+            serde_json::from_str::<Value>(example).expect("deserialize 2")
+        );
+    }
+
+    #[test]
+    fn test_link() {
+        let example = r#"{
+            "url": "https://www.theguardian.com/money/2019/dec/07/i-lost-my-193000-inheritance-with-one-wrong-digit-on-my-sort-code",
+            "title": "‘I lost my £193,000 inheritance – with one wrong digit on my sort code’",
+            "description": "When Peter Teich’s money went to another Barclays customer, the bank offered £25 as a token gesture",
+            "type": "link",
+            "author_name": "",
+            "author_url": "",
+            "provider_name": "",
+            "provider_url": "",
+            "html": "",
+            "width": 0,
+            "height": 0,
+            "image": null,
+            "embed_url": "",
+            "blurhash": null
+        }"#;
+        let subject: Card = serde_json::from_str(example).expect("deserialize");
+        assert_eq!(
+            serde_json::to_value(subject).expect("value convert"),
+            serde_json::from_str::<Value>(example).expect("deserialize 2")
+        );
+    }
 }
