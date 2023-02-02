@@ -1,6 +1,6 @@
 //! Module representing cards of statuses.
 
-use crate::conversion;
+use crate::{conversion, status::TagHistory};
 use is_variant::IsVariant;
 use serde::{Deserialize, Serialize};
 use url::Url;
@@ -56,6 +56,16 @@ pub enum CardType {
     Video,
     /// iframe OEmbed. Not currently accepted, so won’t show up in practice.
     Rich,
+}
+
+/// A preview card which holds a trending link
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
+pub struct TrendsLink {
+    /// The preview card associated with this trending link
+    #[serde(flatten)]
+    pub card: Card,
+    /// The history of this trend
+    pub history: Vec<TagHistory>,
 }
 
 #[cfg(test)]
@@ -133,6 +143,69 @@ mod tests {
             "blurhash": null
         }"#;
         let subject: Card = serde_json::from_str(example).expect("deserialize");
+        assert_eq!(
+            serde_json::to_value(subject).expect("value convert"),
+            serde_json::from_str::<Value>(example).expect("deserialize 2")
+        );
+    }
+
+    #[test]
+    fn test_trending_link() {
+        let example = r#"{
+            "url": "https://www.nbcnews.com/specials/plan-your-vote-2022-elections/index.html",
+            "title": "Plan Your Vote: 2022 Elections",
+            "description": "Everything you need to know about the voting rules where you live, including registration, mail-in voting, changes since 2020, and more.",
+            "type": "link",
+            "author_name": "NBC News",
+            "author_url": "",
+            "provider_name": "NBC News",
+            "provider_url": "",
+            "html": "",
+            "width": 400,
+            "height": 225,
+            "image": "https://files.mastodon.social/cache/preview_cards/images/045/027/478/original/0783d5e91a14fd49.jpeg",
+            "embed_url": "",
+            "blurhash": "UcQmF#ay~qofj[WBj[j[~qof9Fayofofayay",
+            "history": [
+              {
+                "day": "1661817600",
+                "accounts": "7",
+                "uses": "7"
+              },
+              {
+                "day": "1661731200",
+                "accounts": "23",
+                "uses": "23"
+              },
+              {
+                "day": "1661644800",
+                "accounts": "0",
+                "uses": "0"
+              },
+              {
+                "day": "1661558400",
+                "accounts": "0",
+                "uses": "0"
+              },
+              {
+                "day": "1661472000",
+                "accounts": "0",
+                "uses": "0"
+              },
+              {
+                "day": "1661385600",
+                "accounts": "0",
+                "uses": "0"
+              },
+              {
+                "day": "1661299200",
+                "accounts": "0",
+                "uses": "0"
+              }
+            ]
+        }"#;
+
+        let subject: TrendsLink = serde_json::from_str(example).expect("deserialize");
         assert_eq!(
             serde_json::to_value(subject).expect("value convert"),
             serde_json::from_str::<Value>(example).expect("deserialize 2")
