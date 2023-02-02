@@ -55,22 +55,18 @@ pub enum Error {
     /// Missing Access Token.
     #[error("Missing Access Token.")]
     AccessTokenRequired,
-    /// MastodonBuilder & AppBuilder error
-    #[error("builder required field {0:?} to be constructed")]
-    #[deprecated = "use [`Error::Builder`] instead"]
-    MissingField(&'static str),
-    #[cfg(feature = "toml")]
     /// Error serializing to toml
+    #[cfg(feature = "toml")]
     #[error("Error serializing to toml")]
     TomlSer(#[from] TomlSerError),
-    #[cfg(feature = "toml")]
     /// Error deserializing from toml
+    #[cfg(feature = "toml")]
     #[error("Error deserializing from toml")]
     TomlDe(#[from] TomlDeError),
 
-    #[cfg(any(feature = "toml", feature = "json"))]
     /// Error raised in the helpers::json::to_writer or helpers::toml::to_writer function if not
     /// all bytes were written to the writer
+    #[cfg(any(feature = "toml", feature = "json"))]
     #[error("Not all bytes were written")]
     NotAllBytesWritten,
 
