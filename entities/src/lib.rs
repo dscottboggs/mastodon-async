@@ -68,6 +68,7 @@ pub mod prelude {
         attachment::{Attachment, MediaType},
         card::Card,
         context::Context,
+        custom_emoji::CustomEmoji,
         event::Event,
         filter::{Filter, FilterContext},
         ids::*,
@@ -79,7 +80,7 @@ pub mod prelude {
         relationship::Relationship,
         report::Report,
         search_result::SearchResult,
-        status::{Application, Emoji, Status},
+        status::{Application, Status},
         visibility::Visibility,
         Empty,
     };
