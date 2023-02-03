@@ -2,7 +2,7 @@ use is_variant::IsVariant;
 use serde::{de::Visitor, Deserialize, Deserializer, Serialize};
 use time::{serde::iso8601, OffsetDateTime};
 
-use crate::FilterId;
+use crate::{FilterId, StatusId};
 
 /// Represents a user-defined filter for determining which statuses should not
 /// be shown to the user.
@@ -84,7 +84,7 @@ pub enum Action {
 }
 
 impl<'de> Deserialize<'de> for Action {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
     where
         D: Deserializer<'de>,
     {
@@ -97,7 +97,7 @@ impl<'de> Deserialize<'de> for Action {
                 formatter.write_str(r#""warn" or "hide" (or really any string; any string other than "hide" will deserialize to "warn")"#)
             }
 
-            fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+            fn visit_str<E>(self, v: &str) -> std::result::Result<Self::Value, E>
             where
                 E: serde::de::Error,
             {
@@ -175,6 +175,17 @@ mod v1 {
         /// Should the filter consider word boundaries?
         pub whole_word: bool,
     }
+}
+
+/// Represents a filter whose keywords matched a given status.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Result {
+    pub filter: Filter,
+    /// The keyword within the filter that was matched.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub keyword_matches: Vec<String>,
+    /// The status ID within the filter that was matched.
+    pub status_matches: Option<StatusId>,
 }
 
 #[cfg(test)]
