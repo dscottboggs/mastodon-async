@@ -59,4 +59,5 @@ define_ids!(
     "an announcement ID" as AnnouncementId,
     "a Vapid key for push streaming API" as VapidKey,
     "a conversation ID" as ConversationId,
+    "a poll ID" as PollId,
 );
