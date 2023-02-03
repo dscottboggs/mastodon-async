@@ -176,13 +176,17 @@ pub struct MetadataField {
     pub name: String,
     /// value part of metadata
     pub value: String,
+    /// Timestamp of when the server verified a URL value for a rel=“me” link.
+    #[serde(with = "iso8601::option")]
+    pub verified_at: Option<OffsetDateTime>,
 }
 
 impl MetadataField {
-    pub fn new(name: &str, value: &str) -> MetadataField {
+    pub fn new(name: &str, value: &str, verified_at: Option<OffsetDateTime>) -> MetadataField {
         MetadataField {
             name: name.into(),
             value: value.into(),
+            verified_at,
         }
     }
 }
@@ -301,6 +305,7 @@ impl CredentialsBuilder {
             .push(MetadataField {
                 name: field.into(),
                 value: value.into(),
+                verified_at: None
             });
         self
     }
