@@ -36,14 +36,14 @@ pub struct Edit {
 /// The current state of the poll options at this revision. Note that edits
 /// changing the poll options will be collapsed together into one edit,
 /// since this action resets the poll.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct PollEdit {
     /// The poll options at this revision
     pub options: Vec<PollEditOption>,
 }
 
 /// The poll options at this revision
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct PollEditOption {
     /// The text for a poll option.
     pub title: String,
