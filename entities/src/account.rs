@@ -499,6 +499,8 @@ mod fields_attributes_ser {
 }
 
 /// Represents a subset of your follows who also follow some other user.
+///
+/// See also [the API documentation](https://docs.joinmastodon.org/entities/FamiliarFollowers/)
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 pub struct FamiliarFollowers {
     /// The ID of the Account in the database.
