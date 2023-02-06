@@ -1,6 +1,7 @@
 //! Module containing everything related to an instance.
 use isolang::Language;
 use serde::{Deserialize, Serialize};
+use time::{serde::iso8601, OffsetDateTime};
 use url::Url;
 
 use crate::{account::Account, admin, conversion, RuleId};
@@ -148,6 +149,18 @@ pub struct Configuration {
     pub polls: v1::configuration::Polls,
     /// Hints related to translation.
     pub translation: configuration::Translation,
+}
+
+/// Represents an extended description for the instance, to be shown on its about page.
+///
+/// See also [the API documentation](https://docs.joinmastodon.org/entities/ExtendedDescription/)
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
+pub struct ExtendedDescription {
+    /// A timestamp of when the extended description was last updated.
+    #[serde(with = "iso8601")]
+    pub updated_at: OffsetDateTime,
+    /// The rendered HTML content of the extended description.
+    pub content: String,
 }
 
 pub mod configuration {
@@ -432,6 +445,8 @@ pub mod v1 {
 
 #[cfg(test)]
 mod tests {
+    use time::format_description::well_known::Iso8601;
+
     use super::*;
 
     #[test]
@@ -583,5 +598,20 @@ mod tests {
 }"##;
         let subject: Instance = serde_json::from_str(example).expect("deserialize");
         assert_eq!(subject.domain, "mastodon.social");
+    }
+
+    #[test]
+    fn test_extended_description() {
+        let example = r#"{
+            "updated_at":"2022-11-03T04:09:07Z",
+            "content":"<p>For inquiries not related specifically to the operation of this server, such as press inquiries, please contact <a href=\"mailto:press@joinmastodon.org\">press@joinmastodon.org</a>.</p>\n\n<h2>Funding</h2>\n\n<p>This server is crowdfunded by <a href=\"https://patreon.com/mastodon\">Patreon donations</a>. For a list of sponsors, see <a href=\"https://joinmastodon.org/sponsors\">joinmastodon.org</a>.</p>\n\n<h2>Reporting and moderation</h2>\n\n<p>When reporting accounts, please make sure to include at least a few posts that show rule-breaking behaviour, when applicable. If there is any additional context that might help make a decision, please also include it in the comment. This is especially important when the content is in a language nobody on the moderation team speaks.</p>\n\n<p>We usually handle reports within 24 hours. Please mind that you are not notified when a report you have made has led to a punitive action, and that not all punitive actions are externally visible. For first time offenses, we may opt to delete offending content, escalating to harsher measures on repeat offenses.</p>\n\n<h2>Impressum</h2>\n\n<p>Mastodon gGmbH<br>\nMühlenstraße 8a<br>\n14167 Berlin<br>\nGermany</p>\n\n<p>E-Mail-Adresse: hello@joinmastodon.org</p>\n\n<p>Vertretungsberechtigt: Eugen Rochko (Geschäftsführer)</p>\n\n<p>Umsatzsteuer Identifikationsnummer (USt-ID): DE344258260</p>\n\n<p>Handelsregister<br>\nGeführt bei: Amtsgericht Charlottenburg<br>\nNummer: HRB 230086 B</p>\n"
+        }"#;
+        let subject: ExtendedDescription = serde_json::from_str(example).expect("deserialize");
+        assert_eq!(
+            subject.updated_at,
+            OffsetDateTime::parse("2022-11-03T04:09:07Z", &Iso8601::PARSING)
+                .expect("parse test date")
+        );
+        assert_eq!(subject.content, "<p>For inquiries not related specifically to the operation of this server, such as press inquiries, please contact <a href=\"mailto:press@joinmastodon.org\">press@joinmastodon.org</a>.</p>\n\n<h2>Funding</h2>\n\n<p>This server is crowdfunded by <a href=\"https://patreon.com/mastodon\">Patreon donations</a>. For a list of sponsors, see <a href=\"https://joinmastodon.org/sponsors\">joinmastodon.org</a>.</p>\n\n<h2>Reporting and moderation</h2>\n\n<p>When reporting accounts, please make sure to include at least a few posts that show rule-breaking behaviour, when applicable. If there is any additional context that might help make a decision, please also include it in the comment. This is especially important when the content is in a language nobody on the moderation team speaks.</p>\n\n<p>We usually handle reports within 24 hours. Please mind that you are not notified when a report you have made has led to a punitive action, and that not all punitive actions are externally visible. For first time offenses, we may opt to delete offending content, escalating to harsher measures on repeat offenses.</p>\n\n<h2>Impressum</h2>\n\n<p>Mastodon gGmbH<br>\nMühlenstraße 8a<br>\n14167 Berlin<br>\nGermany</p>\n\n<p>E-Mail-Adresse: hello@joinmastodon.org</p>\n\n<p>Vertretungsberechtigt: Eugen Rochko (Geschäftsführer)</p>\n\n<p>Umsatzsteuer Identifikationsnummer (USt-ID): DE344258260</p>\n\n<p>Handelsregister<br>\nGeführt bei: Amtsgericht Charlottenburg<br>\nNummer: HRB 230086 B</p>\n");
     }
 }
