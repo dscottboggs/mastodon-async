@@ -7,7 +7,7 @@ use crate::{
 };
 
 /// Represents a revision of a status that has been edited.
-/// 
+///
 /// See also [the API documentation](https://docs.joinmastodon.org/entities/StatusEdit/)
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Edit {
