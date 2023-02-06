@@ -498,6 +498,15 @@ mod fields_attributes_ser {
     }
 }
 
+/// Represents a subset of your follows who also follow some other user.
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
+pub struct FamiliarFollowers {
+    /// The ID of the Account in the database.
+    pub id: AccountId,
+    /// Accounts you follow that also follow this account.
+    pub accounts: Vec<Account>,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
