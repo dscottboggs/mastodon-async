@@ -80,7 +80,7 @@ pub mod prelude {
         relationship::Relationship,
         report::Report,
         search_result::SearchResult,
-        status::{Application, Status},
+        status::{self, Application, Status},
         visibility::Visibility,
         Empty,
     };

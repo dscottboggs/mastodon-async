@@ -1,13 +1,16 @@
 //! Module containing all info relating to a status.
+
+pub mod edit;
 /// For building a new status
 pub mod new;
 pub mod poll;
 pub mod scheduled;
 
+pub use edit::Edit;
 use isolang::Language;
 pub use new::{NewStatus, NewStatusBuilder};
 pub use poll::{Poll, PollBuilder};
-pub use scheduled::Status as ScheduledStatus;
+pub use scheduled::Status as Scheduled;
 
 use crate::{custom_emoji::CustomEmoji, filter};
 
