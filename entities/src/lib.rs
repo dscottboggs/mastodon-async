@@ -36,6 +36,8 @@ pub use ids::*;
 pub mod instance;
 /// Data structures for ser/de of list-related resources
 pub mod list;
+/// Represents the last read position within a user's timelines.
+pub mod marker;
 /// Data structures for ser/de of mention-related resources
 pub mod mention;
 /// Data structures for ser/de of notification-related resources
