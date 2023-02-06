@@ -61,3 +61,28 @@ define_ids!(
     "a conversation ID" as ConversationId,
     "a poll ID" as PollId,
 );
+
+/// the ID of an application.
+///
+/// As [`Application`] doesn't have an ID, I'm not sure what you're supposed to compare this to.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(transparent)]
+pub struct ApplicationId(i64);
+
+impl AsRef<i64> for ApplicationId {
+    fn as_ref(&self) -> &i64 {
+        &self.0
+    }
+}
+
+impl ApplicationId {
+    pub fn new(v: i64) -> Self {
+        Self(v)
+    }
+}
+
+impl Display for ApplicationId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
