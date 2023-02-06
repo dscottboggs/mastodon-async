@@ -5,7 +5,7 @@ use crate::StatusId;
 /// Represents a status's source as plain text.
 ///
 /// See also [the API documentation](https://docs.joinmastodon.org/entities/StatusSource/)
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Source {
     /// ID of the status in the database.
     pub id: StatusId,
