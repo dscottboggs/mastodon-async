@@ -5,12 +5,14 @@ pub mod edit;
 pub mod new;
 pub mod poll;
 pub mod scheduled;
+pub mod source;
 
 pub use edit::Edit;
 use isolang::Language;
 pub use new::{NewStatus, NewStatusBuilder};
 pub use poll::{Poll, PollBuilder};
 pub use scheduled::Status as Scheduled;
+pub use source::Source;
 
 use crate::{custom_emoji::CustomEmoji, filter};
 
