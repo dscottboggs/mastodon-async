@@ -2,10 +2,12 @@
 /// For building a new status
 pub mod new;
 pub mod poll;
+pub mod scheduled;
 
 use isolang::Language;
 pub use new::{NewStatus, NewStatusBuilder};
 pub use poll::{Poll, PollBuilder};
+pub use scheduled::Status as ScheduledStatus;
 
 use crate::{custom_emoji::CustomEmoji, filter};
 
@@ -302,7 +304,7 @@ mod tests {
         assert_eq!(acct.followers_count, 322930);
         assert_eq!(acct.following_count, 459);
         assert_eq!(acct.statuses_count, 61323);
-        assert_eq!(acct.last_status_at, Some("2019-12-10T08:14:44.811Z".parse().expect("parse last status time")));
+        assert_eq!(acct.last_status_at, Some("2019-12-10T08:14:44.811Z".into()));
         assert!(acct.emojis.is_empty());
         let field = acct.fields.get(0).expect("first field");
         assert_eq!(field.name, "Patreon");
@@ -311,14 +313,23 @@ mod tests {
         let field = acct.fields.get(1).expect("second field");
         assert_eq!(field.name, "Homepage");
         assert_eq!(field.value, "<a href=\"https://zeonfederated.com\" rel=\"me nofollow noopener noreferrer\" target=\"_blank\"><span class=\"invisible\">https://</span><span class=\"\">zeonfederated.com</span><span class=\"invisible\"></span}");
-        assert_eq!(field.verified_at, Some(OffsetDateTime::parse("2019-07-15T18:29:57.191+00:00", &Iso8601::PARSING).expect("parse field verified time")));
+        assert_eq!(
+            field.verified_at,
+            Some(
+                OffsetDateTime::parse("2019-07-15T18:29:57.191+00:00", &Iso8601::PARSING)
+                    .expect("parse field verified time")
+            )
+        );
         assert!(status.media_attachments.is_empty());
         assert!(status.mentions.is_empty());
         assert!(status.tags.is_empty());
         assert!(status.emojis.is_empty());
         let card = status.card.expect("card");
         assert_eq!(card.url.as_str(), "https://www.theguardian.com/money/2019/dec/07/i-lost-my-193000-inheritance-with-one-wrong-digit-on-my-sort-code");
-        assert_eq!(card.title, "‘I lost my £193,000 inheritance – with one wrong digit on my sort code’");
+        assert_eq!(
+            card.title,
+            "‘I lost my £193,000 inheritance – with one wrong digit on my sort code’"
+        );
         assert_eq!(card.description, "When Peter Teich’s money went to another Barclays customer, the bank offered £25 as a token gesture");
         assert!(card.card_type.is_link());
         assert!(card.author_name.is_empty());
