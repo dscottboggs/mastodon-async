@@ -1,5 +1,5 @@
 use derive_builder::Builder;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use time::{serde::iso8601, OffsetDateTime};
 
 use crate::prelude::CustomEmoji;
