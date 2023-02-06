@@ -305,7 +305,7 @@ impl CredentialsBuilder {
             .push(MetadataField {
                 name: field.into(),
                 value: value.into(),
-                verified_at: None
+                verified_at: None,
             });
         self
     }
