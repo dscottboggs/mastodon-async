@@ -1,34 +1,81 @@
 //! module containing everything relating to a relationship with
 //! another account.
+use isolang::Language;
 use serde::{Deserialize, Serialize};
 
 use crate::RelationshipId;
 
-/// A struct containing information about a relationship with another account.
+/// Represents the relationship between accounts, such as following / blocking / muting / etc.
+///
+/// See also [the API documentation](https://docs.joinmastodon.org/entities/Relationship/)
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Relationship {
     /// Target account id
     pub id: RelationshipId,
-    /// Whether the application client follows the account.
+    /// Are you following this user?
     pub following: bool,
-    /// Whether the account follows the application client.
+    /// Are you followed by this user?
     pub followed_by: bool,
-    /// Whether the application client blocks the account.
+    /// Are you blocking this user?
     pub blocking: bool,
-    /// Whether the application client blocks the account.
+    /// Is this user blocking you?
+    pub blocked_by: bool,
+    /// Are you muting this user?
     pub muting: bool,
-    /// Whether the application client has requested to follow the account.
+    /// Do you have a pending follow request for this user?
     pub requested: bool,
-    /// Whether the user is also muting notifications
+    /// Are you muting notifications from this user?
     pub muting_notifications: bool,
-    /// Whether the user is currently blocking the accounts's domain
+    /// Are you blocking this user’s domain?
     pub domain_blocking: bool,
-    /// Whether the user's reblogs will show up in the home timeline
+    /// Are you receiving this user’s boosts in your home timeline?
     pub showing_reblogs: bool,
-    /// Whether the user is currently endorsing the account
-    ///
-    /// This field is not techincally nullable with mastodon >= 2.5.0, but
-    /// making it `Option<bool>` here means we shouldn't get deser errors when
-    /// making calls to pleroma or mastodon<2.5.0 instances
-    pub endorsed: Option<bool>,
+    /// Have you enabled notifications for this user?
+    pub notifying: bool,
+    /// Which languages are you following from this user?
+    #[serde(default)]
+    pub languages: Vec<Language>,
+    /// Are you featuring this user on your profile?
+    #[serde(default)]
+    pub endorsed: bool,
+    /// This user’s profile bio
+    pub note: String,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_deserialize() {
+        let example = r#"{
+          "id": "1",
+          "following": true,
+          "showing_reblogs": true,
+          "notifying": false,
+          "followed_by": true,
+          "blocking": false,
+          "blocked_by": false,
+          "muting": false,
+          "muting_notifications": false,
+          "requested": false,
+          "domain_blocking": false,
+          "endorsed": false,
+          "note": ""
+        }"#;
+        let subject: Relationship = serde_json::from_str(example).expect("deserialize");
+        assert_eq!(subject.id, RelationshipId::new("1"));
+        assert!(subject.following);
+        assert!(subject.showing_reblogs);
+        assert!(!subject.notifying);
+        assert!(subject.followed_by);
+        assert!(!subject.blocking);
+        assert!(!subject.blocked_by);
+        assert!(!subject.muting);
+        assert!(!subject.muting_notifications);
+        assert!(!subject.requested);
+        assert!(!subject.domain_blocking);
+        assert!(!subject.endorsed);
+        assert!(subject.note.is_empty());
+    }
 }
