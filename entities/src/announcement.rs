@@ -43,13 +43,21 @@ struct Announcement {
     pub reactions: Vec<Reaction>,
 }
 
+/// Represents an emoji reaction to an Announcement.
+///
+/// See also [the API documentation](https://docs.joinmastodon.org/entities/Reaction/)
 #[derive(Default, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Reaction {
+    /// The emoji used for the reaction. Either a unicode emoji, or a custom emoji’s shortcode.
     pub name: String,
+    /// The total number of users who have added this reaction.
     pub count: i64,
-    pub me: bool,
-    pub url: Option<String>,
-    pub static_url: Option<String>,
+    /// If there is a currently authorized user: Have you added this reaction?
+    pub me: Option<bool>,
+    /// If the reaction is a custom emoji: A link to the custom emoji.
+    pub url: Option<Url>,
+    /// If the reaction is a custom emoji: A link to a non-animated version of the custom emoji.
+    pub static_url: Option<Url>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -123,5 +131,34 @@ mod tests {
 }"##;
         let ann: Announcement = serde_json::from_str(sample).expect("deserialize");
         assert_eq!(ann.id, AnnouncementId::new("8"));
+    }
+
+    #[test]
+    fn test_reaction_standard_emoji() {
+        let example = r#"{
+          "name": "🤔",
+          "count": 1,
+          "me": true
+        }"#;
+        let subject: Reaction = serde_json::from_str(example).expect("deserialize");
+        assert_eq!(subject.name, "🤔");
+        assert_eq!(subject.count, 1);
+        assert!(subject.me.expect("me"));
+    }
+    #[test]
+    fn test_reaction_custom_emoji() {
+        let example = r#"{
+          "name": "bongoCat",
+          "count": 9,
+          "me": false,
+          "url": "https://files.mastodon.social/custom_emojis/images/000/067/715/original/fdba57dff7576d53.png",
+          "static_url": "https://files.mastodon.social/custom_emojis/images/000/067/715/static/fdba57dff7576d53.png"
+        }"#;
+        let subject: Reaction = serde_json::from_str(example).expect("deserialize");
+        assert_eq!(subject.name, "bongoCat");
+        assert_eq!(subject.count, 9);
+        assert!(!subject.me.expect("me"));
+        assert_eq!(subject.url.expect("url").as_ref(), "https://files.mastodon.social/custom_emojis/images/000/067/715/original/fdba57dff7576d53.png");
+        assert_eq!(subject.static_url.expect("static url").as_ref(), "https://files.mastodon.social/custom_emojis/images/000/067/715/static/fdba57dff7576d53.png");
     }
 }
