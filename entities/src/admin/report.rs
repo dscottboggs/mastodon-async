@@ -1,4 +1,4 @@
-use crate::{admin, instance::Rule, status::Status, ReportId};
+use crate::{admin, instance::Rule, report, status::Status, ReportId};
 use serde::{Deserialize, Serialize};
 use time::{serde::iso8601, OffsetDateTime};
 
@@ -15,7 +15,7 @@ pub struct Report {
     #[serde(with = "iso8601")]
     pub action_taken_at: OffsetDateTime,
     /// The category under which the report is classified.
-    pub category: Category,
+    pub category: report::Category,
     /// An optional reason for reporting.
     pub comment: String,
     /// Whether a report was forwarded to a remote instance.
@@ -38,20 +38,4 @@ pub struct Report {
     pub statuses: Vec<Status>,
     /// Rules attached to the report, for context.
     pub rules: Vec<Rule>,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub enum Category {
-    /// Malicious, fake, or repetitive content
-    Spam,
-    /// Violates one or more specific rules
-    Violation,
-    /// The default (catch-all) category
-    Other,
-}
-
-impl Default for Category {
-    fn default() -> Self {
-        Self::Other
-    }
 }
