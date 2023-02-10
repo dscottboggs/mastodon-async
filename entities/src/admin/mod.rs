@@ -7,6 +7,7 @@ pub mod email_domain_block;
 pub mod ip_block;
 pub mod measure;
 pub mod report;
+pub mod tag;
 
 pub use account::*;
 pub use canonical_email_block::*;
