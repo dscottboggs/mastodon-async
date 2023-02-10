@@ -291,7 +291,7 @@ impl Mastodon {
     /// Add a push notifications subscription
     pub async fn add_push_subscription(&self, request: &AddPushRequest) -> Result<Subscription> {
         let call_id = Uuid::new_v4();
-        let request = request.build()?;
+        let request = request.build();
         let url = &self.route("/api/v1/push/subscription");
         debug!(
             url = url, method = stringify!($method),

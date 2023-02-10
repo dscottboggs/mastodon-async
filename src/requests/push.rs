@@ -1,7 +1,6 @@
-use crate::{
-    entities::push::{add_subscription, update_data},
-    errors::Result,
-};
+use mastodon_async_entities::push::Alerts;
+
+use crate::entities::push::{add_subscription, update_data};
 
 /// Container for the key & auth strings for an AddPushRequest
 ///
@@ -41,8 +40,12 @@ impl Keys {
 /// // Example
 ///
 /// ```no_run
-/// use mastodon_async::{Mastodon, Data};
-/// use mastodon_async::requests::{AddPushRequest, Keys};
+/// use mastodon_async::{
+///     entities::push::AlertsBuilder,
+///     Mastodon,
+///     Data,
+///     requests::{AddPushRequest, Keys}
+/// };
 ///
 /// tokio_test::block_on(async {
 ///     let data = Data::default();
@@ -50,8 +53,13 @@ impl Keys {
 ///
 ///     let keys = Keys::new("stahesuahoei293ise===", "tasecoa,nmeozka==");
 ///     let mut request = AddPushRequest::new("http://example.com/push/endpoint", &keys);
-///     request.follow().reblog();
-///
+///     request.alerts(
+///         AlertsBuilder::default()
+///             .follow(true)
+///             .reblog(true)
+///             .build()
+///             .unwrap()
+///     );
 ///     client.add_push_subscription(&request).await.unwrap();
 /// });
 /// ```
@@ -62,10 +70,7 @@ pub struct AddPushRequest {
     p256dh: String,
     auth: String,
 
-    follow: Option<bool>,
-    favourite: Option<bool>,
-    reblog: Option<bool>,
-    mention: Option<bool>,
+    alerts: Alerts,
 }
 
 impl AddPushRequest {
@@ -88,78 +93,15 @@ impl AddPushRequest {
         }
     }
 
-    /// A flag that indicates if you want follow notifications pushed
-    ///
-    /// // Example
-    /// ```
-    /// use mastodon_async::requests::{AddPushRequest, Keys};
-    /// let keys = Keys::new("abcdef===", "foobar==");
-    /// let push_endpoint = "https://example.com/push/endpoint";
-    /// let mut request = AddPushRequest::new(push_endpoint, &keys);
-    /// request.follow();
-    /// ```
-    pub fn follow(&mut self) -> &mut Self {
-        self.follow = Some(true);
+    /// Set the alerts which should be requested to be notified by this request.
+    pub fn alerts(&mut self, alerts: Alerts) -> &mut Self {
+        self.alerts = alerts;
         self
     }
 
-    /// A flag that indicates if you want favourite notifications pushed
-    ///
-    /// // Example
-    /// ```
-    /// use mastodon_async::requests::{AddPushRequest, Keys};
-    /// let keys = Keys::new("abcdef===", "foobar==");
-    /// let push_endpoint = "https://example.com/push/endpoint";
-    /// let mut request = AddPushRequest::new(push_endpoint, &keys);
-    /// request.favourite();
-    /// ```
-    pub fn favourite(&mut self) -> &mut Self {
-        self.favourite = Some(true);
-        self
-    }
-
-    /// A flag that indicates if you want reblog notifications pushed
-    ///
-    /// // Example
-    /// ```
-    /// use mastodon_async::requests::{AddPushRequest, Keys};
-    /// let keys = Keys::new("abcdef===", "foobar==");
-    /// let push_endpoint = "https://example.com/push/endpoint";
-    /// let mut request = AddPushRequest::new(push_endpoint, &keys);
-    /// request.reblog();
-    /// ```
-    pub fn reblog(&mut self) -> &mut Self {
-        self.reblog = Some(true);
-        self
-    }
-
-    /// A flag that indicates if you want mention notifications pushed
-    ///
-    /// // Example
-    /// ```
-    /// use mastodon_async::requests::{AddPushRequest, Keys};
-    /// let keys = Keys::new("abcdef===", "foobar==");
-    /// let push_endpoint = "https://example.com/push/endpoint";
-    /// let mut request = AddPushRequest::new(push_endpoint, &keys);
-    /// request.mention();
-    /// ```
-    pub fn mention(&mut self) -> &mut Self {
-        self.mention = Some(true);
-        self
-    }
-
-    fn flags_present(&self) -> bool {
-        self.follow.is_some()
-            || self.favourite.is_some()
-            || self.reblog.is_some()
-            || self.mention.is_some()
-    }
-
-    pub(crate) fn build(&self) -> Result<add_subscription::Form> {
-        use crate::entities::push::{
-            add_subscription::{Data, Form, Keys, Subscription},
-            Alerts,
-        };
+    /// Build the form.
+    pub fn build(&self) -> add_subscription::Form {
+        use crate::entities::push::add_subscription::{Data, Form, Keys, Subscription};
         let mut form = Form {
             subscription: Subscription {
                 endpoint: self.endpoint.clone(),
@@ -170,30 +112,14 @@ impl AddPushRequest {
             },
             data: None,
         };
-        if self.flags_present() {
-            let mut alerts = Alerts::default();
 
-            if let Some(follow) = self.follow {
-                alerts.follow = Some(follow);
-            }
-
-            if let Some(favourite) = self.favourite {
-                alerts.favourite = Some(favourite);
-            }
-
-            if let Some(reblog) = self.reblog {
-                alerts.reblog = Some(reblog);
-            }
-
-            if let Some(mention) = self.mention {
-                alerts.mention = Some(mention);
-            }
-
+        if self.alerts.is_some() {
             form.data = Some(Data {
-                alerts: Some(alerts),
+                alerts: Some(self.alerts),
             });
         }
-        Ok(form)
+
+        form
     }
 }
 
@@ -202,15 +128,24 @@ impl AddPushRequest {
 /// // Example
 ///
 /// ```no_run
-/// use mastodon_async::{Mastodon, Data, requests::UpdatePushRequest};
+/// use mastodon_async::{
+///     entities::push::AlertsBuilder,
+///     Mastodon,
+///     Data,
+///     requests::UpdatePushRequest
+/// };
 ///
 /// let data = Data::default();
 /// let client = Mastodon::from(data);
 ///
 /// let mut request = UpdatePushRequest::new("foobar");
-/// request.follow(true)
-///     .reblog(true);
-///
+/// request.alerts(
+///     AlertsBuilder::default()
+///         .follow(true)
+///         .reblog(true)
+///         .build()
+///         .unwrap()
+/// );
 /// tokio_test::block_on(async {
 ///     client.update_push_data(&request).await.unwrap();
 /// });
@@ -218,10 +153,7 @@ impl AddPushRequest {
 #[derive(Debug, Default, Clone, PartialEq, Eq, Serialize)]
 pub struct UpdatePushRequest {
     id: String,
-    follow: Option<bool>,
-    favourite: Option<bool>,
-    reblog: Option<bool>,
-    mention: Option<bool>,
+    alerts: Alerts,
 }
 
 impl UpdatePushRequest {
@@ -239,90 +171,24 @@ impl UpdatePushRequest {
         }
     }
 
-    /// A flag that indicates if you want follow notifications pushed
-    ///
-    /// // Example
-    /// ```
-    /// let mut request = mastodon_async::requests::UpdatePushRequest::new("foobar");
-    /// request.follow(true);
-    /// ```
-    pub fn follow(&mut self, follow: bool) -> &mut Self {
-        self.follow = Some(follow);
+    /// Set alerts which should be enabled or disabled by this update.
+    pub fn alerts(&mut self, alerts: Alerts) -> &mut Self {
+        self.alerts = alerts;
         self
     }
 
-    /// A flag that indicates if you want favourite notifications pushed
-    ///
-    /// // Example
-    /// ```
-    /// let mut request = mastodon_async::requests::UpdatePushRequest::new("foobar");
-    /// request.favourite(true);
-    /// ```
-    pub fn favourite(&mut self, favourite: bool) -> &mut Self {
-        self.favourite = Some(favourite);
-        self
-    }
-
-    /// A flag that indicates if you want reblog notifications pushed
-    ///
-    /// // Example
-    /// ```
-    /// use mastodon_async::requests::UpdatePushRequest;
-    /// let mut request = UpdatePushRequest::new("foobar");
-    /// request.reblog(true);
-    /// ```
-    pub fn reblog(&mut self, reblog: bool) -> &mut Self {
-        self.reblog = Some(reblog);
-        self
-    }
-
-    /// A flag that indicates if you want mention notifications pushed
-    ///
-    /// // Example
-    /// ```
-    /// use mastodon_async::requests::UpdatePushRequest;
-    /// let mut request = UpdatePushRequest::new("foobar");
-    /// request.mention(true);
-    /// ```
-    pub fn mention(&mut self, mention: bool) -> &mut Self {
-        self.mention = Some(mention);
-        self
-    }
-
-    fn flags_present(&self) -> bool {
-        self.follow.is_some()
-            || self.favourite.is_some()
-            || self.reblog.is_some()
-            || self.mention.is_some()
-    }
-
-    pub(crate) fn build(&self) -> update_data::Form {
-        use crate::entities::push::{
-            update_data::{Data, Form},
-            Alerts,
-        };
+    /// Build the form from the update
+    pub fn build(&self) -> update_data::Form {
+        use crate::entities::push::update_data::{Data, Form};
 
         let mut form = Form {
             id: self.id.clone(),
             ..Default::default()
         };
 
-        if self.flags_present() {
-            let mut alerts = Alerts::default();
-            if let Some(follow) = self.follow {
-                alerts.follow = Some(follow);
-            }
-            if let Some(favourite) = self.favourite {
-                alerts.favourite = Some(favourite);
-            }
-            if let Some(reblog) = self.reblog {
-                alerts.reblog = Some(reblog);
-            }
-            if let Some(mention) = self.mention {
-                alerts.mention = Some(mention);
-            }
+        if self.alerts.is_some() {
             form.data = Data {
-                alerts: Some(alerts),
+                alerts: Some(self.alerts),
             };
         }
         form
@@ -331,6 +197,8 @@ impl UpdatePushRequest {
 
 #[cfg(test)]
 mod tests {
+    use mastodon_async_entities::push::AlertsBuilder;
+
     use super::*;
     use crate::entities::push::{add_subscription, update_data, Alerts};
 
@@ -357,118 +225,57 @@ mod tests {
                 endpoint: "https://example.com/push/endpoint".to_string(),
                 p256dh: "anetohias===".to_string(),
                 auth: "oeatssah=".to_string(),
-                follow: None,
-                favourite: None,
-                reblog: None,
-                mention: None,
-            }
-        );
-    }
-    #[test]
-    fn test_add_push_request_follow() {
-        let endpoint = "https://example.com/push/endpoint";
-        let keys = Keys::new("anetohias===", "oeatssah=");
-        let mut req = AddPushRequest::new(endpoint, &keys);
-        req.follow();
-        assert_eq!(
-            req,
-            AddPushRequest {
-                endpoint: "https://example.com/push/endpoint".to_string(),
-                p256dh: "anetohias===".to_string(),
-                auth: "oeatssah=".to_string(),
-                follow: Some(true),
-                favourite: None,
-                reblog: None,
-                mention: None,
+                ..Default::default()
             }
         );
     }
 
-    #[test]
-    fn test_add_push_request_favourite() {
-        let endpoint = "https://example.com/push/endpoint";
-        let keys = Keys::new("anetohias===", "oeatssah=");
-        let mut req = AddPushRequest::new(endpoint, &keys);
-        req.favourite();
-        assert_eq!(
-            req,
-            AddPushRequest {
-                endpoint: "https://example.com/push/endpoint".to_string(),
-                p256dh: "anetohias===".to_string(),
-                auth: "oeatssah=".to_string(),
-                follow: None,
-                favourite: Some(true),
-                reblog: None,
-                mention: None,
-            }
-        );
-    }
-    #[test]
-    fn test_add_push_request_reblog() {
-        let endpoint = "https://example.com/push/endpoint";
-        let keys = Keys::new("anetohias===", "oeatssah=");
-        let mut req = AddPushRequest::new(endpoint, &keys);
-        req.reblog();
-        assert_eq!(
-            req,
-            AddPushRequest {
-                endpoint: "https://example.com/push/endpoint".to_string(),
-                p256dh: "anetohias===".to_string(),
-                auth: "oeatssah=".to_string(),
-                follow: None,
-                favourite: None,
-                reblog: Some(true),
-                mention: None,
-            }
-        );
-    }
-    #[test]
-    fn test_add_push_request_mention() {
-        let endpoint = "https://example.com/push/endpoint";
-        let keys = Keys::new("anetohias===", "oeatssah=");
-        let mut req = AddPushRequest::new(endpoint, &keys);
-        req.mention();
-        assert_eq!(
-            req,
-            AddPushRequest {
-                endpoint: "https://example.com/push/endpoint".to_string(),
-                p256dh: "anetohias===".to_string(),
-                auth: "oeatssah=".to_string(),
-                follow: None,
-                favourite: None,
-                reblog: None,
-                mention: Some(true),
-            }
-        );
-    }
-    #[test]
-    fn test_add_push_request_build_no_flags() {
-        let endpoint = "https://example.com/push/endpoint";
-        let keys = Keys::new("anetohias===", "oeatssah=");
-        let req = AddPushRequest::new(endpoint, &keys);
-        let form = req.build().expect("Couldn't build form");
-        assert_eq!(
-            form,
-            add_subscription::Form {
-                subscription: add_subscription::Subscription {
-                    endpoint: "https://example.com/push/endpoint".to_string(),
-                    keys: add_subscription::Keys {
+    macro_rules! alerts_builder_test {
+        ($name:ident, $set:ident $(; $rest_names:ident, $rest_set:ident)*;) => {
+            #[test]
+            fn $name() {
+                let endpoint = "https://example.com/push/endpoint";
+                let keys = Keys::new("anetohias===", "oeatssah=");
+                let mut req = AddPushRequest::new(endpoint, &keys);
+                req.alerts(AlertsBuilder::default().$set(true).build().unwrap());
+                assert_eq!(
+                    req,
+                    AddPushRequest {
+                        endpoint: "https://example.com/push/endpoint".to_string(),
                         p256dh: "anetohias===".to_string(),
                         auth: "oeatssah=".to_string(),
-                    },
-                },
-                data: None,
+                        alerts: Alerts {
+                            $set: Some(true),
+                            ..Default::default()
+                        }
+                    }
+                );
             }
-        );
+
+            alerts_builder_test!($($rest_names, $rest_set;)*);
+        };
+        () => {};
     }
+    alerts_builder_test!(
+        test_add_push_request_follow, follow;
+        test_add_push_request_favourite, favourite;
+        test_add_push_request_reblog, reblog;
+        test_add_push_request_mention, mention;
+    );
 
     #[test]
     fn test_add_push_request_build() {
         let endpoint = "https://example.com/push/endpoint";
         let keys = Keys::new("anetohias===", "oeatssah=");
         let mut req = AddPushRequest::new(endpoint, &keys);
-        req.follow().reblog();
-        let form = req.build().expect("Couldn't build form");
+        req.alerts(
+            AlertsBuilder::default()
+                .follow(true)
+                .reblog(true)
+                .build()
+                .unwrap(),
+        );
+        let form = req.build();
         assert_eq!(
             form,
             add_subscription::Form {
@@ -482,9 +289,8 @@ mod tests {
                 data: Some(add_subscription::Data {
                     alerts: Some(Alerts {
                         follow: Some(true),
-                        favourite: None,
                         reblog: Some(true),
-                        mention: None,
+                        ..Default::default()
                     }),
                 }),
             }
@@ -498,74 +304,42 @@ mod tests {
             req,
             UpdatePushRequest {
                 id: "some-id".to_string(),
-                follow: None,
-                favourite: None,
-                reblog: None,
-                mention: None,
+                ..Default::default()
             }
         );
     }
 
-    #[test]
-    fn test_update_push_request_follow() {
-        let mut req = UpdatePushRequest::new("some-id");
-        req.follow(true);
-        assert_eq!(
-            req,
-            UpdatePushRequest {
-                id: "some-id".to_string(),
-                follow: Some(true),
-                favourite: None,
-                reblog: None,
-                mention: None,
+    macro_rules! test_update_push_request {
+        ($name:ident, $set:ident $(; $rest_names:ident, $rest_set:ident)*;) => {
+            #[test]
+            fn $name() {
+                let mut req = UpdatePushRequest::new("some-id");
+                req.alerts(AlertsBuilder::default().$set(true).build().unwrap());
+                assert_eq!(
+                    req,
+                    UpdatePushRequest {
+                        id: "some-id".to_string(),
+                        alerts: Alerts {
+                            $set: Some(true),
+                            ..Default::default()
+                        }
+                    }
+                );
             }
-        );
+
+            test_update_push_request!($($rest_names, $rest_set;)*);
+        };
+        () => {}
     }
-    #[test]
-    fn test_update_push_request_favourite() {
-        let mut req = UpdatePushRequest::new("some-id");
-        req.favourite(true);
-        assert_eq!(
-            req,
-            UpdatePushRequest {
-                id: "some-id".to_string(),
-                follow: None,
-                favourite: Some(true),
-                reblog: None,
-                mention: None,
-            }
-        );
+
+    test_update_push_request! {
+        test_update_push_request_follow, follow;
+        test_update_push_request_favourite, favourite;
+        test_update_push_request_reblog, reblog;
+        test_update_push_request_mention, mention;
+
     }
-    #[test]
-    fn test_update_push_request_reblog() {
-        let mut req = UpdatePushRequest::new("some-id");
-        req.reblog(true);
-        assert_eq!(
-            req,
-            UpdatePushRequest {
-                id: "some-id".to_string(),
-                follow: None,
-                favourite: None,
-                reblog: Some(true),
-                mention: None,
-            }
-        );
-    }
-    #[test]
-    fn test_update_push_request_mention() {
-        let mut req = UpdatePushRequest::new("some-id");
-        req.mention(true);
-        assert_eq!(
-            req,
-            UpdatePushRequest {
-                id: "some-id".to_string(),
-                follow: None,
-                favourite: None,
-                reblog: None,
-                mention: Some(true),
-            }
-        );
-    }
+
     #[test]
     fn test_update_push_request_build_no_flags() {
         let req = UpdatePushRequest::new("some-id");
@@ -582,7 +356,10 @@ mod tests {
     #[test]
     fn test_update_push_request_build() {
         let mut req = UpdatePushRequest::new("some-id");
-        req.favourite(false);
+        req.alerts(Alerts {
+            favourite: Some(false),
+            ..Default::default()
+        });
         let form = req.build();
         assert_eq!(
             form,
@@ -590,10 +367,8 @@ mod tests {
                 id: "some-id".to_string(),
                 data: update_data::Data {
                     alerts: Some(Alerts {
-                        follow: None,
                         favourite: Some(false),
-                        reblog: None,
-                        mention: None,
+                        ..Default::default()
                     }),
                 },
             }
