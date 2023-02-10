@@ -84,8 +84,8 @@ pub(crate) mod maybe_empty_url {
 }
 
 pub mod date_from_timestamp {
-    use serde::{Deserializer, Serializer};
-    use time::{Date, PrimitiveDateTime, Time};
+    use serde::{de, de::Visitor, Deserializer, Serializer};
+    use time::{Date, OffsetDateTime, PrimitiveDateTime, Time};
 
     pub(crate) fn serialize<S>(value: &Date, ser: S) -> Result<S::Ok, S::Error>
     where
@@ -103,7 +103,26 @@ pub mod date_from_timestamp {
     where
         D: Deserializer<'de>,
     {
-        let time = time::serde::iso8601::deserialize(deserializer)?;
-        Ok(time.date())
+        struct Vizitor;
+
+        impl<'v> Visitor<'v> for Vizitor {
+            type Value = Date;
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                write!(
+                    formatter,
+                    "a string containing an integer representing a unix timestamp"
+                )
+            }
+            fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                let invalid = || de::Error::invalid_value(de::Unexpected::Str(v), &self);
+                let n = v.parse().map_err(|_| invalid())?;
+                let it = OffsetDateTime::from_unix_timestamp(n).map_err(|_| invalid())?;
+                Ok(it.date())
+            }
+        }
+        deserializer.deserialize_str(Vizitor)
     }
 }
