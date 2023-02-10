@@ -510,6 +510,22 @@ pub struct FamiliarFollowers {
     pub accounts: Vec<Account>,
 }
 
+/// Represents a suggested account to follow and an associated reason for the
+/// suggestion.
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
+pub struct Suggestion {
+    source: SuggestionSource,
+    account: Account,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, IsVariant)]
+#[serde(rename_all = "snake_case")]
+pub enum SuggestionSource {
+    Staff,
+    PastInteractions,
+    Global,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -525,7 +541,7 @@ mod tests {
         }
         assert_eq!(serde_json::to_string(&color).expect("serialize"), example);
         let color: Color = serde_json::from_str(r#""""#).expect("parse");
-        assert_eq!(Color::Unspecified, color);
+        assert!(color.is_unspecified());
         assert!(color.to_string().is_empty());
     }
 
