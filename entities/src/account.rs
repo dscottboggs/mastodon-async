@@ -1,6 +1,7 @@
 //! A module containing everything relating to a account returned from the api.
 
 use derive_builder::Builder;
+use is_variant::IsVariant;
 use isolang::Language;
 use serde::{
     de::{self, Deserializer, Unexpected, Visitor},
@@ -359,7 +360,7 @@ pub struct Role {
     pub updated_at: OffsetDateTime,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, IsVariant)]
 /// An RGB color as expected by the API. Valid values are the empty string
 /// (`Unspecified`) or hexadecimal color codes like `"#C0FF3E"`.
 pub enum Color {
