@@ -7,8 +7,9 @@ use super::{
     status::Tag,
 };
 
-/// A struct containing results of a search, with `Tag` objects in the
-/// `hashtags` field
+/// Represents the results of a search.
+///
+/// See also [the API documentation](https://docs.joinmastodon.org/entities/Search/)
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct SearchResult {
     /// An array of matched Accounts.
