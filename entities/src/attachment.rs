@@ -280,7 +280,7 @@ mod tests {
         let subject: Attachment = serde_json::from_str(example).expect("deserialize");
         assert_eq!(
             serde_json::to_value(subject).expect("convert to value"),
-            serde_json::from_str::<Value>(&example).expect("deserialize (to Value)")
+            serde_json::from_str::<Value>(example).expect("deserialize (to Value)")
         )
     }
     #[test]
@@ -321,7 +321,7 @@ mod tests {
         let subject: Attachment = serde_json::from_str(example).expect("deserialize");
         assert_eq!(
             serde_json::to_value(subject).expect("convert to value"),
-            serde_json::from_str::<Value>(&example).expect("deserialize (to Value)")
+            serde_json::from_str::<Value>(example).expect("deserialize (to Value)")
         )
     }
 }
