@@ -119,23 +119,15 @@ pub struct Mention {
     pub id: String,
 }
 
-/// Hashtags in the status. This functions both as a
-/// [`Status::Tag`](https://docs.joinmastodon.org/entities/Status/#Tag), and
-/// as a [`Tag`](https://docs.joinmastodon.org/entities/Tag/). In the case of
-/// the former, at the time of writing, the history field is always empty and
-/// the following field is always none.
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+/// Represents a hashtag used within the content of a status.
+///
+/// See also [the API documentation](https://docs.joinmastodon.org/entities/Status/#Tag)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Tag {
     /// The hashtag, not including the preceding `#`.
     pub name: String,
     /// The URL of the hashtag.
     pub url: String,
-    /// Usage statistics for given days (typically the past week).
-    #[serde(default = "Vec::new")]
-    pub history: Vec<TagHistory>,
-    /// Whether the current token’s authorized user is following this tag.
-    pub following: Option<bool>,
 }
 
 /// Application details.
@@ -145,17 +137,6 @@ pub struct Application {
     pub name: String,
     /// Homepage URL of the application.
     pub website: Option<String>,
-}
-
-/// Usage statistics for given days (typically the past week).
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct TagHistory {
-    /// UNIX timestamp on midnight of the given day.
-    pub day: String,
-    /// The counted usage of the tag within that day.
-    pub uses: String,
-    /// The total of accounts using the tag within that day.
-    pub accounts: String,
 }
 
 /// Represents a hashtag that is featured on a profile.

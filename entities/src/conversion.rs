@@ -82,3 +82,28 @@ pub(crate) mod maybe_empty_url {
         deserializer.deserialize_str(MEUVisitor)
     }
 }
+
+pub mod date_from_timestamp {
+    use serde::{Deserializer, Serializer};
+    use time::{Date, PrimitiveDateTime, Time};
+
+    pub(crate) fn serialize<S>(value: &Date, ser: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let time = PrimitiveDateTime::new(
+            *value,
+            Time::from_hms(0, 0, 0).map_err(|err| serde::ser::Error::custom(format!("{err:?}")))?,
+        )
+        .assume_utc();
+        ser.serialize_str(&time.unix_timestamp().to_string())
+    }
+
+    pub(crate) fn deserialize<'de, D>(deserializer: D) -> Result<Date, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let time = time::serde::iso8601::deserialize(deserializer)?;
+        Ok(time.date())
+    }
+}
