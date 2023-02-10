@@ -15,6 +15,8 @@ pub mod announcement;
 pub mod application;
 /// Data structures for ser/de of attachment-related resources
 pub mod attachment;
+/// Data structures for ser/de of auth-related resources
+pub mod auth;
 /// Data structures for ser/de of card-related resources
 pub mod card;
 /// Data structures for ser/de of context-related resources
@@ -70,6 +72,7 @@ pub mod prelude {
     pub use super::{
         account::{Account, Source},
         attachment::{Attachment, MediaType},
+        auth,
         card::Card,
         context::Context,
         custom_emoji::CustomEmoji,

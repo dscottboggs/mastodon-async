@@ -1,4 +1,4 @@
-use is_variant::IsVariant;
+use derive_is_enum_variant::is_enum_variant;
 use isolang::Language;
 use serde::{Deserialize, Serialize};
 
@@ -101,7 +101,7 @@ struct PreferencesSerializer {
 }
 
 /// Whether media attachments should be automatically displayed or blurred/hidden.
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, IsVariant)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, is_enum_variant)]
 #[serde(rename_all = "snake_case")]
 pub enum MediaExpansion {
     /// Hide media marked as sensitive
