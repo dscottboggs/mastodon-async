@@ -1,8 +1,6 @@
+use crate::entities::auth::Scopes;
 use derive_builder::Builder;
 use serde::Serialize;
-// use try_from::TryInto;
-
-use crate::scopes::Scopes;
 
 /// Represents an application that can be registered with a mastodon instance
 #[derive(Clone, Builder, Debug, Default, Serialize, PartialEq)]
@@ -44,13 +42,13 @@ impl App {
     /// // Example
     ///
     /// ```
-    /// use mastodon_async::{apps::App, scopes::Scopes};
+    /// use mastodon_async::{apps::App, prelude::*};
     ///
     /// let mut builder = App::builder();
     /// builder.client_name("mastodon-async-test");
     /// let app = builder.build().unwrap();
     /// let scopes = app.scopes();
-    /// assert_eq!(scopes, &Scopes::read_all());
+    /// assert_eq!(scopes, &auth::Scopes::read_all());
     /// ```
     pub fn scopes(&self) -> &Scopes {
         &self.scopes

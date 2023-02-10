@@ -2,17 +2,17 @@ use std::{
     cmp::{Ordering, PartialEq, PartialOrd},
     collections::HashSet,
     fmt,
-    ops::BitOr,
+    ops::{BitOr, Deref},
     str::FromStr,
 };
 
 use is_variant::IsVariant;
-use serde::ser::{Serialize, Serializer};
 
-use crate::errors::Error;
+use crate::error::Error;
 use serde::{
     de::{self, Visitor},
-    Deserialize, Deserializer,
+    ser::Serializer,
+    Deserialize, Deserializer, Serialize,
 };
 
 /// Represents a set of OAuth scopes
@@ -20,11 +20,11 @@ use serde::{
 /// // Example
 ///
 /// ```rust
-/// use mastodon_async::prelude::*;
+/// use mastodon_async_entities::prelude::*;
 ///
-/// let read = Scopes::read_all();
-/// let write = Scopes::write_all();
-/// let follow = Scopes::follow();
+/// let read = auth::Scopes::read_all();
+/// let write = auth::Scopes::write_all();
+/// let follow = auth::Scopes::follow();
 /// let all = read | write | follow;
 /// ```
 #[derive(Clone)]
@@ -85,7 +85,7 @@ impl Scopes {
     /// Represents all available oauth scopes: "read write follow push"
     ///
     /// ```
-    /// use mastodon_async::scopes::Scopes;
+    /// use mastodon_async_entities::auth::Scopes;
     ///
     /// let scope = Scopes::all();
     /// assert_eq!(&format!("{}", scope), "read write follow push");
@@ -97,7 +97,7 @@ impl Scopes {
     /// Represents the full "read" scope
     ///
     /// ```
-    /// use mastodon_async::scopes::Scopes;
+    /// use mastodon_async_entities::auth::Scopes;
     ///
     /// let scope = Scopes::read_all();
     /// assert_eq!(&format!("{}", scope), "read");
@@ -109,7 +109,7 @@ impl Scopes {
     /// Represents a specific "read:___" scope
     ///
     /// ```
-    /// use mastodon_async::scopes::{Read, Scopes};
+    /// use mastodon_async_entities::auth::scopes::{Read, Scopes};
     ///
     /// let scope = Scopes::read(Read::Accounts);
     /// assert_eq!(&format!("{}", scope), "read:accounts");
@@ -121,7 +121,7 @@ impl Scopes {
     /// Represents the full "write" scope
     ///
     /// ```
-    /// use mastodon_async::scopes::Scopes;
+    /// use mastodon_async_entities::auth::Scopes;
     ///
     /// let scope = Scopes::write_all();
     /// assert_eq!(&format!("{}", scope), "write");
@@ -133,7 +133,7 @@ impl Scopes {
     /// Represents a specific "write:___" scope
     ///
     /// ```
-    /// use mastodon_async::scopes::{Scopes, Write};
+    /// use mastodon_async_entities::auth::scopes::{Scopes, Write};
     ///
     /// let scope = Scopes::write(Write::Accounts);
     /// assert_eq!(&format!("{}", scope), "write:accounts");
@@ -145,7 +145,7 @@ impl Scopes {
     /// Represents the "follow" scope
     ///
     /// ```
-    /// use mastodon_async::scopes::Scopes;
+    /// use mastodon_async_entities::auth::Scopes;
     ///
     /// let scope = Scopes::follow();
     /// assert_eq!(&format!("{}", scope), "follow");
@@ -157,7 +157,7 @@ impl Scopes {
     /// Represents the full "push" scope
     ///
     /// ```
-    /// use mastodon_async::scopes::Scopes;
+    /// use mastodon_async_entities::auth::Scopes;
     ///
     /// let scope = Scopes::push();
     /// assert_eq!(&format!("{}", scope), "push");
@@ -171,10 +171,10 @@ impl Scopes {
     /// // Example
     ///
     /// ```rust
-    /// use mastodon_async::prelude::*;
+    /// use mastodon_async_entities::prelude::*;
     ///
-    /// let read = Scopes::read_all();
-    /// let write = Scopes::write_all();
+    /// let read = auth::Scopes::read_all();
+    /// let write = auth::Scopes::write_all();
     /// let read_write = read.and(write);
     /// ```
     pub fn and(self, other: Scopes) -> Scopes {
@@ -225,6 +225,13 @@ impl Default for Scopes {
     }
 }
 
+impl Deref for Scopes {
+    type Target = HashSet<Scope>;
+    fn deref(&self) -> &Self::Target {
+        &self.scopes
+    }
+}
+
 impl fmt::Debug for Scopes {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "[")?;
@@ -256,8 +263,7 @@ impl fmt::Display for Scopes {
 }
 
 /// Permission scope of the application.
-/// [Details on what each permission provides][1]
-/// [1]: https://github.com/tootsuite/documentation/blob/master/Using-the-API/OAuth-details.md)
+/// [Details on what each permission provides](https://github.com/tootsuite/documentation/blob/master/Using-the-API/OAuth-details.md)
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, IsVariant)]
 #[serde(rename_all = "lowercase")]
 pub enum Scope {
@@ -288,7 +294,7 @@ impl FromStr for Scope {
                 let w: Write = Write::from_str(&write[6..])?;
                 Scope::Write(Some(w))
             }
-            _ => return Err(Error::Other("Unknown scope".to_string())),
+            _ => return Err(Error::UnknownScope(s.to_owned())),
         })
     }
 }
@@ -406,7 +412,7 @@ impl FromStr for Read {
             "reports" => Read::Reports,
             "search" => Read::Search,
             "statuses" => Read::Statuses,
-            _ => return Err(Error::Other("Unknown 'read' subcategory".to_string())),
+            _ => return Err(Error::UnknownScope(s.to_owned())),
         })
     }
 }
@@ -501,7 +507,7 @@ impl FromStr for Write {
             "notifications" => Write::Notifications,
             "reports" => Write::Reports,
             "statuses" => Write::Statuses,
-            _ => return Err(Error::Other("Unknown 'write' subcategory".to_string())),
+            _ => return Err(Error::UnknownScope(s.to_owned())),
         })
     }
 }

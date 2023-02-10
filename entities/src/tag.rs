@@ -15,7 +15,7 @@ pub struct Tag {
     pub history: Vec<History>,
     /// Whether the current token’s authorized user is following this tag.
     ///
-    /// `None` when querying without an authenticated token.
+    /// `None` when querying without an authenticated token.,
     pub following: Option<bool>,
 }
 
