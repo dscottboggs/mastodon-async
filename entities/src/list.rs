@@ -1,4 +1,4 @@
-use is_variant::IsVariant;
+use derive_is_enum_variant::is_enum_variant;
 use serde::{Deserialize, Serialize};
 
 use crate::ListId;
@@ -17,7 +17,7 @@ pub struct List {
 }
 
 /// Which replies should be shown in the list.
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq, IsVariant)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq, is_enum_variant)]
 #[serde(rename_all = "lowercase")]
 pub enum RepliesPolicy {
     /// Show replies to any followed user

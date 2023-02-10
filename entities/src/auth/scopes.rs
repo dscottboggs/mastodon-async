@@ -6,9 +6,9 @@ use std::{
     str::FromStr,
 };
 
-use derive_is_enum_variant::is_enum_variant;
-
 use crate::error::Error;
+
+use derive_is_enum_variant::is_enum_variant;
 use serde::{
     de::{self, Visitor},
     ser::Serializer,
@@ -22,9 +22,9 @@ use serde::{
 /// ```rust
 /// use mastodon_async_entities::prelude::*;
 ///
-/// let read = Scopes::read_all();
-/// let write = Scopes::write_all();
-/// let follow = Scopes::follow();
+/// let read = auth::Scopes::read_all();
+/// let write = auth::Scopes::write_all();
+/// let follow = auth::Scopes::follow();
 /// let all = read | write | follow;
 /// ```
 #[derive(Clone)]
