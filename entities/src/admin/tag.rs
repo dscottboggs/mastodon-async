@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{tag, TagId};
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Tag {
     /// Non-admin data related to this hashtag
     #[serde(flatten)]
