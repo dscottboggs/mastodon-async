@@ -5,6 +5,7 @@ use uuid::Uuid;
 
 use crate::{
     apps::{App, AppBuilder},
+    entities::auth::Scopes,
     helpers::read_response::read_response,
     scopes::Scopes,
     Data, Error, Mastodon, Result,
@@ -234,7 +235,7 @@ impl Registered {
     ///         "the-client-id",
     ///         "the-client-secret",
     ///         "https://example.com/redirect",
-    ///         Scopes::read_all(),
+    ///         auth::Scopes::read_all(),
     ///         false,
     ///     );
     ///     let url = registration.authorize_url().unwrap();
@@ -279,7 +280,7 @@ impl Registered {
     /// let orig_client_id = "some-client_id";
     /// let orig_client_secret = "some-client-secret";
     /// let orig_redirect = "https://example.social/redirect";
-    /// let orig_scopes = Scopes::all();
+    /// let orig_scopes = auth::Scopes::all();
     /// let orig_force_login = false;
     ///
     /// let registered = Registered::from_parts(
