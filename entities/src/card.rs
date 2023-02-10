@@ -1,6 +1,6 @@
 //! Module representing cards of statuses.
 
-use crate::{conversion, status::TagHistory};
+use crate::{conversion, tag};
 use is_variant::IsVariant;
 use serde::{Deserialize, Serialize};
 use url::Url;
@@ -67,7 +67,7 @@ pub struct TrendsLink {
     #[serde(flatten)]
     pub card: Card,
     /// The history of this trend
-    pub history: Vec<TagHistory>,
+    pub history: Vec<tag::History>,
 }
 
 #[cfg(test)]
