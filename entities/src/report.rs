@@ -1,5 +1,5 @@
 //! module containing information about a finished report of a user.
-use is_variant::IsVariant;
+use derive_is_enum_variant::is_enum_variant;
 use serde::{Deserialize, Serialize};
 use time::{serde::iso8601, OffsetDateTime};
 
@@ -36,7 +36,7 @@ pub struct Report {
     pub target_account: Account,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, IsVariant)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, is_enum_variant)]
 #[serde(rename_all = "lowercase")]
 pub enum Category {
     /// Malicious, fake, or repetitive content

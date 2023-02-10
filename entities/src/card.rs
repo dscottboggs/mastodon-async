@@ -1,7 +1,7 @@
 //! Module representing cards of statuses.
 
 use crate::{conversion, tag};
-use is_variant::IsVariant;
+use derive_is_enum_variant::is_enum_variant;
 use serde::{Deserialize, Serialize};
 use url::Url;
 
@@ -47,7 +47,7 @@ pub struct Card {
 }
 
 /// The type of the preview card.
-#[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq, IsVariant)]
+#[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq, is_enum_variant)]
 #[serde(rename_all = "lowercase")]
 pub enum CardType {
     /// Link OEmbed
