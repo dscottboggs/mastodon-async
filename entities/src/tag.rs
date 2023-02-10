@@ -5,7 +5,7 @@ use time::Date;
 /// Represents a hashtag used within the content of a status.
 ///
 /// See also [the API documentation](https://docs.joinmastodon.org/entities/Tag/)
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
 pub struct Tag {
     /// The value of the hashtag after the `#` sign.
     pub name: String,
