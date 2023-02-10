@@ -116,8 +116,6 @@ pub mod page;
 pub mod registration;
 /// Requests
 pub mod requests;
-/// OAuth Scopes
-pub mod scopes;
 
 #[macro_use]
 mod macros;
@@ -126,8 +124,8 @@ pub mod polling_time;
 /// Automatically import the things you need
 pub mod prelude {
     pub use crate::{
-        entities::prelude::*, scopes::Scopes, Data, Mastodon, NewStatus, NewStatusBuilder,
-        Registration, StatusesRequest, Visibility,
+        entities::prelude::*, Data, Mastodon, NewStatus, NewStatusBuilder, Registration,
+        StatusesRequest, Visibility,
     };
     // Legacy alias; TODO remove for 2.0
     pub use super::entities::status::NewStatusBuilder as StatusBuilder;
