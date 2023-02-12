@@ -2,7 +2,7 @@ use derive_is_enum_variant::is_enum_variant;
 use serde::{de::Visitor, Deserialize, Deserializer, Serialize};
 use time::{serde::iso8601, OffsetDateTime};
 
-use crate::{FilterId, StatusId};
+use crate::{FilterId, StatusId, KeywordId, FilteredStatusId};
 
 /// Represents a user-defined filter for determining which statuses should not
 /// be shown to the user.
@@ -126,7 +126,7 @@ impl<'de> Deserialize<'de> for Action {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Keyword {
     /// The ID of the FilterKeyword in the database.
-    id: String,
+    id: KeywordId,
     /// The phrase to be matched against.
     keyword: String,
     /// Should the filter consider word boundaries? See [implementation guidelines
@@ -146,12 +146,14 @@ pub struct Keyword {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Status {
     /// The ID of the FilterStatus in the database.
-    id: String,
+    id: FilteredStatusId,
     /// The ID of the filtered Status in the database.
-    status_id: String,
+    status_id: StatusId,
 }
 
 mod v1 {
+    use crate::FilterId;
+
     pub use super::FilterContext;
     use serde::{Deserialize, Serialize};
     use time::{serde::iso8601, OffsetDateTime};
@@ -160,7 +162,7 @@ mod v1 {
     #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
     pub struct Filter {
         /// The ID of the Filter in the database.
-        pub id: String,
+        pub id: FilterId,
         /// The text to be filtered.
         pub phrase: String,
         /// The contexts in which the filter should be applied.
@@ -190,10 +192,10 @@ pub struct Result {
 
 #[cfg(test)]
 mod tests {
-    #[cfg(feature = "json")]
+    use time::format_description::well_known::Iso8601;
+
     use super::*;
 
-    #[cfg(feature = "json")]
     #[test]
     fn test_filter_action_serialize_and_deserialize() {
         use Action::*;
@@ -216,11 +218,88 @@ mod tests {
         // This behavior is specified by the spec https://docs.joinmastodon.org/entities/Filter/#filter_action
 
         // improper value
-        let subject: Result<Action, _> = serde_json::from_str("[1, 2, 3]");
+        let subject: std::result::Result<Action, _> = serde_json::from_str("[1, 2, 3]");
         let subject = subject.expect_err("value was not expected to be valid");
         assert_eq!(
             subject.to_string(),
             r#"invalid type: sequence, expected "warn" or "hide" (or really any string; any string other than "hide" will deserialize to "warn") at line 1 column 0"#
         );
+    }
+
+    #[test]
+    fn test_v1_filter_example() {
+        let example = r#"{
+          "id": "8449",
+          "phrase": "test",
+          "context": [
+            "home",
+            "notifications",
+            "public",
+            "thread"
+          ],
+          "whole_word": false,
+          "expires_at": "2019-11-26T09:08:06.254Z",
+          "irreversible": true
+        }"#;
+        let subject: v1::Filter = serde_json::from_str(example).unwrap();
+        assert_eq!(subject.id, FilterId::new("8449"));
+        assert_eq!(subject.phrase, "test");
+        assert!(subject.context.iter().any(|ctx| ctx.is_home()));
+        assert!(subject.context.iter().any(|ctx| ctx.is_notifications()));
+        assert!(subject.context.iter().any(|ctx| ctx.is_thread()));
+        assert!(subject.context.iter().any(|ctx| ctx.is_public()));
+        assert!(!subject.whole_word);
+        assert!(subject.expires_at.is_some());
+        assert_eq!(
+            subject.expires_at.unwrap(),
+            OffsetDateTime::parse("2019-11-26T09:08:06.254Z", &Iso8601::PARSING).unwrap()
+        );
+        assert!(subject.irreversible);
+    }
+
+    #[test]
+    fn test_filter_example() {
+        let example = r#"{
+        	"id": "19972",
+        	"title": "Test filter",
+        	"context": [
+        		"home"
+        	],
+        	"expires_at": "2022-09-20T17:27:39.296Z",
+        	"filter_action": "warn",
+        	"keywords": [
+        		{
+        			"id": "1197",
+        			"keyword": "bad word",
+        			"whole_word": false
+        		}
+        	],
+        	"statuses": [
+        		{
+        			"id": "1",
+        			"status_id": "109031743575371913"
+        		}
+            ]
+        }"#;
+        let subject: Filter = serde_json::from_str(example).unwrap();
+        assert_eq!(subject.id, FilterId::new("19972"));
+        assert_eq!(subject.title, "Test filter");
+        assert!(subject.context[0].is_home());
+        assert_eq!(subject.context.len(), 1);
+        assert!(subject.expires_at.is_some());
+        assert_eq!(
+            subject.expires_at.unwrap(),
+            OffsetDateTime::parse("2022-09-20T17:27:39.296Z", &Iso8601::PARSING).unwrap()
+        );
+        assert!(subject.filter_action.is_warn());
+        let kw = &subject.keywords[0];
+        assert_eq!(kw.id, KeywordId::new("1197"));
+        assert_eq!(kw.keyword, "bad word");
+        assert!(!kw.whole_word);
+        assert_eq!(subject.keywords.len(), 1);
+        let status = &subject.statuses[0];
+        assert_eq!(status.id, FilteredStatusId::new("1"));
+        assert_eq!(status.status_id, StatusId::new("109031743575371913"));
+        assert_eq!(subject.statuses.len(), 1);
     }
 }
