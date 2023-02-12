@@ -2,7 +2,7 @@ use derive_is_enum_variant::is_enum_variant;
 use serde::{de::Visitor, Deserialize, Deserializer, Serialize};
 use time::{serde::iso8601, OffsetDateTime};
 
-use crate::{FilterId, StatusId, KeywordId, FilteredStatusId};
+use crate::{FilterId, FilteredStatusId, KeywordId, StatusId};
 
 /// Represents a user-defined filter for determining which statuses should not
 /// be shown to the user.
