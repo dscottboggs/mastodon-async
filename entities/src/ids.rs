@@ -69,4 +69,3 @@ define_ids!(
 As [`Application`] doesn't have an ID, I'm not sure what you're supposed to compare this to." as ApplicationId(from i64, as i64 ref),
     "a role ID" as RoleId(from i64, as i64 ref),
 );
-
