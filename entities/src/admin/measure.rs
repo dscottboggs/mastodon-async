@@ -11,7 +11,7 @@ pub struct Measure {
     /// The units associated with this data item’s value, if applicable.
     pub unit: Option<String>,
     /// The numeric total associated with the requested measure.
-    #[serde(with = "conversion::string_to_u64")]
+    #[serde(with = "conversion::string_to::u64")]
     pub total: u64,
     /// A human-readable formatted value for this data item.
     #[serde(default)]
@@ -20,7 +20,7 @@ pub struct Measure {
     /// period. Previous period is calculated by subtracting the start_at and
     /// end_at dates, then offsetting both start and end dates backwards by the
     /// length of the time period.
-    #[serde(with = "conversion::string_to_u64::option")]
+    #[serde(with = "conversion::string_to::u64::option")]
     pub previous_total: Option<u64>,
     /// The data available for the requested measure, split into daily buckets.
     pub data: Vec<Data>,
@@ -33,7 +33,7 @@ pub struct Data {
     #[serde(with = "iso8601")]
     pub date: OffsetDateTime,
     /// The numeric value for the requested measure.
-    #[serde(with = "conversion::string_to_u64")]
+    #[serde(with = "conversion::string_to::u64")]
     pub value: u64,
 }
 
