@@ -58,6 +58,7 @@ pub mod search_result;
 pub mod status;
 /// Data structures for ser/de of tags.
 pub mod tag;
+mod test;
 /// Data structure for ser/de visibility
 pub mod visibility;
 
