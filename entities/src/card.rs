@@ -72,145 +72,112 @@ pub struct TrendsLink {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::Value;
+    use crate::serde_value_test;
 
     use super::*;
 
-    #[test]
-    fn test_video() {
-        let example = r#"{
-          "url": "https://www.youtube.com/watch?v=OMv_EPMED8Y",
-          "title": "♪ Brand New Friend (Christmas Song!)",
-          "description": "",
-          "type": "video",
-          "author_name": "YOGSCAST Lewis & Simon",
-          "author_url": "https://www.youtube.com/user/BlueXephos",
-          "provider_name": "YouTube",
-          "provider_url": "https://www.youtube.com/",
-          "html": "<iframe width=\"480\" height=\"270\" src=\"https://www.youtube.com/embed/OMv_EPMED8Y?feature=oembed\" frameborder=\"0\" allowfullscreen=\"\"></iframe>",
-          "width": 480,
-          "height": 270,
-          "image": "https://files.mastodon.social/preview_cards/images/014/179/145/original/9cf4b7cf5567b569.jpeg",
-          "embed_url": "",
-          "blurhash": "UvK0HNkV,:s9xBR%njog0fo2W=WBS5ozofV@"
-        }"#;
-        let subject: Card = serde_json::from_str(example).expect("deserialize");
-        assert_eq!(
-            serde_json::to_value(subject).expect("value convert"),
-            serde_json::from_str::<Value>(example).expect("deserialize 2")
-        );
-    }
+    serde_value_test!(test_video(Card): r#"{
+        "url": "https://www.youtube.com/watch?v=OMv_EPMED8Y",
+        "title": "♪ Brand New Friend (Christmas Song!)",
+        "description": "",
+        "type": "video",
+        "author_name": "YOGSCAST Lewis & Simon",
+        "author_url": "https://www.youtube.com/user/BlueXephos",
+        "provider_name": "YouTube",
+        "provider_url": "https://www.youtube.com/",
+        "html": "<iframe width=\"480\" height=\"270\" src=\"https://www.youtube.com/embed/OMv_EPMED8Y?feature=oembed\" frameborder=\"0\" allowfullscreen=\"\"></iframe>",
+        "width": 480,
+        "height": 270,
+        "image": "https://files.mastodon.social/preview_cards/images/014/179/145/original/9cf4b7cf5567b569.jpeg",
+        "embed_url": "",
+        "blurhash": "UvK0HNkV,:s9xBR%njog0fo2W=WBS5ozofV@"
+    }"#);
 
-    #[test]
-    fn test_photo() {
-        let example = r#"{
-            "url": "https://www.flickr.com/photos/tomfenskephotography/49088768431/",
-            "title": "Oregon",
-            "description": "",
-            "type": "photo",
-            "author_name": "Tom Fenske Photography",
-            "author_url": "https://www.flickr.com/photos/tomfenskephotography/",
-            "provider_name": "Flickr",
-            "provider_url": "https://www.flickr.com/",
-            "html": "",
-            "width": 1024,
-            "height": 427,
-            "image": "https://files.mastodon.social/preview_cards/images/014/287/139/original/651b1c6976817824.jpeg",
-            "embed_url": "https://live.staticflickr.com/65535/49088768431_6a4322b3bb_b.jpg",
-            "blurhash": "UnE{@jt6M_oIAhjYs+ayT2WBf9ayRkkDXAj["
-        }"#;
-        let subject: Card = serde_json::from_str(example).expect("deserialize");
-        assert_eq!(
-            serde_json::to_value(subject).expect("value convert"),
-            serde_json::from_str::<Value>(example).expect("deserialize 2")
-        );
-    }
+    serde_value_test!(test_photo(Card): r#"{
+        "url": "https://www.flickr.com/photos/tomfenskephotography/49088768431/",
+        "title": "Oregon",
+        "description": "",
+        "type": "photo",
+        "author_name": "Tom Fenske Photography",
+        "author_url": "https://www.flickr.com/photos/tomfenskephotography/",
+        "provider_name": "Flickr",
+        "provider_url": "https://www.flickr.com/",
+        "html": "",
+        "width": 1024,
+        "height": 427,
+        "image": "https://files.mastodon.social/preview_cards/images/014/287/139/original/651b1c6976817824.jpeg",
+        "embed_url": "https://live.staticflickr.com/65535/49088768431_6a4322b3bb_b.jpg",
+        "blurhash": "UnE{@jt6M_oIAhjYs+ayT2WBf9ayRkkDXAj["
+    }"#);
 
-    #[test]
-    fn test_link() {
-        let example = r#"{
-            "url": "https://www.theguardian.com/money/2019/dec/07/i-lost-my-193000-inheritance-with-one-wrong-digit-on-my-sort-code",
-            "title": "‘I lost my £193,000 inheritance – with one wrong digit on my sort code’",
-            "description": "When Peter Teich’s money went to another Barclays customer, the bank offered £25 as a token gesture",
-            "type": "link",
-            "author_name": "",
-            "author_url": "",
-            "provider_name": "",
-            "provider_url": "",
-            "html": "",
-            "width": 0,
-            "height": 0,
-            "image": null,
-            "embed_url": "",
-            "blurhash": null
-        }"#;
-        let subject: Card = serde_json::from_str(example).expect("deserialize");
-        assert_eq!(
-            serde_json::to_value(subject).expect("value convert"),
-            serde_json::from_str::<Value>(example).expect("deserialize 2")
-        );
-    }
+    serde_value_test!(test_link(Card): r#"{
+        "url": "https://www.theguardian.com/money/2019/dec/07/i-lost-my-193000-inheritance-with-one-wrong-digit-on-my-sort-code",
+        "title": "‘I lost my £193,000 inheritance – with one wrong digit on my sort code’",
+        "description": "When Peter Teich’s money went to another Barclays customer, the bank offered £25 as a token gesture",
+        "type": "link",
+        "author_name": "",
+        "author_url": "",
+        "provider_name": "",
+        "provider_url": "",
+        "html": "",
+        "width": 0,
+        "height": 0,
+        "image": null,
+        "embed_url": "",
+        "blurhash": null
+    }"#);
 
-    #[test]
-    fn test_trending_link() {
-        let example = r#"{
-            "url": "https://www.nbcnews.com/specials/plan-your-vote-2022-elections/index.html",
-            "title": "Plan Your Vote: 2022 Elections",
-            "description": "Everything you need to know about the voting rules where you live, including registration, mail-in voting, changes since 2020, and more.",
-            "type": "link",
-            "author_name": "NBC News",
-            "author_url": "",
-            "provider_name": "NBC News",
-            "provider_url": "",
-            "html": "",
-            "width": 400,
-            "height": 225,
-            "image": "https://files.mastodon.social/cache/preview_cards/images/045/027/478/original/0783d5e91a14fd49.jpeg",
-            "embed_url": "",
-            "blurhash": "UcQmF#ay~qofj[WBj[j[~qof9Fayofofayay",
-            "history": [
-              {
-                "day": "1661817600",
-                "accounts": "7",
-                "uses": "7"
-              },
-              {
-                "day": "1661731200",
-                "accounts": "23",
-                "uses": "23"
-              },
-              {
-                "day": "1661644800",
-                "accounts": "0",
-                "uses": "0"
-              },
-              {
-                "day": "1661558400",
-                "accounts": "0",
-                "uses": "0"
-              },
-              {
-                "day": "1661472000",
-                "accounts": "0",
-                "uses": "0"
-              },
-              {
-                "day": "1661385600",
-                "accounts": "0",
-                "uses": "0"
-              },
-              {
-                "day": "1661299200",
-                "accounts": "0",
-                "uses": "0"
-              }
-            ]
-        }"#;
-
-        let subject: TrendsLink = serde_json::from_str(example).expect("deserialize");
-        assert_eq!(
-            serde_json::to_value(subject).expect("value convert"),
-            serde_json::from_str::<Value>(example).expect("deserialize 2")
-        );
-    }
+    serde_value_test!(test_trending_link(TrendsLink): r#"{
+        "url": "https://www.nbcnews.com/specials/plan-your-vote-2022-elections/index.html",
+        "title": "Plan Your Vote: 2022 Elections",
+        "description": "Everything you need to know about the voting rules where you live, including registration, mail-in voting, changes since 2020, and more.",
+        "type": "link",
+        "author_name": "NBC News",
+        "author_url": "",
+        "provider_name": "NBC News",
+        "provider_url": "",
+        "html": "",
+        "width": 400,
+        "height": 225,
+        "image": "https://files.mastodon.social/cache/preview_cards/images/045/027/478/original/0783d5e91a14fd49.jpeg",
+        "embed_url": "",
+        "blurhash": "UcQmF#ay~qofj[WBj[j[~qof9Fayofofayay",
+        "history": [
+          {
+            "day": "1661817600",
+            "accounts": "7",
+            "uses": "7"
+          },
+          {
+            "day": "1661731200",
+            "accounts": "23",
+            "uses": "23"
+          },
+          {
+            "day": "1661644800",
+            "accounts": "0",
+            "uses": "0"
+          },
+          {
+            "day": "1661558400",
+            "accounts": "0",
+            "uses": "0"
+          },
+          {
+            "day": "1661472000",
+            "accounts": "0",
+            "uses": "0"
+          },
+          {
+            "day": "1661385600",
+            "accounts": "0",
+            "uses": "0"
+          },
+          {
+            "day": "1661299200",
+            "accounts": "0",
+            "uses": "0"
+          }
+        ]
+    }"#);
 }

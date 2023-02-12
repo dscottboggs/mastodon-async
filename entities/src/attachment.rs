@@ -170,13 +170,11 @@ pub struct ProcessedAttachment {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::Value;
+    use crate::serde_value_test;
 
     use super::*;
 
-    #[test]
-    fn test_deserialize_with_image() {
-        let example = r##"{
+    serde_value_test!(test_deserialize_with_image(Attachment): r##"{
   "id": "22345792",
   "type": "image",
   "url": "https://files.mastodon.social/media_attachments/files/022/345/792/original/57859aede991da25.jpeg",
@@ -203,17 +201,9 @@ mod tests {
   },
   "description": "test media description",
   "blurhash": "UFBWY:8_0Jxv4mx]t8t64.%M-:IUWGWAt6M}"
-}"##;
-        let example = example.replace(char::is_whitespace, "");
-        let subject: Attachment = serde_json::from_str(&example).expect("deserialize");
-        assert_eq!(
-            serde_json::to_value(subject).expect("convert to value"),
-            serde_json::from_str::<Value>(&example).expect("deserialize (to Value)")
-        )
-    }
-    #[test]
-    fn test_deserialize_with_audio() {
-        let example = r##"{
+}"##);
+
+    serde_value_test!(test_deserialize_with_audio(Attachment): r##"{
   "id": "21165404",
   "type": "audio",
   "url": "https://files.mastodon.social/media_attachments/files/021/165/404/original/a31a4a46cd713cd2.mp3",
@@ -233,16 +223,9 @@ mod tests {
   },
   "description": null,
   "blurhash": null
-}"##;
-        let subject: Attachment = serde_json::from_str(example).expect("deserialize");
-        assert_eq!(
-            serde_json::to_value(subject).expect("convert to value"),
-            serde_json::from_str::<Value>(example).expect("deserialize (to Value)")
-        )
-    }
-    #[test]
-    fn test_deserialize_with_video() {
-        let example = r##"{
+}"##);
+
+    serde_value_test!(test_deserialize_with_video(Attachment): r##"{
   "id": "22546306",
   "type": "video",
   "url": "https://files.mastodon.social/media_attachments/files/022/546/306/original/dab9a597f68b9745.mp4",
@@ -276,16 +259,9 @@ mod tests {
   },
   "description": null,
   "blurhash": "U58E0g8_0M.94T?bIr00?bD%NGoM?bD%oLt7"
-}"##;
-        let subject: Attachment = serde_json::from_str(example).expect("deserialize");
-        assert_eq!(
-            serde_json::to_value(subject).expect("convert to value"),
-            serde_json::from_str::<Value>(example).expect("deserialize (to Value)")
-        )
-    }
-    #[test]
-    fn test_deserialize_with_gifv() {
-        let example = r##"{
+}"##);
+
+    serde_value_test!(test_deserialize_with_gifv(Attachment): r##"{
   "id": "21130559",
   "type": "gifv",
   "url": "https://files.mastodon.social/media_attachments/files/021/130/559/original/bc84838f77991326.mp4",
@@ -317,11 +293,5 @@ mod tests {
   "description": null,
   "blurhash": "URHT%Jm,2a1d%MRO%LozkrNH$*n*oMn$Rjt7"
 }
-"##;
-        let subject: Attachment = serde_json::from_str(example).expect("deserialize");
-        assert_eq!(
-            serde_json::to_value(subject).expect("convert to value"),
-            serde_json::from_str::<Value>(example).expect("deserialize (to Value)")
-        )
-    }
+"##);
 }
