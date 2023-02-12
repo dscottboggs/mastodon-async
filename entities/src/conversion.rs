@@ -36,6 +36,59 @@ pub(crate) mod string_to_u64 {
 
         deserializer.deserialize_str(StringToIntVisitor)
     }
+
+    pub(crate) mod option {
+        use serde::{
+            de::{self, Visitor},
+            Deserializer, Serializer,
+        };
+
+        pub(crate) fn serialize<S>(value: &Option<u64>, ser: S) -> Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+        {
+            if let Some(value) = value {
+                ser.serialize_str(&value.to_string())
+            } else {
+                ser.serialize_none()
+            }
+        }
+
+        pub(crate) fn deserialize<'de, D>(deserializer: D) -> Result<Option<u64>, D::Error>
+        where
+            D: Deserializer<'de>,
+        {
+            struct StringToIntVisitor;
+
+            impl<'v> Visitor<'v> for StringToIntVisitor {
+                type Value = Option<u64>;
+                fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                    write!(
+                        formatter,
+                        "a string which can be parsed as an unsigned, 64-bit integer"
+                    )
+                }
+                fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+                where
+                    E: serde::de::Error,
+                {
+                    let v: u64 = v
+                        .parse()
+                        .map_err(|_| de::Error::invalid_value(de::Unexpected::Str(v), &self))?;
+                    Ok(Some(v))
+                }
+
+                fn visit_none<E>(self) -> Result<Self::Value, E>
+                where
+                    E: de::Error,
+                {
+                    Ok(None)
+                }
+            }
+
+            deserializer.deserialize_any(StringToIntVisitor)
+        }
+    }
 }
 
 pub(crate) mod maybe_empty_url {
