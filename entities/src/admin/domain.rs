@@ -54,3 +54,32 @@ pub enum BlockSeverity {
     /// Do nothing. Allows for rejecting media or reports
     Noop,
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_domain_block_example() {
+        let example = r#"{
+          "id": "1",
+          "domain": "example.com",
+          "created_at": "2022-11-16T08:15:34.238Z",
+          "severity": "noop",
+          "reject_media": false,
+          "reject_reports": false,
+          "private_comment": null,
+          "public_comment": null,
+          "obfuscate": false
+        }"#;
+        let subject: Block = serde_json::from_str(example).unwrap();
+        assert_eq!(subject.id, DomainBlockId::new("1"));
+        assert_eq!(subject.domain, "example.com");
+        assert!(subject.severity.is_noop());
+        assert!(!subject.reject_media);
+        assert!(!subject.reject_reports);
+        assert!(subject.private_comment.is_none());
+        assert!(subject.public_comment.is_none());
+        assert!(!subject.obfuscate);
+    }
+}
