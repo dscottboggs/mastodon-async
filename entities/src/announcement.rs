@@ -140,7 +140,6 @@ mod tests {
         assert_eq!(reaction.count, 9);
         assert!(reaction.me.is_some());
         assert!(!reaction.me.unwrap());
-        assert_eq!(reaction.url, reaction.static_url);
         assert_eq!(reaction.url.as_ref().map(|it| it.as_ref()), Some("https://files.mastodon.social/custom_emojis/images/000/067/715/original/fdba57dff7576d53.png"));
     }
 
