@@ -25,10 +25,10 @@ pub struct History {
     #[serde(with = "conversion::date_from_timestamp")]
     pub day: Date,
     /// The counted accounts signup attempts using that email domain within that day.
-    #[serde(with = "conversion::string_to_u64")]
+    #[serde(with = "conversion::string_to::u64")]
     pub accounts: u64,
     /// The counted IP signup attempts of that email domain within that day.
-    #[serde(with = "conversion::string_to_u64")]
+    #[serde(with = "conversion::string_to::u64")]
     pub uses: u64,
 }
 
