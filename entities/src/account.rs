@@ -11,7 +11,7 @@ use std::{num::ParseIntError, path::PathBuf, str::FromStr};
 use time::{serde::iso8601, OffsetDateTime};
 use url::Url;
 
-use crate::{custom_emoji::CustomEmoji, AccountId};
+use crate::{custom_emoji::CustomEmoji, AccountId, RoleId};
 
 /// A struct representing an Account.
 ///
@@ -336,7 +336,7 @@ impl CredentialsBuilder {
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
 pub struct Role {
     /// The ID of the Role in the database See also [the API reference](https://docs.joinmastodon.org/entities/Role/#id)
-    pub id: i64,
+    pub id: RoleId,
     /// The name of the role. See also [the API reference](https://docs.joinmastodon.org/entities/Role/#name)
     pub name: String,
     /// The hex code assigned to this role. If no hex code is assigned, the
@@ -348,7 +348,7 @@ pub struct Role {
     /// A bitmask that represents the sum of all permissions granted to the
     /// role. See also [the API reference](https://docs.joinmastodon.org/entities/Role/#permissions) and
     /// <https://docs.joinmastodon.org/entities/Role/#permission-flags>
-    #[serde(with = "role_permissions_serde::numeric_representation::stringified")]
+    #[serde(with = "role_permissions_serde::numeric_representation")]
     pub permissions: RolePermissions,
     /// Whether the role is publicly visible as a badge on user profiles. See also [the API reference](https://docs.joinmastodon.org/entities/Role/#highlighted)
     pub highlighted: bool,
@@ -567,5 +567,32 @@ mod tests {
         assert_eq!(RolePermissions::MANAGE_ROLES, 0x20000);
         assert_eq!(RolePermissions::MANAGE_USER_ACCESS, 0x40000);
         assert_eq!(RolePermissions::DELETE_USER_DATA, 0x80000);
+    }
+
+    #[test]
+    fn test_role_example() {
+        let example = r##"{
+        	"id": 3,
+        	"name": "Owner",
+        	"color": "#ff3838",
+        	"position": 1000,
+        	"permissions": 1,
+        	"highlighted": true,
+        	"created_at": "2022-09-08T22:48:07.983Z",
+        	"updated_at": "2022-09-08T22:48:07.983Z"
+        }"##;
+        let subject: Role = serde_json::from_str(example).unwrap();
+        assert_eq!(subject.id, RoleId::new(3));
+        assert_eq!(subject.name, "Owner");
+        let Color::Value { red, green, blue } = subject.color else {
+            panic!("color should be specified")
+        };
+        assert_eq!(red, 0xFF);
+        assert_eq!(green, 0x38);
+        assert_eq!(blue, 0x38);
+        assert_eq!(subject.position, 1000);
+        assert!(subject.permissions.has_administrator());
+        assert_eq!(subject.permissions, 1);
+        assert!(subject.highlighted);
     }
 }
