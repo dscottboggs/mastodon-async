@@ -600,7 +600,10 @@ mod tests {
         assert_eq!(subject.domain, "mastodon.social");
         let rule = &subject.rules[0];
         assert_eq!(rule.id, RuleId::new("1"));
-        assert_eq!(rule.text, "Sexually explicit or violent media must be marked as sensitive when posting");
+        assert_eq!(
+            rule.text,
+            "Sexually explicit or violent media must be marked as sensitive when posting"
+        );
     }
 
     #[test]
@@ -627,7 +630,10 @@ mod tests {
         }"#;
         let subject: DomainBlock = serde_json::from_str(example).unwrap();
         assert_eq!(subject.domain, "daji******.com");
-        assert_eq!(subject.digest, "3752f63a7079d60c2de5dceb8bd7608e86a15544eb78a494a482041c3684b37f");
+        assert_eq!(
+            subject.digest,
+            "3752f63a7079d60c2de5dceb8bd7608e86a15544eb78a494a482041c3684b37f"
+        );
         assert!(subject.severity.is_suspend());
         assert_eq!(subject.comment.unwrap(), "Inappropriate content");
     }

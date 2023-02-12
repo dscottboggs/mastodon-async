@@ -1,7 +1,7 @@
+use crate::conversion;
 use is_variant::IsVariant;
 use serde::{Deserialize, Serialize};
 use time::{serde::iso8601, OffsetDateTime};
-use crate::conversion;
 
 /// Represents a retention metric.
 ///
