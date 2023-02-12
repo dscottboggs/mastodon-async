@@ -1,4 +1,5 @@
 use crate::DomainBlockId;
+use is_variant::IsVariant;
 use serde::{Deserialize, Serialize};
 use time::{serde::iso8601, OffsetDateTime};
 
@@ -24,7 +25,8 @@ pub struct IpBlock {
 }
 
 /// The associated policy with some IP block.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, IsVariant)]
+#[serde(rename_all = "snake_case")]
 pub enum Severity {
     /// Any signup from this IP range will create a pending account
     SignUpRequiresApproval,
@@ -32,4 +34,27 @@ pub enum Severity {
     SignUpBlock,
     /// Any activity from this IP range will be rejected entirely
     NoAccess,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_ip_block_example() {
+        let example = r#"{
+          "id": "1",
+          "ip": "8.8.8.8/32",
+          "severity": "no_access",
+          "comment": "",
+          "created_at": "2022-11-16T07:22:00.501Z",
+          "expires_at": null
+        }"#;
+        let subject: IpBlock = serde_json::from_str(example).unwrap();
+        assert_eq!(subject.id, DomainBlockId::new("1"));
+        assert_eq!(subject.ip, "8.8.8.8/32");
+        assert!(subject.severity.is_no_access());
+        assert!(subject.comment.is_empty());
+        assert!(subject.expires_at.is_none());
+    }
 }
