@@ -24,3 +24,15 @@ impl Ord for CanonicalEmailBlock {
         self.canonical_email_hash.cmp(&other.canonical_email_hash)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::serde_value_test;
+
+    use super::*;
+
+    serde_value_test!(test_example(CanonicalEmailBlock): r#"{
+    	"id": "2",
+    	"canonical_email_hash": "b344e55d11b3fc25d0d53194e0475838bf17e9be67ce3e6469956222d9a34f9c"
+    }"#);
+}
