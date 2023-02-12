@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use time::{serde::iso8601, OffsetDateTime, Date};
+use time::{serde::iso8601, Date, OffsetDateTime};
 
 use crate::{conversion, EmailDomainBlockId};
 
