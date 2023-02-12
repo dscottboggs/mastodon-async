@@ -617,4 +617,18 @@ mod tests {
         );
         assert_eq!(subject.content, "<p>For inquiries not related specifically to the operation of this server, such as press inquiries, please contact <a href=\"mailto:press@joinmastodon.org\">press@joinmastodon.org</a>.</p>\n\n<h2>Funding</h2>\n\n<p>This server is crowdfunded by <a href=\"https://patreon.com/mastodon\">Patreon donations</a>. For a list of sponsors, see <a href=\"https://joinmastodon.org/sponsors\">joinmastodon.org</a>.</p>\n\n<h2>Reporting and moderation</h2>\n\n<p>When reporting accounts, please make sure to include at least a few posts that show rule-breaking behaviour, when applicable. If there is any additional context that might help make a decision, please also include it in the comment. This is especially important when the content is in a language nobody on the moderation team speaks.</p>\n\n<p>We usually handle reports within 24 hours. Please mind that you are not notified when a report you have made has led to a punitive action, and that not all punitive actions are externally visible. For first time offenses, we may opt to delete offending content, escalating to harsher measures on repeat offenses.</p>\n\n<h2>Impressum</h2>\n\n<p>Mastodon gGmbH<br>\nMühlenstraße 8a<br>\n14167 Berlin<br>\nGermany</p>\n\n<p>E-Mail-Adresse: hello@joinmastodon.org</p>\n\n<p>Vertretungsberechtigt: Eugen Rochko (Geschäftsführer)</p>\n\n<p>Umsatzsteuer Identifikationsnummer (USt-ID): DE344258260</p>\n\n<p>Handelsregister<br>\nGeführt bei: Amtsgericht Charlottenburg<br>\nNummer: HRB 230086 B</p>\n");
     }
+    #[test]
+    fn test_domain_block_example() {
+        let example = r#"{
+          "domain":"daji******.com",
+          "digest":"3752f63a7079d60c2de5dceb8bd7608e86a15544eb78a494a482041c3684b37f",
+          "severity":"suspend",
+          "comment":"Inappropriate content"
+        }"#;
+        let subject: DomainBlock = serde_json::from_str(example).unwrap();
+        assert_eq!(subject.domain, "daji******.com");
+        assert_eq!(subject.digest, "3752f63a7079d60c2de5dceb8bd7608e86a15544eb78a494a482041c3684b37f");
+        assert!(subject.severity.is_suspend());
+        assert_eq!(subject.comment.unwrap(), "Inappropriate content");
+    }
 }
