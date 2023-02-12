@@ -124,13 +124,13 @@ pub struct Activity {
     /// UNIX Timestamp at midnight at the first day of the week.
     pub week: String,
     /// The number of Statuses created since the week began (cast from an integer)
-    #[serde(with = "conversion::string_to_u64")]
+    #[serde(with = "conversion::string_to::u64")]
     pub statuses: u64,
     /// The number of user logins since the week began (cast from an integer)
-    #[serde(with = "conversion::string_to_u64")]
+    #[serde(with = "conversion::string_to::u64")]
     pub logins: u64,
     /// The number of user registrations since the week began (cast from an integer)
-    #[serde(with = "conversion::string_to_u64")]
+    #[serde(with = "conversion::string_to::u64")]
     pub registrations: u64,
 }
 
