@@ -291,7 +291,7 @@ mod tests {
         assert_eq!(acct.acct, "Gargron");
         assert_eq!(acct.display_name, "Eugen");
         assert!(!acct.locked);
-        assert!(!acct.bot.expect("bot"));
+        assert!(!acct.bot);
         assert!(acct.discoverable.expect("discoverable"));
         assert!(!acct.group);
         assert_eq!(
