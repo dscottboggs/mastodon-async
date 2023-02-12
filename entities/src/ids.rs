@@ -41,6 +41,8 @@ define_ids!(
     "an account ID" as AccountId,
     "an attachment ID" as AttachmentId,
     "a filter ID" as FilterId,
+    "a filter keyword ID" as KeywordId,
+    "the ID of an instance of a filtered status. See [`filter::Status`]" as FilteredStatusId,
     "a list ID" as ListId,
     "a mention ID" as MentionId,
     "a notification ID" as NotificationId,
