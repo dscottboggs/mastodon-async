@@ -124,5 +124,7 @@ mod tests {
 }"##;
         let account: Account = serde_json::from_str(data).expect("deserialize");
         assert_eq!(account.id, AccountId::new("108965278956942133"));
+        let ip = &account.ips[0];
+        assert_eq!(ip.ip.to_string(), "192.168.42.1");
     }
 }
