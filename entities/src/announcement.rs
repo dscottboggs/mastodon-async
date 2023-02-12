@@ -131,6 +131,17 @@ mod tests {
 }"##;
         let ann: Announcement = serde_json::from_str(sample).expect("deserialize");
         assert_eq!(ann.id, AnnouncementId::new("8"));
+        assert_eq!(ann.content, "<p>Looks like there was an issue processing audio attachments without embedded art since yesterday due to an experimental new feature. That issue has now been fixed, so you may see older posts with audio from other servers pop up in your feeds now as they are being finally properly processed. Sorry!</p>");
+        assert!(ann.starts_at.is_none());
+        assert!(ann.ends_at.is_none());
+        assert!(!ann.all_day);
+        let reaction = &ann.reactions[0];
+        assert_eq!(reaction.name, "bongoCat");
+        assert_eq!(reaction.count, 9);
+        assert!(reaction.me.is_some());
+        assert!(!reaction.me.unwrap());
+        assert_eq!(reaction.url, reaction.static_url);
+        assert_eq!(reaction.url.as_ref().map(|it| it.as_ref()), Some("https://files.mastodon.social/custom_emojis/images/000/067/715/original/fdba57dff7576d53.png"));
     }
 
     #[test]
