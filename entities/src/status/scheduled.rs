@@ -59,7 +59,7 @@ pub struct Poll {
     /// The poll options to be used.
     pub options: Vec<String>,
     /// How many seconds the poll should last before closing.
-    #[serde(with = "conversion::string_to_u64")]
+    #[serde(with = "conversion::string_to::u64")]
     pub expires_in: u64,
     /// Whether the poll allows multiple choices.
     pub multiple: Option<bool>,
