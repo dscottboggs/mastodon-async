@@ -598,6 +598,9 @@ mod tests {
 }"##;
         let subject: Instance = serde_json::from_str(example).expect("deserialize");
         assert_eq!(subject.domain, "mastodon.social");
+        let rule = &subject.rules[0];
+        assert_eq!(rule.id, RuleId::new("1"));
+        assert_eq!(rule.text, "Sexually explicit or violent media must be marked as sensitive when posting");
     }
 
     #[test]
