@@ -17,7 +17,7 @@ pub struct Notification {
     pub id: NotificationId,
     /// The type of event that resulted in the notification..
     #[serde(rename = "type")]
-    pub notification_type: NotificationType,
+    pub notification_type: Type,
     /// The timestamp of the notification.
     #[serde(with = "iso8601")]
     pub created_at: OffsetDateTime,
@@ -35,7 +35,7 @@ pub struct Notification {
 /// The type of notification.
 #[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq, is_enum_variant)]
 #[serde(rename_all = "snake_case")]
-pub enum NotificationType {
+pub enum Type {
     /// Someone mentioned you in their status
     Mention,
     /// Someone you enabled notifications for has posted a status
