@@ -22,7 +22,7 @@ pub struct Poll {
     /// How many votes have been received.
     pub votes_count: u64,
     /// How many unique accounts have voted on a multiple-choice poll. `None`
-    /// if [`multiple`] is `false`.
+    /// if [`multiple`](Poll::multiple) is `false`.
     pub voters_count: Option<u64>,
     /// Possible answers for the poll.
     pub options: Vec<PollOption>,

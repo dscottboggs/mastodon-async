@@ -15,7 +15,7 @@ pub struct NewStatus {
     ///
     /// Note that this means there is at this time no check provided by this
     /// type to ensure that this value is set when it is required by the API,
-    /// and an APIError should be expected from [`crate::Mastodon::new_status()`]
+    /// and an APIError should be expected from [`Mastodon::new_status()`](https://docs.rs/mastodon-async/latest/mastodon_async/mastodon/struct.Mastodon.html#method.new_status)
     /// in this case.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(into, strip_option))]
