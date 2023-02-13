@@ -11,7 +11,6 @@ macro_rules! define_ids {
         define_ids!($($rest_doc as $rest_name(from $rest_from_t, as $rest_ref_t ref),)+);
     };
     ($doc:literal as $name:ident(from $from_t:ty, as $ref_t:ident ref),) => {
-        /// Wrapper type for a account ID string
         #[doc = concat!("Wrapper type for ", $doc)]
         #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
         #[serde(transparent)]
@@ -43,7 +42,7 @@ define_ids!(
     "an attachment ID" as AttachmentId(from String, as str ref),
     "a filter ID" as FilterId(from String, as str ref),
     "a filter keyword ID" as KeywordId(from String, as str ref),
-    "the ID of an instance of a filtered status. See [`filter::Status`]" as FilteredStatusId(from String, as str ref),
+    "the ID of an instance of a filtered status. See [`filter::Status`](crate::filter::Status)" as FilteredStatusId(from String, as str ref),
     "a list ID" as ListId(from String, as str ref),
     "a mention ID" as MentionId(from String, as str ref),
     "a notification ID" as NotificationId(from String, as str ref),
@@ -66,6 +65,6 @@ define_ids!(
     "a hashtag ID" as TagId(from String, as str ref),
     "the ID of an application.
 
-As [`Application`] doesn't have an ID, I'm not sure what you're supposed to compare this to." as ApplicationId(from i64, as i64 ref),
+As [`Application`](crate::application::Application) doesn't have an ID, I'm not sure what you're supposed to compare this to." as ApplicationId(from i64, as i64 ref),
     "a role ID" as RoleId(from i64, as i64 ref),
 );
