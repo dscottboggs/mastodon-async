@@ -23,6 +23,6 @@ pub mod prelude {
     pub use super::{
         account, dimension, domain, email_domain_block, ip_block, measure, Account,
         CanonicalEmailBlock, Cohort, CohortFrequency, Dimension, EmailDomainBlock, IpBlock,
-        Measure, Report, Tag
+        Measure, Report, Tag,
     };
 }
