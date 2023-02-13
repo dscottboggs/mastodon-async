@@ -1,11 +1,10 @@
 #![cfg_attr(not(feature = "toml"), allow(dead_code))]
 #![cfg_attr(not(feature = "toml"), allow(unused_imports))]
 mod register;
-use mastodon_async::Result;
+use mastodon_async::{prelude::*, Result};
 
 #[cfg(feature = "toml")]
 async fn run() -> Result<()> {
-    use mastodon_async::entities::AccountId;
     let mastodon = register::get_mastodon_data().await?;
     let input = register::read_line("Enter the account id you'd like to follow: ")?;
     let account = AccountId::new(input.trim());

@@ -40,7 +40,7 @@ pub async fn register() -> Result<Mastodon> {
     let website = read_line("Please enter your mastodon instance url:")?;
     let registration = Registration::new(website.trim())
         .client_name("elefren-examples")
-        .scopes(auth::Scopes::all())
+        .scopes(Scopes::all())
         .website("https://github.com/dscottboggs/mastodon-async")
         .build()
         .await?;

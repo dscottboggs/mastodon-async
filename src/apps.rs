@@ -48,7 +48,7 @@ impl App {
     /// builder.client_name("mastodon-async-test");
     /// let app = builder.build().unwrap();
     /// let scopes = app.scopes();
-    /// assert_eq!(scopes, &auth::Scopes::read_all());
+    /// assert_eq!(scopes, &Scopes::read_all());
     /// ```
     pub fn scopes(&self) -> &Scopes {
         &self.scopes
