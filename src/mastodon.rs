@@ -1,7 +1,7 @@
 use std::{borrow::Cow, ops::Deref, path::Path, sync::Arc};
 
 use crate::{
-    entities::{account::Account, prelude::*, report::Report, status::Status, Empty},
+    entities::prelude::*,
     errors::{Error, Result},
     event_stream::event_stream,
     helpers::read_response::read_response,
@@ -11,7 +11,6 @@ use crate::{
 };
 use futures::TryStream;
 use log::{as_debug, as_serde, debug, error, trace};
-use mastodon_async_entities::{account::CredentialsBuilder, attachment::ProcessedAttachment};
 use reqwest::{multipart::Part, Client, RequestBuilder};
 use url::Url;
 use uuid::Uuid;
@@ -59,8 +58,8 @@ impl Mastodon {
         (get) mutes: "mutes" => Account,
         (get) notifications: "notifications" => Notification,
         (get) instance_peers: "instance/peers" => String,
-        (get) instance_activity: "instance/activity" => Activity,
-        (get) instance_rules: "instance/rules" => Rule,
+        (get) instance_activity: "instance/activity" => instance::Activity,
+        (get) instance_rules: "instance/rules" => instance::Rule,
         (get) reports: "reports" => Report,
         (get (q: &'a str, #[serde(skip_serializing_if = "Option::is_none")] limit: Option<u64>, following: bool,)) search_accounts: "accounts/search" => Account,
         (get) get_endorsements: "endorsements" => Account,
@@ -179,7 +178,10 @@ impl Mastodon {
     }
 
     /// Update the user credentials
-    pub async fn update_credentials(&self, changes: CredentialsBuilder) -> Result<Account> {
+    pub async fn update_credentials(
+        &self,
+        changes: account::CredentialsBuilder,
+    ) -> Result<Account> {
         let url = self.route("/api/v1/accounts/update_credentials");
         let response = self
             .client

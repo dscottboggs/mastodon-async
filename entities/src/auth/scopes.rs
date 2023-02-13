@@ -22,9 +22,9 @@ use serde::{
 /// ```rust
 /// use mastodon_async_entities::prelude::*;
 ///
-/// let read = auth::Scopes::read_all();
-/// let write = auth::Scopes::write_all();
-/// let follow = auth::Scopes::follow();
+/// let read = Scopes::read_all();
+/// let write = Scopes::write_all();
+/// let follow = Scopes::follow();
 /// let all = read | write | follow;
 /// ```
 #[derive(Clone)]
@@ -85,7 +85,7 @@ impl Scopes {
     /// Represents all available oauth scopes: "read write follow push"
     ///
     /// ```
-    /// use mastodon_async_entities::auth::Scopes;
+    /// use mastodon_async_entities::prelude::*;
     ///
     /// let scope = Scopes::all();
     /// assert_eq!(&format!("{}", scope), "read write follow push");
@@ -97,7 +97,7 @@ impl Scopes {
     /// Represents the full "read" scope
     ///
     /// ```
-    /// use mastodon_async_entities::auth::Scopes;
+    /// use mastodon_async_entities::prelude::*;
     ///
     /// let scope = Scopes::read_all();
     /// assert_eq!(&format!("{}", scope), "read");
@@ -121,7 +121,7 @@ impl Scopes {
     /// Represents the full "write" scope
     ///
     /// ```
-    /// use mastodon_async_entities::auth::Scopes;
+    /// use mastodon_async_entities::prelude::*;
     ///
     /// let scope = Scopes::write_all();
     /// assert_eq!(&format!("{}", scope), "write");
@@ -145,7 +145,7 @@ impl Scopes {
     /// Represents the "follow" scope
     ///
     /// ```
-    /// use mastodon_async_entities::auth::Scopes;
+    /// use mastodon_async_entities::prelude::*;
     ///
     /// let scope = Scopes::follow();
     /// assert_eq!(&format!("{}", scope), "follow");
@@ -157,7 +157,7 @@ impl Scopes {
     /// Represents the full "push" scope
     ///
     /// ```
-    /// use mastodon_async_entities::auth::Scopes;
+    /// use mastodon_async_entities::prelude::*;
     ///
     /// let scope = Scopes::push();
     /// assert_eq!(&format!("{}", scope), "push");
@@ -173,8 +173,8 @@ impl Scopes {
     /// ```rust
     /// use mastodon_async_entities::prelude::*;
     ///
-    /// let read = auth::Scopes::read_all();
-    /// let write = auth::Scopes::write_all();
+    /// let read = Scopes::read_all();
+    /// let write = Scopes::write_all();
     /// let read_write = read.and(write);
     /// ```
     pub fn and(self, other: Scopes) -> Scopes {
