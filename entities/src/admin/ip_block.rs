@@ -1,5 +1,5 @@
 use crate::DomainBlockId;
-use is_variant::IsVariant;
+use derive_is_enum_variant::is_enum_variant;
 use serde::{Deserialize, Serialize};
 use time::{serde::iso8601, OffsetDateTime};
 
@@ -25,7 +25,7 @@ pub struct IpBlock {
 }
 
 /// The associated policy with some IP block.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, IsVariant)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, is_enum_variant)]
 #[serde(rename_all = "snake_case")]
 pub enum Severity {
     /// Any signup from this IP range will create a pending account

@@ -1,5 +1,5 @@
 use crate::conversion;
-use is_variant::IsVariant;
+use derive_is_enum_variant::is_enum_variant;
 use serde::{Deserialize, Serialize};
 use time::{serde::iso8601, OffsetDateTime};
 
@@ -20,7 +20,9 @@ pub struct Cohort {
 /// The size of the bucket for the returned [`Cohort`] data.
 ///
 /// See also [the API documentation](https://docs.joinmastodon.org/entities/Admin_Cohort/#frequency)
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, IsVariant)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, is_enum_variant,
+)]
 #[serde(rename_all = "lowercase")]
 pub enum CohortFrequency {
     Day,
