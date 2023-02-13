@@ -33,9 +33,9 @@ pub struct Card {
     pub provider_url: Option<Url>,
     /// HTML to be used for generating the preview card.
     pub html: String,
-    /// Width of preview, in pixels. When [`card_type`] is `Link`, this is `0`.
+    /// Width of preview, in pixels. When [`card_type`](Card::card_type) is `Link`, this is `0`.
     pub width: u64,
-    /// Height of preview, in pixels. When [`card_type`] is `Link`, this is `0`.
+    /// Height of preview, in pixels. When [`card_type`](Card::card_type) is `Link`, this is `0`.
     pub height: u64,
     /// Used for photo embeds, instead of custom html.
     #[serde(with = "conversion::maybe_empty_url")]
