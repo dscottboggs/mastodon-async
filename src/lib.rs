@@ -40,7 +40,7 @@
 //! let client = Mastodon::from(data);
 //! tokio_test::block_on(async {
 //!     let stream = client.stream_user().await.unwrap();
-//!     stream.try_for_each(|event| async move {
+//!     stream.try_for_each(|(event, _client)| async move {
 //!         match event {
 //!             Event::Update(ref status) => { /* .. */ },
 //!             Event::Notification(ref notification) => { /* .. */ },
