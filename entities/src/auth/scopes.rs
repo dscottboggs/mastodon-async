@@ -360,39 +360,29 @@ impl Default for Scope {
 
 /// Represents the granular "read:___" oauth scopes
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, IsVariant)]
+#[serde(rename_all = "lowercase")]
 pub enum Read {
     /// Accounts
-    #[serde(rename = "accounts")]
     Accounts,
     /// Blocks
-    #[serde(rename = "blocks")]
     Blocks,
     /// Favourites
-    #[serde(rename = "favourites")]
     Favourites,
     /// Filters
-    #[serde(rename = "filters")]
     Filters,
     /// Follows
-    #[serde(rename = "follows")]
     Follows,
     /// Lists
-    #[serde(rename = "lists")]
     Lists,
     /// Mutes
-    #[serde(rename = "mutes")]
     Mutes,
     /// Notifications
-    #[serde(rename = "notifications")]
     Notifications,
     /// Reports
-    #[serde(rename = "reports")]
     Reports,
     /// Search
-    #[serde(rename = "search")]
     Search,
     /// Statuses
-    #[serde(rename = "statuses")]
     Statuses,
 }
 
@@ -455,39 +445,29 @@ impl fmt::Display for Read {
 
 /// Represents the granular "write:___" oauth scopes
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, IsVariant)]
+#[serde(rename_all = "lowercase")]
 pub enum Write {
     /// Accounts
-    #[serde(rename = "accounts")]
     Accounts,
     /// Blocks
-    #[serde(rename = "blocks")]
     Blocks,
     /// Favourites
-    #[serde(rename = "favourites")]
     Favourites,
     /// Filters
-    #[serde(rename = "filters")]
     Filters,
     /// Follows
-    #[serde(rename = "follows")]
     Follows,
     /// Lists
-    #[serde(rename = "lists")]
     Lists,
     /// Media
-    #[serde(rename = "media")]
     Media,
     /// Mutes
-    #[serde(rename = "mutes")]
     Mutes,
     /// Notifications
-    #[serde(rename = "notifications")]
     Notifications,
     /// Reports
-    #[serde(rename = "reports")]
     Reports,
     /// Statuses
-    #[serde(rename = "statuses")]
     Statuses,
 }
 
