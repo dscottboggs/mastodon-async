@@ -7,7 +7,7 @@ use crate::{custom_emoji::CustomEmoji, status, AccountId, AnnouncementId, Status
 /// Represents an announcement set by an administrator.
 ///
 /// See also [the API documentation](https://docs.joinmastodon.org/entities/Announcement/)
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Announcement {
     /// The ID of the announcement in the database.
     pub id: AnnouncementId,
