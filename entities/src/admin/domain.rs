@@ -1,4 +1,4 @@
-use is_variant::IsVariant;
+use derive_is_enum_variant::is_enum_variant;
 use serde::{Deserialize, Serialize};
 use time::{serde::iso8601, OffsetDateTime};
 
@@ -44,7 +44,7 @@ pub struct Block {
     pub obfuscate: bool,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, IsVariant)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, is_enum_variant)]
 #[serde(rename_all = "lowercase")]
 pub enum BlockSeverity {
     /// Account statuses from this domain will be hidden by default
