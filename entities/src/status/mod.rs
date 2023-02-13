@@ -106,19 +106,6 @@ pub struct Status {
     pub filtered: Vec<filter::Result>,
 }
 
-/// A mention of another user.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct Mention {
-    /// URL of user's profile (can be remote).
-    pub url: String,
-    /// The username of the account.
-    pub username: String,
-    /// Equals `username` for local users, includes `@domain` for remote ones.
-    pub acct: String,
-    /// Account ID.
-    pub id: String,
-}
-
 /// Represents a hashtag used within the content of a status.
 ///
 /// See also [the API documentation](https://docs.joinmastodon.org/entities/Status/#Tag)
