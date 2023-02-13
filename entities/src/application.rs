@@ -11,7 +11,7 @@ pub struct Application {
     /// The website associated with your application
     pub website: Option<String>,
     /// Used for Push Streaming API. Returned with POST /api/v1/apps. Equivalent
-    /// to [`WebPushSubscription::server_key`]
+    /// to [`Subscription::server_key`](crate::push::Subscription::server_key)
     pub vapid_key: Option<VapidKey>,
     /// Client ID key, to be used for obtaining OAuth tokens
     pub client_id: Option<String>,
