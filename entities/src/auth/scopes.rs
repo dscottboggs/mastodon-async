@@ -22,9 +22,9 @@ use serde::{
 /// ```rust
 /// use mastodon_async_entities::prelude::*;
 ///
-/// let read = auth::Scopes::read_all();
-/// let write = auth::Scopes::write_all();
-/// let follow = auth::Scopes::follow();
+/// let read = Scopes::read_all();
+/// let write = Scopes::write_all();
+/// let follow = Scopes::follow();
 /// let all = read | write | follow;
 /// ```
 #[derive(Clone)]

@@ -1,7 +1,7 @@
 #![cfg_attr(not(feature = "toml"), allow(dead_code))]
 #![cfg_attr(not(feature = "toml"), allow(unused_imports))]
 mod register;
-use mastodon_async::{Result, StatusBuilder, Visibility};
+use mastodon_async::{prelude::*, Result};
 
 #[cfg(feature = "toml")]
 async fn run() -> Result<()> {
