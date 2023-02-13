@@ -9,7 +9,6 @@ use crate::{
         Empty,
     },
     errors::{Error, Result},
-    event_stream::event_stream,
     helpers::read_response::read_response,
     log_serde,
     polling_time::PollingTime,

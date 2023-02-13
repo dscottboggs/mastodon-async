@@ -527,7 +527,8 @@ tokio_test::block_on(async {
     }).await.unwrap();
 });"
             ),
-            pub async fn $fn_name(&self) -> Result<impl TryStream<Ok=Event, Error=Error>> {
+            pub async fn $fn_name(&self) -> Result<impl TryStream<Ok=(Event, Mastodon), Error=Error> + '_> {
+                use $crate::event_stream::event_stream;
                 let url = self.route(&format!("/api/v1/streaming/{}", $stream));
                 let response = self.authenticated(self.client.get(&url)).header("Accept", "application/json").send().await?;
                 debug!(
@@ -537,7 +538,7 @@ tokio_test::block_on(async {
                 );
                 let status = response.status();
                 if status.is_success() {
-                     Ok(event_stream(response, url))
+                     Ok(event_stream(response, url, self))
                 } else {
                     let response = response.json().await?;
                     Err(Error::Api{ status, response })
@@ -575,7 +576,8 @@ tokio_test::block_on(async {
     }).await.unwrap();
 });"
             ),
-            pub async fn $fn_name(&self, $param: $param_type) -> Result<impl TryStream<Ok=Event, Error=Error>> {
+            pub async fn $fn_name(&self, $param: $param_type) -> Result<impl TryStream<Ok=(Event, Mastodon), Error=Error> + '_> {
+                use $crate::event_stream::event_stream;
                 let mut url: Url = self.route(concat!("/api/v1/streaming/", stringify!($stream))).parse()?;
                 url.query_pairs_mut().append_pair(stringify!($param), $param.as_ref());
                 let url = url.to_string();
@@ -587,7 +589,7 @@ tokio_test::block_on(async {
                 );
                 let status = response.status();
                 if status.is_success() {
-                     Ok(event_stream(response, url))
+                     Ok(event_stream(response, url, self))
                 } else {
                     let response = response.json().await?;
                     Err(Error::Api{ status, response })

@@ -1,10 +1,6 @@
 use std::io;
 
-use crate::{
-    entities::{event::Event, prelude::Notification, status::Status},
-    errors::Result,
-    Error,
-};
+use crate::{errors::Result, prelude::*, Error};
 use futures::{stream::try_unfold, TryStream, TryStreamExt};
 use log::{as_debug, as_serde, debug, error, info, trace};
 use reqwest::Response;
@@ -18,14 +14,15 @@ use tokio_util::io::StreamReader;
 pub fn event_stream(
     response: Response,
     location: String,
-) -> impl TryStream<Ok = Event, Error = Error> {
+    client: &Mastodon,
+) -> impl TryStream<Ok = (Event, Mastodon), Error = Error> + '_ {
     let stream = StreamReader::new(response.bytes_stream().map_err(|err| {
         error!(err = as_debug!(err); "error reading stream");
         io::Error::new(io::ErrorKind::BrokenPipe, format!("{err:?}"))
     }));
     let lines_iter = stream.lines();
-    try_unfold((lines_iter, location), |mut this| async move {
-        let (ref mut lines_iter, ref location) = this;
+    try_unfold((lines_iter, location, client), |mut this| async move {
+        let (ref mut lines_iter, ref location, client) = this;
         let mut lines = vec![];
         while let Some(line) = lines_iter.next_line().await? {
             debug!(message = line, location = &location; "received message");
@@ -37,7 +34,7 @@ pub fn event_stream(
             if let Ok(event) = make_event(&lines) {
                 info!(event = as_serde!(event), location = location; "received event");
                 lines.clear();
-                return Ok(Some((event, this)));
+                return Ok(Some(((event, client.clone()), this)));
             } else {
                 continue;
             }
@@ -46,7 +43,7 @@ pub fn event_stream(
     })
 }
 
-fn make_event(lines: &[String]) -> Result<Event> {
+pub(crate) fn make_event(lines: &[String]) -> Result<Event> {
     let event;
     let data;
     if let Some(event_line) = lines.iter().find(|line| line.starts_with("event:")) {
