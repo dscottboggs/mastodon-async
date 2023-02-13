@@ -18,7 +18,7 @@ pub struct Card {
     pub description: String,
     /// The type of the preview card.
     #[serde(rename = "type")]
-    pub card_type: CardType,
+    pub card_type: Type,
     /// Preview thumbnail.
     pub image: Option<String>,
     /// The author of the original resource.
@@ -49,7 +49,7 @@ pub struct Card {
 /// The type of the preview card.
 #[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq, IsVariant)]
 #[serde(rename_all = "lowercase")]
-pub enum CardType {
+pub enum Type {
     /// Link OEmbed
     Link,
     /// Photo OEmbed

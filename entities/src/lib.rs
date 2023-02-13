@@ -71,24 +71,50 @@ pub struct Empty {}
 /// modules:
 pub mod prelude {
     pub use super::{
-        account::{Account, Source},
-        attachment::{Attachment, MediaType},
-        auth,
-        card::Card,
+        account::{
+            self, /* for
+                  SuggestionSource, Suggestion, FamiliarFollowers, Color, Credentials,
+                  CredentialsBuilder */
+            Account, CredentialAccount, Role, RolePermissions, Source,
+        },
+        admin::prelude::*,
+        announcement::{self /* for Status, Account, Reaction */, Announcement},
+        application::Application,
+        attachment::{
+            self, /* for FocalPoint, SizeSpecificDetails, Meta */
+            Attachment, MediaType, ProcessedAttachment,
+        },
+        auth::prelude::*,
+        card::{self /* for Type */, Card, TrendsLink},
         context::Context,
+        conversation::Conversation,
         custom_emoji::CustomEmoji,
         event::Event,
-        filter::{Filter, FilterContext},
+        filter::{self /* for Action, Keyword, Status, v1, Result */, Filter, FilterContext},
         ids::*,
-        instance::*,
-        list::List,
+        instance::{
+            self, /* for
+                  Usage, Users, Thumbnail, ThumbnailVersions, Contact, Registrations,
+                  Rule, Activity, Configuration, ExtendedDescription */
+            DomainBlock, Instance,
+        },
+        list::{self /* for RepliesPolicy */, List},
+        marker::Marker,
         mention::Mention,
-        notification::Notification,
-        push::Subscription,
+        notification::{self /* for Type */, Notification},
+        preferences::Preferences,
+        push::{
+            self, /* for Alerts, AdminAlerts, add_subscription, update_data */
+            Subscription,
+        },
         relationship::Relationship,
-        report::Report,
+        report::{self /* for Category */, Report},
         search_result::SearchResult,
-        status::{self, Application, Status},
+        status::{
+            self, /* for Scheduled, Source, Tag, Application, FeaturedTag, Mention*/
+            NewStatus, NewStatusBuilder, Poll, PollBuilder, Status,
+        },
+        tag::{self /* for History */, Tag},
         visibility::Visibility,
         Empty,
     };

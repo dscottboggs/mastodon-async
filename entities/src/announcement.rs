@@ -8,7 +8,7 @@ use crate::{custom_emoji::CustomEmoji, status, AccountId, AnnouncementId, Status
 ///
 /// See also [the API documentation](https://docs.joinmastodon.org/entities/Announcement/)
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-struct Announcement {
+pub struct Announcement {
     /// The ID of the announcement in the database.
     pub id: AnnouncementId,
     /// The text of the announcement, as HTML.
