@@ -2,7 +2,8 @@
 #![cfg_attr(not(feature = "toml"), allow(unused_imports))]
 mod register;
 
-use mastodon_async::{Language, Result, StatusBuilder, Visibility};
+use isolang::Language;
+use mastodon_async::{prelude::*, Result};
 
 #[cfg(feature = "toml")]
 async fn run() -> Result<()> {
