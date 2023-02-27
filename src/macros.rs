@@ -578,8 +578,59 @@ tokio_test::block_on(async {
             ),
             pub async fn $fn_name(&self, $param: $param_type) -> Result<impl TryStream<Ok=(Event, Mastodon), Error=Error> + '_> {
                 use $crate::event_stream::event_stream;
-                let mut url: Url = self.route(concat!("/api/v1/streaming/", stringify!($stream))).parse()?;
+                let mut url: Url = self.route(concat!("/api/v1/streaming/", $stream)).parse()?;
                 url.query_pairs_mut().append_pair(stringify!($param), $param.as_ref());
+                let url = url.to_string();
+                let response = self.authenticated(self.client.get(url.as_str())).header("Accept", "application/json").send().await?;
+                debug!(
+                    status = log_serde!(response Status), url = as_debug!(url),
+                    headers = log_serde!(response Headers);
+                    "received API response"
+                );
+                let status = response.status();
+                if status.is_success() {
+                     Ok(event_stream(response, url, self))
+                } else {
+                    let response = response.json().await?;
+                    Err(Error::Api{ status, response })
+                }
+            }
+        }
+        streaming! { $($rest)* }
+    };
+    ($desc:tt $fn_name:ident(flag $param:ident)@$stream:literal, $($rest:tt)*) => {
+        doc_comment! {
+            concat!(
+                $desc,
+                "\n\nExample:\n\n",
+                "
+use mastodon_async::prelude::*;
+use mastodon_async::entities::event::Event;
+use futures_util::{pin_mut, StreamExt, TryStreamExt};
+
+tokio_test::block_on(async {
+    let data = Data::default();
+    let client = Mastodon::from(data);
+    let stream = client.",
+                    stringify!($fn_name),
+                    "(false).await.unwrap();
+    stream.try_for_each(|event| async move {
+        match event {
+            Event::Update(ref status) => { /* .. */ },
+            Event::Notification(ref notification) => { /* .. */ },
+            Event::Delete(ref id) => { /* .. */ },
+            Event::FiltersChanged => { /* .. */ },
+        }
+        Ok(())
+    }).await.unwrap();
+});"
+            ),
+            pub async fn $fn_name(&self, $param: bool) -> Result<impl TryStream<Ok=(Event, Mastodon), Error=Error> + '_> {
+                use $crate::event_stream::event_stream;
+                let mut url: Url = self.route(concat!("/api/v1/streaming/", $stream)).parse()?;
+                if $param {
+                    url.query_pairs_mut().append_key_only(stringify!($param));
+                }
                 let url = url.to_string();
                 let response = self.authenticated(self.client.get(url.as_str())).header("Accept", "application/json").send().await?;
                 debug!(
