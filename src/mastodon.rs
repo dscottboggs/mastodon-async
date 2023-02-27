@@ -130,21 +130,17 @@ impl Mastodon {
         "All public posts known to the server. Analogous to the federated timeline."
         stream_public@"public",
         "All public posts known to the server, filtered for media attachments. Analogous to the federated timeline with 'only media' enabled."
-        stream_public_media@"public:media",
+        stream_public_media@"public/media",
         "All public posts originating from this server."
-        stream_local@"public:local",
-        "All public posts originating from this server, filtered for media attachments. Analogous to the local timeline with 'only media' enabled."
-        stream_local_media@"public:local:media",
+        stream_local(flag only_media)@"public/local",
         "All public posts originating from other servers."
-        stream_remote@"public:remote",
-        "All public posts originating from other servers, filtered for media attachments."
-        stream_remote_media@"public:remote:media",
+        stream_remote(flag only_media)@"public/remote",
         "All public posts using a certain hashtag."
         stream_hashtag(tag: impl AsRef<str>, like "#bots")@"hashtag",
         "All public posts using a certain hashtag, originating from this server."
-        stream_local_hashtag(tag: impl AsRef<str>, like "#bots")@"hashtag:local",
+        stream_local_hashtag(tag: impl AsRef<str>, like "#bots")@"hashtag/local",
         "Notifications for the current user."
-        stream_notifications@"user:notification",
+        stream_notifications@"user/notification",
         "Updates to a specific list."
         stream_list(list: impl AsRef<str>, like "12345")@"list",
         "Updates to direct conversations."
