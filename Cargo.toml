@@ -7,7 +7,7 @@ members = [
 ]
 
 [workspace.package]
-version = "1.2.0"
+version = "1.2.1"
 license = "MIT/Apache-2.0"
 authors = ["Aaron Power <theaaronepower@gmail.com>", "Paul Woolcock <paul@woolcock.us>", "D. Scott Boggs <scott@tams.tech>"]
 edition = "2021"
@@ -30,7 +30,7 @@ features = ["all"]
 
 [dependencies.mastodon-async-entities]
 path = "./entities"
-version = "1.0.3"
+version = "1"
 
 [dependencies]
 futures = "0.3.25"
