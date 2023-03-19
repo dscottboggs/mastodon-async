@@ -3,7 +3,7 @@
 use crate::NotificationId;
 
 use super::{account::Account, status::Status};
-use is_variant::IsVariant;
+use derive_is_enum_variant::is_enum_variant;
 use serde::{Deserialize, Serialize};
 use time::{serde::iso8601, OffsetDateTime};
 
@@ -26,7 +26,7 @@ pub struct Notification {
 }
 
 /// The type of notification.
-#[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq, IsVariant)]
+#[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq, is_enum_variant)]
 #[serde(rename_all = "lowercase")]
 pub enum NotificationType {
     /// Someone mentioned the application client in another status.

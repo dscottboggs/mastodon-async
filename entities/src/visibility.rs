@@ -1,9 +1,9 @@
-use is_variant::IsVariant;
+use derive_is_enum_variant::is_enum_variant;
 use serde::Deserialize;
 use serde::Serialize;
 
 /// The visibility of a status.
-#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq, IsVariant)]
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq, is_enum_variant)]
 #[serde(rename_all = "lowercase")]
 pub enum Visibility {
     /// A Direct message to a user

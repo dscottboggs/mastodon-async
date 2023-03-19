@@ -13,7 +13,7 @@ edition.workspace = true
 futures = "0.3.25"
 thiserror = "1"
 static_assertions = "1"
-is_variant = "1.0.0"
+derive_is_enum_variant = "0.1.1"
 
 [dependencies.log]
 version = "0.4"
