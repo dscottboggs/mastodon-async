@@ -1,9 +1,9 @@
 use std::string::FromUtf8Error;
 use std::{error, fmt, io::Error as IoError, num::TryFromIntError};
 
+use derive_is_enum_variant::is_enum_variant;
 #[cfg(feature = "env")]
 use envy::Error as EnvyError;
-use is_variant::IsVariant;
 use reqwest::{header::ToStrError as HeaderStrError, Error as HttpError, StatusCode};
 use serde::Deserialize;
 use serde_json::Error as SerdeError;
@@ -18,7 +18,7 @@ use url::ParseError as UrlError;
 pub type Result<T> = ::std::result::Result<T, Error>;
 
 /// enum of possible errors encountered using the mastodon API.
-#[derive(Debug, thiserror::Error, IsVariant)]
+#[derive(Debug, thiserror::Error, is_enum_variant)]
 pub enum Error {
     /// Error from the Mastodon API. This typically means something went
     /// wrong with your authentication or data.

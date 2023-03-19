@@ -28,10 +28,6 @@ edition.workspace = true
 [package.metadata.docs.rs]
 features = ["all"]
 
-[patch.crates-io.is_variant]
-git = "https://github.com/dscottboggs/rust_macro_is_variant.git"
-branch = "fixes"
-
 [dependencies.mastodon-async-entities]
 path = "./entities"
 version = "1.0.3"
@@ -48,7 +44,7 @@ static_assertions = "1.1.0"
 percent-encoding = "2.2.0"
 thiserror = "1.0.38"
 derive_deref = "1.1.1"
-is_variant = "1.0.0"
+derive_is_enum_variant = "0.1.1"
 
 [dependencies.parse_link_header]
 version = "0.3.3"

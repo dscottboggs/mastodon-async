@@ -1,8 +1,8 @@
 use crate::{notification::Notification, status::Status};
-use is_variant::IsVariant;
+use derive_is_enum_variant::is_enum_variant;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Deserialize, Serialize, IsVariant)]
+#[derive(Debug, Clone, Deserialize, Serialize, is_enum_variant)]
 /// Events that come from the /streaming/user API call
 pub enum Event {
     /// Update event
