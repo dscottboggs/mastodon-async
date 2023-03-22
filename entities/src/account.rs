@@ -582,7 +582,7 @@ mod tests {
         	"updated_at": "2022-09-08T22:48:07.983Z"
         }"##;
         let subject: Role = serde_json::from_str(example).unwrap();
-        assert_eq!(subject.id, RoleId::new(3));
+        assert_eq!(subject.id, RoleId::new("3"));
         assert_eq!(subject.name, "Owner");
         let Color::Value { red, green, blue } = subject.color else {
             panic!("color should be specified")

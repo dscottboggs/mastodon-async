@@ -113,7 +113,7 @@ mod tests {
         assert!(!params.with_rate_limit);
         assert_eq!(
             params.application_id.expect("application_id"),
-            ApplicationId::new(3)
+            ApplicationId::new("3")
         );
         assert!(subject.media_attachments.is_empty());
     }
@@ -157,7 +157,7 @@ mod tests {
         assert!(!params.with_rate_limit);
         assert_eq!(
             params.application_id.expect("application_id"),
-            ApplicationId::new(3)
+            ApplicationId::new("3")
         );
         assert!(subject.media_attachments.is_empty());
     }
