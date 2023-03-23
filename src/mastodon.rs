@@ -1,6 +1,7 @@
 use std::{borrow::Cow, ops::Deref, path::Path, sync::Arc};
 
 use crate::{
+    apps::App,
     entities::prelude::*,
     errors::{Error, Result},
     helpers::read_response::read_response,
@@ -87,6 +88,8 @@ impl Mastodon {
         (delete) delete_push_subscription: "push/subscription" => Empty,
         (get) get_filters: "filters" => Vec<Filter>,
         (get) get_follow_suggestions: "suggestions" => Vec<Account>,
+        (post (app: App,)) create_app: "apps" => Application,
+        (get) verify_app: "apps/verify_credentials" => Application,
     }
 
     route_v2! {
