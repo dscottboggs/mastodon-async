@@ -82,16 +82,21 @@ impl<'de> Deserialize<'de> for Scopes {
 }
 
 impl Scopes {
-    /// Represents all available oauth scopes: "read write follow push"
+    /// Represents all available oauth scopes: "read write follow push admin:read admin:write"
     ///
     /// ```
     /// use mastodon_async_entities::prelude::*;
     ///
     /// let scope = Scopes::all();
-    /// assert_eq!(&format!("{}", scope), "read write follow push");
+    /// assert_eq!(&format!("{}", scope), "read write follow push admin:read admin:write");
     /// ```
     pub fn all() -> Scopes {
-        Scopes::read_all() | Scopes::write_all() | Scopes::follow() | Scopes::push()
+        Scopes::read_all()
+            | Scopes::write_all()
+            | Scopes::follow()
+            | Scopes::push()
+            | Scopes::admin_read_all()
+            | Scopes::admin_write_all()
     }
 
     /// Represents the full "read" scope
@@ -166,6 +171,54 @@ impl Scopes {
         Scopes::new(Scope::Push)
     }
 
+    /// Represents the full "admin:read" scope
+    ///
+    /// ```
+    /// use mastodon_async_entities::prelude::*;
+    ///
+    /// let scope = Scopes::admin_read_all();
+    /// assert_eq!(&format!("{}", scope), "admin:read");
+    /// ```
+    pub fn admin_read_all() -> Scopes {
+        Scopes::_admin_read(None)
+    }
+
+    /// Represents a specific "admin:read:___" scope
+    ///
+    /// ```
+    /// use mastodon_async_entities::prelude::*;
+    ///
+    /// let scope = Scopes::admin_read(AdminRead::Accounts);
+    /// assert_eq!(&format!("{}", scope), "admin:read:accounts");
+    /// ```
+    pub fn admin_read(subscope: AdminRead) -> Scopes {
+        Scopes::_admin_read(Some(subscope))
+    }
+
+    /// Represents the full "admin:write" scope
+    ///
+    /// ```
+    /// use mastodon_async_entities::prelude::*;
+    ///
+    /// let scope = Scopes::admin_write_all();
+    /// assert_eq!(&format!("{}", scope), "admin:write");
+    /// ```
+    pub fn admin_write_all() -> Scopes {
+        Scopes::_admin_write(None)
+    }
+
+    /// Represents a specific "admin:write:___" scope
+    ///
+    /// ```
+    /// use mastodon_async_entities::prelude::*;
+    ///
+    /// let scope = Scopes::admin_write(AdminWrite::Accounts);
+    /// assert_eq!(&format!("{}", scope), "admin:write:accounts");
+    /// ```
+    pub fn admin_write(subscope: AdminWrite) -> Scopes {
+        Scopes::_admin_write(Some(subscope))
+    }
+
     /// Combines 2 scopes together
     ///
     /// // Example
@@ -187,12 +240,20 @@ impl Scopes {
         Scopes { scopes: new_set }
     }
 
+    fn _read(subscope: Option<Read>) -> Scopes {
+        Scopes::new(Scope::Read(subscope))
+    }
+
     fn _write(subscope: Option<Write>) -> Scopes {
         Scopes::new(Scope::Write(subscope))
     }
 
-    fn _read(subscope: Option<Read>) -> Scopes {
-        Scopes::new(Scope::Read(subscope))
+    fn _admin_read(subscope: Option<AdminRead>) -> Scopes {
+        Scopes::new(Scope::AdminRead(subscope))
+    }
+
+    fn _admin_write(subscope: Option<AdminWrite>) -> Scopes {
+        Scopes::new(Scope::AdminWrite(subscope))
     }
 
     fn new(scope: Scope) -> Scopes {
@@ -263,7 +324,7 @@ impl fmt::Display for Scopes {
 }
 
 /// Permission scope of the application.
-/// [Details on what each permission provides](https://github.com/tootsuite/documentation/blob/master/Using-the-API/OAuth-details.md)
+/// [Details on what each permission provides](https://docs.joinmastodon.org/api/oauth-scopes/#list-of-scopes)
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, is_enum_variant)]
 #[serde(rename_all = "lowercase")]
 pub enum Scope {
@@ -275,6 +336,10 @@ pub enum Scope {
     Follow,
     /// Push permissions
     Push,
+    /// Admin read only permissions.
+    AdminRead(Option<AdminRead>),
+    /// Admin write only permissions.
+    AdminWrite(Option<AdminWrite>),
 }
 
 impl FromStr for Scope {
@@ -286,6 +351,8 @@ impl FromStr for Scope {
             "write" => Scope::Write(None),
             "follow" => Scope::Follow,
             "push" => Scope::Push,
+            "admin:read" => Scope::AdminRead(None),
+            "admin:write" => Scope::AdminWrite(None),
             read if read.starts_with("read:") => {
                 let r: Read = Read::from_str(&read[5..])?;
                 Scope::Read(Some(r))
@@ -293,6 +360,14 @@ impl FromStr for Scope {
             write if write.starts_with("write:") => {
                 let w: Write = Write::from_str(&write[6..])?;
                 Scope::Write(Some(w))
+            }
+            admin_read if admin_read.starts_with("admin:read:") => {
+                let ar: AdminRead = AdminRead::from_str(&admin_read[11..])?;
+                Scope::AdminRead(Some(ar))
+            }
+            admin_write if admin_write.starts_with("admin:write:") => {
+                let aw: AdminWrite = AdminWrite::from_str(&admin_write[12..])?;
+                Scope::AdminWrite(Some(aw))
             }
             _ => return Err(Error::UnknownScope(s.to_owned())),
         })
@@ -321,18 +396,46 @@ impl Ord for Scope {
             (Scope::Read(..), Scope::Write(..)) => Ordering::Less,
             (Scope::Read(..), Scope::Follow) => Ordering::Less,
             (Scope::Read(..), Scope::Push) => Ordering::Less,
+            (Scope::Read(..), Scope::AdminRead(..)) => Ordering::Less,
+            (Scope::Read(..), Scope::AdminWrite(..)) => Ordering::Less,
 
             (Scope::Write(..), Scope::Read(..)) => Ordering::Greater,
             (Scope::Write(..), Scope::Follow) => Ordering::Less,
             (Scope::Write(..), Scope::Push) => Ordering::Less,
+            (Scope::Write(..), Scope::AdminRead(..)) => Ordering::Less,
+            (Scope::Write(..), Scope::AdminWrite(..)) => Ordering::Less,
 
             (Scope::Follow, Scope::Read(..)) => Ordering::Greater,
             (Scope::Follow, Scope::Write(..)) => Ordering::Greater,
             (Scope::Follow, Scope::Follow) => Ordering::Equal,
             (Scope::Follow, Scope::Push) => Ordering::Less,
+            (Scope::Follow, Scope::AdminRead(..)) => Ordering::Less,
+            (Scope::Follow, Scope::AdminWrite(..)) => Ordering::Less,
 
+            (Scope::Push, Scope::Read(..)) => Ordering::Greater,
+            (Scope::Push, Scope::Write(..)) => Ordering::Greater,
+            (Scope::Push, Scope::Follow) => Ordering::Greater,
             (Scope::Push, Scope::Push) => Ordering::Equal,
-            (Scope::Push, _) => Ordering::Greater,
+            (Scope::Push, Scope::AdminRead(..)) => Ordering::Less,
+            (Scope::Push, Scope::AdminWrite(..)) => Ordering::Less,
+
+            (Scope::AdminRead(None), Scope::AdminRead(None)) => Ordering::Equal,
+            (Scope::AdminRead(None), Scope::AdminRead(Some(..))) => Ordering::Less,
+            (Scope::AdminRead(Some(..)), Scope::AdminRead(None)) => Ordering::Greater,
+            (Scope::AdminRead(Some(ref a)), Scope::AdminRead(Some(ref b))) => a.cmp(b),
+
+            (Scope::AdminWrite(None), Scope::AdminWrite(None)) => Ordering::Equal,
+            (Scope::AdminWrite(None), Scope::AdminWrite(Some(..))) => Ordering::Less,
+            (Scope::AdminWrite(Some(..)), Scope::AdminWrite(None)) => Ordering::Greater,
+            (Scope::AdminWrite(Some(ref a)), Scope::AdminWrite(Some(ref b))) => a.cmp(b),
+
+            (Scope::AdminRead(..), Scope::Read(..)) => Ordering::Greater,
+            (Scope::AdminRead(..), Scope::Write(..)) => Ordering::Greater,
+            (Scope::AdminRead(..), Scope::Follow) => Ordering::Greater,
+            (Scope::AdminRead(..), Scope::Push) => Ordering::Greater,
+            (Scope::AdminRead(..), Scope::AdminWrite(..)) => Ordering::Less,
+
+            (Scope::AdminWrite(..), _) => Ordering::Greater,
         }
     }
 }
@@ -347,6 +450,10 @@ impl fmt::Display for Scope {
             Write(None) => "write",
             Follow => "follow",
             Push => "push",
+            AdminRead(Some(ref ar)) => return fmt::Display::fmt(ar, f),
+            AdminRead(None) => "admin:read",
+            AdminWrite(Some(ref aw)) => return fmt::Display::fmt(aw, f),
+            AdminWrite(None) => "admin:write",
         };
         write!(f, "{}", s)
     }
@@ -523,6 +630,164 @@ impl fmt::Display for Write {
                 Write::Notifications => "notifications",
                 Write::Reports => "reports",
                 Write::Statuses => "statuses",
+            }
+        )
+    }
+}
+
+/// Represents the granular "admin:read:___" oauth scopes
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, is_enum_variant)]
+pub enum AdminRead {
+    /// Accounts
+    #[serde(rename = "accounts")]
+    Accounts,
+    /// Canonical email blocks
+    #[serde(rename = "canonical_email_blocks")]
+    CanonicalEmailBlocks,
+    /// Domain allows
+    #[serde(rename = "domain_allows")]
+    DomainAllows,
+    /// Domain blocks
+    #[serde(rename = "domain_blocks")]
+    DomainBlocks,
+    /// Email domain blocks
+    #[serde(rename = "email_domain_blocks")]
+    EmailDomainBlocks,
+    /// IP blocks
+    #[serde(rename = "ip_blocks")]
+    IpBlocks,
+    /// Reports
+    #[serde(rename = "reports")]
+    Reports,
+}
+
+impl FromStr for AdminRead {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<AdminRead, Self::Err> {
+        Ok(match s {
+            "accounts" => AdminRead::Accounts,
+            "canonical_email_blocks" => AdminRead::CanonicalEmailBlocks,
+            "domain_allows" => AdminRead::DomainAllows,
+            "domain_blocks" => AdminRead::DomainBlocks,
+            "email_domain_blocks" => AdminRead::EmailDomainBlocks,
+            "ip_blocks" => AdminRead::IpBlocks,
+            "reports" => AdminRead::Reports,
+            _ => {
+                return Err(Error::UnknownScope(
+                    "Unknown 'admin:read' subcategory".to_string(),
+                ))
+            }
+        })
+    }
+}
+
+impl PartialOrd for AdminRead {
+    fn partial_cmp(&self, other: &AdminRead) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for AdminRead {
+    fn cmp(&self, other: &AdminRead) -> Ordering {
+        let a = format!("{:?}", self);
+        let b = format!("{:?}", other);
+        a.cmp(&b)
+    }
+}
+
+impl fmt::Display for AdminRead {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "admin:read:{}",
+            match *self {
+                AdminRead::Accounts => "accounts",
+                AdminRead::CanonicalEmailBlocks => "canonical_email_blocks",
+                AdminRead::DomainAllows => "domain_allows",
+                AdminRead::DomainBlocks => "domain_blocks",
+                AdminRead::EmailDomainBlocks => "email_domain_blocks",
+                AdminRead::IpBlocks => "ip_blocks",
+                AdminRead::Reports => "reports",
+            }
+        )
+    }
+}
+
+/// Represents the granular "admin:write:___" oauth scopes
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, is_enum_variant)]
+pub enum AdminWrite {
+    /// Accounts
+    #[serde(rename = "accounts")]
+    Accounts,
+    /// Canonical email blocks
+    #[serde(rename = "canonical_email_blocks")]
+    CanonicalEmailBlocks,
+    /// Domain allows
+    #[serde(rename = "domain_allows")]
+    DomainAllows,
+    /// Domain blocks
+    #[serde(rename = "domain_blocks")]
+    DomainBlocks,
+    /// Email domain blocks
+    #[serde(rename = "email_domain_blocks")]
+    EmailDomainBlocks,
+    /// IP blocks
+    #[serde(rename = "ip_blocks")]
+    IpBlocks,
+    /// Reports
+    #[serde(rename = "reports")]
+    Reports,
+}
+
+impl FromStr for AdminWrite {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<AdminWrite, Self::Err> {
+        Ok(match s {
+            "accounts" => AdminWrite::Accounts,
+            "canonical_email_blocks" => AdminWrite::CanonicalEmailBlocks,
+            "domain_allows" => AdminWrite::DomainAllows,
+            "domain_blocks" => AdminWrite::DomainBlocks,
+            "email_domain_blocks" => AdminWrite::EmailDomainBlocks,
+            "ip_blocks" => AdminWrite::IpBlocks,
+            "reports" => AdminWrite::Reports,
+            _ => {
+                return Err(Error::UnknownScope(
+                    "Unknown 'admin:write' subcategory".to_string(),
+                ))
+            }
+        })
+    }
+}
+
+impl PartialOrd for AdminWrite {
+    fn partial_cmp(&self, other: &AdminWrite) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for AdminWrite {
+    fn cmp(&self, other: &AdminWrite) -> Ordering {
+        let a = format!("{:?}", self);
+        let b = format!("{:?}", other);
+        a.cmp(&b)
+    }
+}
+
+impl fmt::Display for AdminWrite {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "admin:write:{}",
+            match *self {
+                AdminWrite::Accounts => "accounts",
+                AdminWrite::CanonicalEmailBlocks => "canonical_email_blocks",
+                AdminWrite::DomainAllows => "domain_allows",
+                AdminWrite::DomainBlocks => "domain_blocks",
+                AdminWrite::EmailDomainBlocks => "email_domain_blocks",
+                AdminWrite::IpBlocks => "ip_blocks",
+                AdminWrite::Reports => "reports",
             }
         )
     }
