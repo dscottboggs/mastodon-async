@@ -98,8 +98,6 @@ pub use mastodon_async_entities::{
 pub use registration::Registration;
 pub use requests::{AddFilterRequest, AddPushRequest, StatusesRequest, UpdatePushRequest};
 
-/// Registering your App
-pub mod apps;
 /// Contains the struct that holds the client auth data
 pub mod data;
 /// Entities returned from the API
