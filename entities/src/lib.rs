@@ -4,6 +4,7 @@ use serde::Serialize;
 
 /// Error types for this crate
 pub mod error;
+pub use error::Error;
 
 /// Data structures for ser/de of account-related resources
 pub mod account;
@@ -31,6 +32,8 @@ pub mod custom_emoji;
 pub mod event;
 /// Data structures for ser/de of filter-related resources
 pub mod filter;
+/// Builders for form submissions
+pub mod forms;
 /// Type-safe ID values
 pub mod ids;
 pub use ids::*;
@@ -91,6 +94,7 @@ pub mod prelude {
         custom_emoji::CustomEmoji,
         event::Event,
         filter::{self /* for Action, Keyword, Status, v1, Result */, Filter, FilterContext},
+        forms,
         ids::*,
         instance::{
             self, /* for
