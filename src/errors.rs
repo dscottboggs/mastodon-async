@@ -1,8 +1,8 @@
 use std::string::FromUtf8Error;
 use std::{error, fmt, io::Error as IoError, num::TryFromIntError};
 
-use derive_is_enum_variant::is_enum_variant;
 use derive_builder::UninitializedFieldError;
+use derive_is_enum_variant::is_enum_variant;
 #[cfg(feature = "env")]
 use envy::Error as EnvyError;
 use reqwest::{header::ToStrError as HeaderStrError, Error as HttpError, StatusCode};
