@@ -4,10 +4,8 @@ use reqwest::Client;
 use uuid::Uuid;
 
 use crate::{
-    apps::{App, AppBuilder},
-    entities::auth::Scopes,
-    helpers::read_response::read_response,
-    log_serde, Data, Error, Mastodon, Result,
+    entities::forms, entities::prelude::*, helpers::read_response::read_response, log_serde, Data,
+    Error, Mastodon, Result,
 };
 
 const DEFAULT_REDIRECT_URI: &str = "urn:ietf:wg:oauth:2.0:oob";
@@ -18,7 +16,7 @@ const DEFAULT_REDIRECT_URI: &str = "urn:ietf:wg:oauth:2.0:oob";
 pub struct Registration {
     base: String,
     client: Client,
-    app_builder: AppBuilder,
+    app_builder: forms::ApplicationBuilder,
     force_login: bool,
 }
 
@@ -62,7 +60,7 @@ impl Registration {
         Registration {
             base: base.into(),
             client,
-            app_builder: AppBuilder::default(),
+            app_builder: forms::ApplicationBuilder::default(),
             force_login: false,
         }
     }
@@ -74,14 +72,14 @@ impl Registration {
         Registration {
             base: base.into(),
             client: Client::new(),
-            app_builder: AppBuilder::default(),
+            app_builder: forms::ApplicationBuilder::default(),
             force_login: false,
         }
     }
 
     /// Sets the name of this app
     ///
-    /// This is required, and if this isn't set then the AppBuilder::build
+    /// This is required, and if this isn't set then the forms::ApplicationBuilder::build
     /// method will fail
     pub fn client_name(&mut self, name: impl Into<String>) -> &mut Self {
         self.app_builder.client_name(name);
@@ -118,10 +116,10 @@ impl Registration {
     /// Register the given application
     ///
     /// ```no_run
-    /// use mastodon_async::{apps::App, prelude::*};
+    /// use mastodon_async::{apps::forms::Application, prelude::*};
     ///
     /// tokio_test::block_on(async {
-    ///     let mut app = App::builder();
+    ///     let mut app = forms::Application::builder();
     ///     app.client_name("mastodon-async_test");
     ///
     ///     let registration = Registration::new("https://botsin.space")
@@ -137,9 +135,9 @@ impl Registration {
     ///     println!("{:?}", mastodon.get_home_timeline().await.unwrap().initial_items);
     /// });
     /// ```
-    pub async fn register<I: TryInto<App>>(&mut self, app: I) -> Result<Registered>
+    pub async fn register<I: TryInto<forms::Application>>(&mut self, app: I) -> Result<Registered>
     where
-        Error: From<<I as TryInto<App>>::Error>,
+        Error: From<<I as TryInto<forms::Application>>::Error>,
     {
         let app = app.try_into()?;
         let oauth = self.send_app(&app).await?;
@@ -176,7 +174,7 @@ impl Registration {
     /// });
     /// ```
     pub async fn build(&mut self) -> Result<Registered> {
-        let app: App = self.app_builder.clone().build()?;
+        let app: forms::Application = self.app_builder.clone().build()?;
         let oauth = self.send_app(&app).await?;
 
         Ok(Registered {
@@ -190,7 +188,7 @@ impl Registration {
         })
     }
 
-    async fn send_app(&self, app: &App) -> Result<OAuth> {
+    async fn send_app(&self, app: &forms::Application) -> Result<OAuth> {
         let url = format!("{}/api/v1/apps", self.base);
         let call_id = Uuid::new_v4();
         debug!(url = url, app = as_serde!(app), call_id = as_debug!(call_id); "registering app");
@@ -392,14 +390,14 @@ mod tests {
     fn test_registration_new() {
         let r = Registration::new("https://example.com");
         assert_eq!(r.base, "https://example.com".to_string());
-        assert_eq!(r.app_builder, AppBuilder::default());
+        assert_eq!(r.app_builder, forms::ApplicationBuilder::default());
     }
 
     #[test]
     fn test_registration_with_sender() {
         let r = Registration::with_sender("https://example.com");
         assert_eq!(r.base, "https://example.com".to_string());
-        assert_eq!(r.app_builder, AppBuilder::default());
+        assert_eq!(r.app_builder, forms::ApplicationBuilder::default());
     }
 
     #[test]
@@ -410,7 +408,7 @@ mod tests {
         assert_eq!(r.base, "https://example.com".to_string());
         assert_eq!(
             &mut r.app_builder,
-            AppBuilder::default().client_name("foo-test")
+            forms::ApplicationBuilder::default().client_name("foo-test")
         );
     }
 
@@ -422,7 +420,7 @@ mod tests {
         assert_eq!(r.base, "https://example.com".to_string());
         assert_eq!(
             &mut r.app_builder,
-            AppBuilder::default().redirect_uris("https://foo.com")
+            forms::ApplicationBuilder::default().redirect_uris("https://foo.com")
         );
     }
 
@@ -434,7 +432,7 @@ mod tests {
         assert_eq!(r.base, "https://example.com".to_string());
         assert_eq!(
             &mut r.app_builder,
-            AppBuilder::default().scopes(Scopes::all())
+            forms::ApplicationBuilder::default().scopes(Scopes::all())
         );
     }
 
@@ -446,7 +444,7 @@ mod tests {
         assert_eq!(r.base, "https://example.com".to_string());
         assert_eq!(
             &mut r.app_builder,
-            AppBuilder::default().website("https://website.example.com")
+            forms::ApplicationBuilder::default().website("https://website.example.com")
         );
     }
 
