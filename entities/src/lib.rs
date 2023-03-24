@@ -87,7 +87,7 @@ pub mod prelude {
             self, /* for FocalPoint, SizeSpecificDetails, Meta */
             Attachment, MediaType, ProcessedAttachment,
         },
-        auth::prelude::*,
+        auth::{self, prelude::*},
         card::{self /* for Type */, Card, TrendsLink},
         context::Context,
         conversation::Conversation,

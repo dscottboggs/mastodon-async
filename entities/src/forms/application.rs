@@ -29,9 +29,9 @@ impl Application {
     /// // Example
     ///
     /// ```
-    /// use mastodon_async::apps::App;
+    /// use mastodon_async_entities::prelude::*;
     ///
-    /// let mut builder = App::builder();
+    /// let mut builder = forms::Application::builder();
     /// ```
     pub fn builder() -> ApplicationBuilder {
         ApplicationBuilder::default()
@@ -42,9 +42,9 @@ impl Application {
     /// // Example
     ///
     /// ```
-    /// use mastodon_async::{apps::App, prelude::*};
+    /// use mastodon_async_entities::prelude::*;
     ///
-    /// let mut builder = App::builder();
+    /// let mut builder = forms::Application::builder();
     /// builder.client_name("mastodon-async-test");
     /// let app = builder.build().unwrap();
     /// let scopes = app.scopes();

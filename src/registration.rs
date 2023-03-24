@@ -79,8 +79,8 @@ impl Registration {
 
     /// Sets the name of this app
     ///
-    /// This is required, and if this isn't set then the forms::ApplicationBuilder::build
-    /// method will fail
+    /// This is required, and if this isn't set then the
+    /// [`entities::forms::ApplicationBuilder::build`] method will fail
     pub fn client_name(&mut self, name: impl Into<String>) -> &mut Self {
         self.app_builder.client_name(name);
         self
@@ -116,7 +116,7 @@ impl Registration {
     /// Register the given application
     ///
     /// ```no_run
-    /// use mastodon_async::{apps::forms::Application, prelude::*};
+    /// use mastodon_async::prelude::*;
     ///
     /// tokio_test::block_on(async {
     ///     let mut app = forms::Application::builder();
