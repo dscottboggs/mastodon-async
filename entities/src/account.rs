@@ -323,11 +323,8 @@ impl CredentialsBuilder {
 ///     "id": 3,
 ///     "name": "Owner",
 ///     "color": "#ff3838",
-///     "position": 1000,
 ///     "permissions": 1,
-///     "highlighted": true,
-///     "created_at": "2022-09-08T22:48:07.983Z",
-///     "updated_at": "2022-09-08T22:48:07.983Z"
+///     "highlighted": true
 /// }"##;
 /// let example: Role = serde_json::from_str(example_serialized).unwrap();
 /// assert_eq!(example.name, "Owner");
@@ -342,9 +339,6 @@ pub struct Role {
     /// The hex code assigned to this role. If no hex code is assigned, the
     /// string will be empty. See also [the API reference](https://docs.joinmastodon.org/entities/Role/#color)
     pub color: Color,
-    /// An index for the role’s position. The higher the position, the more
-    /// priority the role has over other roles. See also [the API reference](https://docs.joinmastodon.org/entities/Role/#position)
-    pub position: i64,
     /// A bitmask that represents the sum of all permissions granted to the
     /// role. See also [the API reference](https://docs.joinmastodon.org/entities/Role/#permissions) and
     /// <https://docs.joinmastodon.org/entities/Role/#permission-flags>
@@ -352,12 +346,6 @@ pub struct Role {
     pub permissions: RolePermissions,
     /// Whether the role is publicly visible as a badge on user profiles. See also [the API reference](https://docs.joinmastodon.org/entities/Role/#highlighted)
     pub highlighted: bool,
-    /// The date that the role was created See also [the API reference](https://docs.joinmastodon.org/entities/Role/#created_at)
-    #[serde(with = "iso8601")]
-    pub created_at: OffsetDateTime,
-    /// The date that the role was updated. See also [the API reference](https://docs.joinmastodon.org/entities/Role/#updated_at)
-    #[serde(with = "iso8601")]
-    pub updated_at: OffsetDateTime,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, is_enum_variant)]
@@ -575,11 +563,8 @@ mod tests {
         	"id": 3,
         	"name": "Owner",
         	"color": "#ff3838",
-        	"position": 1000,
         	"permissions": 1,
-        	"highlighted": true,
-        	"created_at": "2022-09-08T22:48:07.983Z",
-        	"updated_at": "2022-09-08T22:48:07.983Z"
+        	"highlighted": true
         }"##;
         let subject: Role = serde_json::from_str(example).unwrap();
         assert_eq!(subject.id, RoleId::new("3"));
@@ -590,7 +575,6 @@ mod tests {
         assert_eq!(red, 0xFF);
         assert_eq!(green, 0x38);
         assert_eq!(blue, 0x38);
-        assert_eq!(subject.position, 1000);
         assert!(subject.permissions.has_administrator());
         assert_eq!(subject.permissions, 1);
         assert!(subject.highlighted);
