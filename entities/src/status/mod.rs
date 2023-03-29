@@ -79,7 +79,7 @@ pub struct Status {
     /// If not empty, warning text that should be displayed before the actual
     /// content.
     pub spoiler_text: String,
-    /// The visibilty of the status.
+    /// The visibility of the status.
     pub visibility: Visibility,
     /// An array of attachments.
     pub media_attachments: Vec<Attachment>,
@@ -87,7 +87,7 @@ pub struct Status {
     pub mentions: Vec<Mention>,
     /// An array of tags.
     pub tags: Vec<Tag>,
-    /// Media that is attached to this status.
+    /// The application that created this status.
     pub application: Option<Application>,
     /// The detected language for the status, if detected.
     pub language: Option<Language>,
