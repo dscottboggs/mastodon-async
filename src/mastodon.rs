@@ -6,7 +6,8 @@ use crate::{
     helpers::read_response::read_response,
     log_serde,
     polling_time::PollingTime,
-    AddFilterRequest, AddPushRequest, Data, NewStatus, Page, StatusesRequest, UpdatePushRequest,
+    AddFilterRequest, AddPushRequest, AddReportRequest, Data, NewStatus, Page, StatusesRequest,
+    UpdatePushRequest,
 };
 use futures::TryStream;
 use log::{as_debug, as_serde, debug, error, trace};
@@ -75,7 +76,6 @@ impl Mastodon {
         (delete (domain: String,)) unblock_domain: "domain_blocks" => Empty,
         (get) instance: "instance" => Instance,
         (get) verify_credentials: "accounts/verify_credentials" => Account,
-        (post (account_id: &str, status_ids: Vec<&str>, comment: String,)) report: "reports" => Report,
         (post (domain: String,)) block_domain: "domain_blocks" => Empty,
         (post (id: &str,)) authorize_follow_request: "accounts/follow_requests/authorize" => Empty,
         (post (id: &str,)) reject_follow_request: "accounts/follow_requests/reject" => Empty,
@@ -118,6 +118,7 @@ impl Mastodon {
         (post) endorse_user[AccountId]: "accounts/{}/pin" => Relationship,
         (post) unendorse_user[AccountId]: "accounts/{}/unpin" => Relationship,
         (get) attachment[AttachmentId]: "media/{}" => Attachment,
+        (get) report[ReportId]: "reports/{}" => Report,
     }
 
     streaming! {
@@ -194,6 +195,22 @@ impl Mastodon {
         let response = self
             .authenticated(self.client.post(&url))
             .json(&status)
+            .send()
+            .await?;
+        debug!(
+            status = log_serde!(response Status), url = url,
+            headers = log_serde!(response Headers);
+            "received API response"
+        );
+        read_response(response).await
+    }
+
+    /// Create a report.
+    pub async fn add_report(&self, request: &AddReportRequest) -> Result<Report> {
+        let url = self.route("/api/v1/reports");
+        let response = self
+            .authenticated(self.client.post(&url))
+            .json(&request)
             .send()
             .await?;
         debug!(
