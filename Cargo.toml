@@ -45,7 +45,6 @@ percent-encoding = "2.2.0"
 thiserror = "1.0.38"
 derive_deref = "1.1.1"
 derive_is_enum_variant = "0.1.1"
-serde_with = "2.3.1"
 
 [dependencies.derive_builder]
 version = "0.12.0"
@@ -75,6 +74,14 @@ optional = true
 version = "2.2"
 features = ["serde"]
 
+[dependencies.hex]
+version = "0.4"
+features = ["serde"]
+
+[dependencies.ipnet]
+version = "2"
+features = ["serde"]
+
 [dependencies.reqwest]
 version = "0.11"
 features = ["multipart", "json", "stream"]
@@ -82,6 +89,10 @@ features = ["multipart", "json", "stream"]
 [dependencies.serde]
 version = "1"
 features = ["derive"]
+
+[dependencies.serde_with]
+version = "2"
+features = ["hex", "time_0_3"]
 
 [dependencies.toml]
 version = "0.7"

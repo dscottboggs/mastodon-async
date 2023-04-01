@@ -7,6 +7,8 @@ pub use self::report::AddReportRequest;
 /// Data structure for the MastodonClient::statuses method
 pub use self::statuses::StatusesRequest;
 
+/// Requests specific to the admin API.
+pub mod admin;
 mod filter;
 mod push;
 mod report;

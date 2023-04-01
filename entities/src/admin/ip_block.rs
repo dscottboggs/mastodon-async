@@ -1,5 +1,6 @@
-use crate::DomainBlockId;
+use crate::IpBlockId;
 use derive_is_enum_variant::is_enum_variant;
+use ipnet::IpNet;
 use serde::{Deserialize, Serialize};
 use time::{serde::iso8601, OffsetDateTime};
 
@@ -8,11 +9,11 @@ use time::{serde::iso8601, OffsetDateTime};
 /// See also [the API documentation](https://docs.joinmastodon.org/entities/Admin_IpBlock/)
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct IpBlock {
-    /// The ID of the DomainBlock in the database.
-    pub id: DomainBlockId,
+    /// The ID of the IP block in the database.
+    pub id: IpBlockId,
     /// The IP address range that is not allowed to federate.
-    pub ip: String,
-    /// The associated policy with this IP block.
+    pub ip: IpNet,
+    /// The policy associated with this IP block.
     pub severity: Severity,
     /// The recorded reason for this IP block.
     pub comment: String,
@@ -52,7 +53,7 @@ mod tests {
         }"#;
         let subject: IpBlock = serde_json::from_str(example).unwrap();
         assert_eq!(subject.id, DomainBlockId::new("1"));
-        assert_eq!(subject.ip, "8.8.8.8/32");
+        assert_eq!(subject.ip, "8.8.8.8/32".parse().unwrap());
         assert!(subject.severity.is_no_access());
         assert!(subject.comment.is_empty());
         assert!(subject.expires_at.is_none());

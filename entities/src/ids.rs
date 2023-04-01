@@ -124,9 +124,10 @@ define_ids!(
     "a canonical email block ID" as CanonicalEmailBlockId,
     "a dimension key" as DimensionKey,
     "a dimension data element key" as DimensionDataKey,
-    "an ID of a domain allow rule" as AllowDomainId,
+    "an ID of a domain allow rule" as DomainAllowId,
     "an ID of a domain block" as DomainBlockId,
     "an ID of an email domain block" as EmailDomainBlockId,
+    "an ID of an IP range block" as IpBlockId,
     "a measurement key" as MeasureKey,
     "an announcement ID" as AnnouncementId,
     "a VAPID key for the push streaming API" as VapidKey,
@@ -135,4 +136,5 @@ define_ids!(
     "a hashtag ID" as TagId,
     "the ID of an application. As [`Application`](crate::application::Application) doesn't have an ID, I'm not sure what you're supposed to compare this to." as ApplicationId,
     "a role ID" as RoleId,
+    "a warning preset ID. These are not yet exposed by the Mastodon API." as WarningPresetId,
 );

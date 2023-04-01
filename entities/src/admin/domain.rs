@@ -1,8 +1,7 @@
+use crate::{DomainAllowId, DomainBlockId};
 use derive_is_enum_variant::is_enum_variant;
 use serde::{Deserialize, Serialize};
 use time::{serde::iso8601, OffsetDateTime};
-
-use crate::{AllowDomainId, DomainBlockId};
 
 /// Represents a domain allowed to federate.
 ///
@@ -10,7 +9,7 @@ use crate::{AllowDomainId, DomainBlockId};
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Allow {
     /// The ID of the DomainAllow in the database.
-    pub id: AllowDomainId,
+    pub id: DomainAllowId,
     /// The domain that is allowed to federate.
     pub domain: String,
     /// When the domain was allowed to federate.
