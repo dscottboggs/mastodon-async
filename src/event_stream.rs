@@ -2,10 +2,10 @@ use std::io;
 
 use crate::{errors::Result, prelude::*, Error};
 use futures::{stream::try_unfold, TryStream, TryStreamExt};
-use log::{as_debug, as_serde, debug, error, info, trace};
 use reqwest::Response;
 use tokio::io::AsyncBufReadExt;
 use tokio_util::io::StreamReader;
+use tracing::{debug, error, info, trace};
 
 /// Return a stream of events from the given response by parsing Server-Sent
 /// Events as they come in.
@@ -17,7 +17,7 @@ pub fn event_stream(
     client: &Mastodon,
 ) -> impl TryStream<Ok = (Event, Mastodon), Error = Error> + '_ {
     let stream = StreamReader::new(response.bytes_stream().map_err(|err| {
-        error!(err = as_debug!(err); "error reading stream");
+        error!(?err, "error reading stream");
         io::Error::new(io::ErrorKind::BrokenPipe, format!("{err:?}"))
     }));
     let lines_iter = stream.lines();
@@ -25,14 +25,14 @@ pub fn event_stream(
         let (ref mut lines_iter, ref location, client) = this;
         let mut lines = vec![];
         while let Some(line) = lines_iter.next_line().await? {
-            debug!(message = line, location = &location; "received message");
+            debug!(message = line, location, "received message");
             let line = line.trim().to_string();
             if line.starts_with(':') || line.is_empty() {
                 continue;
             }
             lines.push(line);
             if let Ok(event) = make_event(&lines) {
-                info!(event = as_serde!(event), location = location; "received event");
+                info!(?event, location, "received event");
                 lines.clear();
                 return Ok(Some(((event, client.clone()), this)));
             } else {
@@ -63,7 +63,7 @@ pub(crate) fn make_event(lines: &[String]) -> Result<Event> {
         data = message.payload;
     }
     let event: &str = &event;
-    trace!(event = event, payload = data; "SSE message parsed");
+    trace!(event, payload = data, "SSE message parsed");
     Ok(match event {
         "notification" => {
             let data = data
