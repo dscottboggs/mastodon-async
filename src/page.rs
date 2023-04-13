@@ -9,12 +9,12 @@ use tracing::{debug, error, trace};
 use uuid::Uuid;
 
 macro_rules! pages {
-    ($($direction:ident: $fun:ident),*) => {
+    ($($direction:ident: $method:ident),*) => {
 
         $(
             doc_comment!(concat!(
                     "Method to retrieve the ", stringify!($direction), " page of results"),
-            pub async fn $fun(&mut self) -> Result<Option<Vec<T>>> {
+            pub async fn $method(&mut self) -> Result<Option<Vec<T>>> {
                 let url = match self.$direction.take() {
                     Some(s) => s,
                     None => return Ok(None),
