@@ -1,4 +1,4 @@
-use std::{time::Duration, fmt::Debug};
+use std::{fmt::Debug, time::Duration};
 
 use crate::{errors::Result, Error};
 use futures::pin_mut;
@@ -57,11 +57,7 @@ where
     if status.is_success() {
         // the the response should deserialize to T
         let result = serde_json::from_slice(bytes)?;
-        debug!(
-            url = url.as_str(),
-            ?result,
-            "result parsed successfully"
-        );
+        debug!(url = url.as_str(), ?result, "result parsed successfully");
         Ok(result)
     } else {
         // we've received an error message, let's deserialize that instead.
