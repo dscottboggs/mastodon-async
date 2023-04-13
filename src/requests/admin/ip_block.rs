@@ -9,6 +9,7 @@ use time::Duration;
 #[skip_serializing_none]
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Builder)]
 #[builder(
+    derive(Debug, PartialEq),
     custom_constructor,
     build_fn(private, name = "try_build"),
     setter(into, strip_option)
