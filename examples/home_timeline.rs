@@ -2,22 +2,23 @@
 #![cfg_attr(not(feature = "toml"), allow(unused_imports))]
 mod register;
 
-use std::fs::File;
 use futures_util::StreamExt;
 use mastodon_async::Result;
-use tracing_subscriber::{EnvFilter, fmt};
+use std::fs::File;
+use tracing_subscriber::{fmt, EnvFilter};
 
 #[cfg(feature = "toml")]
 async fn run() -> Result<()> {
-
-
     let file = File::create("logfile.txt")?;
     let (non_blocking, _guard) = tracing_appender::non_blocking(file);
     let filter = EnvFilter::default()
         .add_directive("hyper=info".parse().unwrap())
         .add_directive("reqwest=info".parse().unwrap())
         .add_directive("mastodon_async=trace".parse().unwrap());
-    fmt().with_env_filter(filter).with_writer(non_blocking).init();
+    fmt()
+        .with_env_filter(filter)
+        .with_writer(non_blocking)
+        .init();
 
     register::get_mastodon_data()
         .await?
