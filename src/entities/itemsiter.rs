@@ -1,6 +1,7 @@
 use crate::page::Page;
 use futures::{stream::unfold, Stream};
 use serde::{Deserialize, Serialize};
+use std::fmt::Debug;
 use tracing::{debug, info, warn};
 
 /// Abstracts away the `next_page` logic into a single stream of items
@@ -22,14 +23,14 @@ use tracing::{debug, info, warn};
 ///
 /// See documentation for `futures::Stream::StreamExt` for available methods.
 #[derive(Debug, Clone)]
-pub(crate) struct ItemsIter<T: Clone + for<'de> Deserialize<'de> + Serialize> {
+pub(crate) struct ItemsIter<T: Clone + for<'de> Deserialize<'de> + Serialize + Debug> {
     page: Page<T>,
     buffer: Vec<T>,
     cur_idx: usize,
     use_initial: bool,
 }
 
-impl<'a, T: Clone + for<'de> Deserialize<'de> + Serialize> ItemsIter<T> {
+impl<'a, T: Clone + for<'de> Deserialize<'de> + Serialize + Debug> ItemsIter<T> {
     pub(crate) fn new(page: Page<T>) -> ItemsIter<T> {
         ItemsIter {
             page,
@@ -41,7 +42,11 @@ impl<'a, T: Clone + for<'de> Deserialize<'de> + Serialize> ItemsIter<T> {
 
     fn need_next_page(&self) -> bool {
         if self.buffer.is_empty() || self.cur_idx == self.buffer.len() {
-            debug!(idx = self.cur_idx, buffer_len = self.buffer.len(), "next page needed");
+            debug!(
+                idx = self.cur_idx,
+                buffer_len = self.buffer.len(),
+                "next page needed"
+            );
             true
         } else {
             false

@@ -16,15 +16,14 @@ macro_rules! methods {
             )]
             async fn $method_with_call_id<T: for<'de> serde::Deserialize<'de> + serde::Serialize>(&self, url: impl AsRef<str>, call_id: Uuid) -> Result<T>
             {
-
-                use log::{debug, as_debug};
+                use tracing::debug;
 
                 let url = url.as_ref();
-                debug!(url = url, method = stringify!($method), call_id = as_debug!(call_id); "making API request");
+                debug!(url, method = stringify!($method), ?call_id, "making API request");
                 let response = self.authenticated(self.client.$method(url)).header("Accept", "application/json").send().await?;
                 read_response(response).await
             }
-         )+
+        )+
     };
 }
 
@@ -45,10 +44,10 @@ macro_rules! paged_routes {
             "```"
             ),
             pub async fn $name(&self) -> Result<Page<$ret>> {
-                use log::{debug, as_debug};
+                use tracing::debug;
                 let url = self.route(concat!("/api/v1/", $url));
                 let call_id = uuid::Uuid::new_v4();
-                debug!(url = url, method = stringify!($method), call_id = as_debug!(call_id); "making API request");
+                debug!(url, method = stringify!($method), ?call_id, "making API request");
                 let response = self.authenticated(self.client.$method(&url)).header("Accept", "application/json").send().await?;
 
                 Page::new(self.clone(), response, call_id).await
@@ -68,7 +67,7 @@ macro_rules! paged_routes {
             ),
             pub async fn $name<'a>(&self, $($param: $typ,)*) -> Result<Page<$ret>> {
                 use serde_urlencoded;
-                use log::{debug, as_debug};
+                use tracing::debug;
 
                 let call_id = uuid::Uuid::new_v4();
 
@@ -96,7 +95,7 @@ macro_rules! paged_routes {
 
                 let url = format!(concat!("/api/v1/", $url, "?{}"), &qs);
 
-                debug!(url = url, method = "get", call_id = as_debug!(call_id); "making API request");
+                debug!(url, method = "get", ?call_id, "making API request");
 
                 let response = self.authenticated(self.client.get(&url)).header("Accept", "application/json").send().await?;
 
@@ -120,7 +119,7 @@ macro_rules! route_v2 {
             ),
             pub async fn $name<'a>(&self, $($param: $typ,)*) -> Result<$ret> {
                 use serde_urlencoded;
-                use log::{debug, as_serde};
+                use tracing::debug;
                 use uuid::Uuid;
 
                 let call_id = Uuid::new_v4();
@@ -144,7 +143,7 @@ macro_rules! route_v2 {
 
                 let qs = serde_urlencoded::to_string(&qs_data)?;
 
-                debug!(query_string_data = as_serde!(qs_data); "URL-encoded data to be sent in API request");
+                debug!(query_string_data = ?qs, "URL-encoded data to be sent in API request");
 
                 let url = format!(concat!("/api/v2/", $url, "?{}"), &qs);
 
@@ -164,7 +163,7 @@ macro_rules! route_v2 {
                 "\n# Errors\nIf `access_token` is not set."),
             pub async fn $name(&self $(, $param: $typ)*, description: Option<String>) -> Result<$ret> {
                 use reqwest::multipart::Form;
-                use log::{debug, as_debug};
+                use tracing::debug;
                 use uuid::Uuid;
 
                 let call_id = Uuid::new_v4();
@@ -181,8 +180,8 @@ macro_rules! route_v2 {
                 let url = &self.route(concat!("/api/v2/", $url));
 
                 debug!(
-                    url = url, method = stringify!($method),
-                    multipart_form_data = as_debug!(form_data), call_id = as_debug!(call_id);
+                    url, method = stringify!($method),
+                    multipart_form_data = ?form_data, ?call_id,
                     "making API request"
                 );
 
@@ -207,7 +206,7 @@ macro_rules! route_v2 {
                 "`\n# Errors\nIf `access_token` is not set."),
             pub async fn $name(&self, $($param: $typ,)*) -> Result<$ret> {
                 use reqwest::multipart::Form;
-                use log::{debug, as_debug};
+                use tracing::debug;
                 use uuid::Uuid;
 
 
@@ -221,8 +220,8 @@ macro_rules! route_v2 {
                 let url = &self.route(concat!("/api/v2/", $url));
 
                 debug!(
-                    url = url, method = stringify!($method),
-                    multipart_form_data = as_debug!(form_data), call_id = as_debug!(call_id);
+                    url, method = stringify!($method),
+                    multipart_form_data = ?form_data, ?call_id;
                     "making API request"
                 );
 
@@ -251,7 +250,7 @@ macro_rules! route {
                 "`\n# Errors\nIf `access_token` is not set."),
             pub async fn $name(&self, $($param: $typ,)*) -> Result<$ret> {
                 use reqwest::multipart::Form;
-                use log::{debug, as_debug};
+                use tracing::debug;
                 use uuid::Uuid;
 
 
@@ -265,8 +264,8 @@ macro_rules! route {
                 let url = &self.route(concat!("/api/v1/", $url));
 
                 debug!(
-                    url = url, method = stringify!($method),
-                    multipart_form_data = as_debug!(form_data), call_id = as_debug!(call_id);
+                    url, method = stringify!($method),
+                    multipart_form_data = ?form_data, ?call_id;
                     "making API request"
                 );
 
@@ -292,7 +291,7 @@ macro_rules! route {
                 "\n# Errors\nIf `access_token` is not set."),
             pub async fn $name(&self $(, $param: $typ)*, description: Option<String>) -> Result<$ret> {
                 use reqwest::multipart::Form;
-                use log::{debug, as_debug};
+                use tracing::debug;
                 use uuid::Uuid;
 
 
@@ -310,8 +309,8 @@ macro_rules! route {
                 let url = &self.route(concat!("/api/v1/", $url));
 
                 debug!(
-                    url = url, method = stringify!($method),
-                    multipart_form_data = as_debug!(form_data), call_id = as_debug!(call_id);
+                    url method = stringify!($method),
+                    multipart_form_data = ?form_data, ?call_id;
                     "making API request"
                 );
 
@@ -335,7 +334,7 @@ macro_rules! route {
             ),
             pub async fn $name<'a>(&self, $($param: $typ,)*) -> Result<$ret> {
                 use serde_urlencoded;
-                use log::{debug, as_serde};
+                use tracing::debug;
                 use uuid::Uuid;
 
                 let call_id = Uuid::new_v4();
@@ -360,7 +359,7 @@ macro_rules! route {
 
                 let qs = serde_urlencoded::to_string(&qs_data)?;
 
-                debug!(query_string_data = as_serde!(qs_data); "URL-encoded data to be sent in API request");
+                debug!(query_string_data = ?qs, "URL-encoded data to be sent in API request");
 
                 let url = format!(concat!("/api/v1/", $url, "?{}"), &qs);
 
@@ -379,7 +378,7 @@ macro_rules! route {
                 "`\n# Errors\nIf `access_token` is not set.",
             ),
             pub async fn $name(&self, $($param: $typ,)*) -> Result<$ret> {
-                use log::{debug, as_debug, as_serde};
+                use tracing::debug;
                 use uuid::Uuid;
 
                 let call_id = Uuid::new_v4();
@@ -392,8 +391,8 @@ macro_rules! route {
                 let url = &self.route(concat!("/api/v1/", $url));
                 debug!(
                     url = url.as_str(), method = stringify!($method),
-                    call_id = as_debug!(call_id),
-                    form_data = as_serde!(&form_data);
+                    ?call_id,
+                    ?form_data,
                     "making API request"
                 );
 
@@ -479,13 +478,13 @@ macro_rules! paged_routes_with_id {
                 "```"
             ),
             pub async fn $name(&self, id: impl AsRef<str>) -> Result<Page<$ret>> {
-                use log::{debug, as_debug};
+                use tracing::debug;
                 use uuid::Uuid;
 
                 let call_id = Uuid::new_v4();
                 let url = self.route(&format!(concat!("/api/v1/", $url), id.as_ref()));
 
-                debug!(url = url, method = stringify!($method), call_id = as_debug!(call_id); "making API request");
+                debug!(url, method = stringify!($method), ?call_id, "making API request");
                 let response = self.authenticated(self.client.$method(&url)).header("Accept", "application/json").send().await?;
                 Page::new(self.clone(), response, call_id).await
             }
@@ -530,8 +529,9 @@ tokio_test::block_on(async {
                 let url = self.route(&format!("/api/v1/streaming/{}", $stream));
                 let response = self.authenticated(self.client.get(&url)).header("Accept", "application/json").send().await?;
                 debug!(
-                    status = log_serde!(response Status), url = &url,
-                    headers = log_serde!(response Headers);
+                    status = %response.status(),
+                    url,
+                    headers = ?response.headers(),
                     "received API response"
                 );
                 let status = response.status();
@@ -581,8 +581,8 @@ tokio_test::block_on(async {
                 let url = url.to_string();
                 let response = self.authenticated(self.client.get(url.as_str())).header("Accept", "application/json").send().await?;
                 debug!(
-                    status = log_serde!(response Status), url = as_debug!(url),
-                    headers = log_serde!(response Headers);
+                    status = %response.status(), ?url,
+                    headers = ?response.headers(),
                     "received API response"
                 );
                 let status = response.status();
@@ -632,8 +632,8 @@ tokio_test::block_on(async {
                 let url = url.to_string();
                 let response = self.authenticated(self.client.get(url.as_str())).header("Accept", "application/json").send().await?;
                 debug!(
-                    status = log_serde!(response Status), url = as_debug!(url),
-                    headers = log_serde!(response Headers);
+                    status = %response.status(), url = ?url,
+                    headers = ?response.headers(),
                     "received API response"
                 );
                 let status = response.status();
