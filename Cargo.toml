@@ -55,10 +55,6 @@ features = ["url"]
 version = "1.2.2"
 features = ["v4"]
 
-[dependencies.log]
-version = "0.4"
-features = ["kv_unstable", "serde", "std", "kv_unstable_serde", "kv_unstable_std"]
-
 [dependencies.time]
 version = "0.3"
 features = ["parsing", "serde", "formatting"]
@@ -98,7 +94,6 @@ indoc = "2.0"
 skeptic = "0.13"
 tempfile = "3"
 # for examples:
-femme = "2.2.1"
 html2text = "0.4.4"
 tracing-subscriber = "0.3"
 
