@@ -209,7 +209,9 @@ impl Registration {
             }
             Err(err) => {
                 error!(
-                    ?err, url, method = stringify!($method),
+                    ?err,
+                    url,
+                    method = stringify!($method),
                     ?call_id,
                     "error making API request"
                 );
