@@ -9,7 +9,7 @@ use tracing::{debug, error, trace};
 use uuid::Uuid;
 
 macro_rules! pages {
-    ($($direction:ident: $fun:ident),*) => {
+    ($($direction:ident: $method:ident),*) => {
 
         $(
             doc_comment!(concat!(
@@ -22,7 +22,7 @@ macro_rules! pages {
                 "This allows for the next page to be retrieved in the future even when\n",
                 "there are no results.",
                 ),
-            pub async fn $fun(&mut self) -> Result<Option<Vec<T>>> {
+            pub async fn $method(&mut self) -> Result<Option<Vec<T>>> {
                 let Some(ref url) = self.$direction else {
                     return Ok(None);
                 };
