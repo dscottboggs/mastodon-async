@@ -89,7 +89,7 @@ impl<'a, T: Clone + for<'de> Deserialize<'de> + Serialize + Debug> ItemsIter<T> 
                 }
                 let item = this.page.initial_items[idx].clone();
                 debug!(
-                    item = ?serde_json::to_string(&item).unwrap_or_default(),
+                    ?item,
                     index = ?idx,
                     "yielding item from initial items");
                 // let item = Box::pin(item);
@@ -103,7 +103,7 @@ impl<'a, T: Clone + for<'de> Deserialize<'de> + Serialize + Debug> ItemsIter<T> 
                 this.cur_idx += 1;
                 let item = this.buffer[idx].clone();
                 debug!(
-                    item = serde_json::to_string(&item).unwrap_or_default(),
+                    ?item,
                     index = ?idx,
                     "yielding item from initial stream");
                 Some((item, this))
