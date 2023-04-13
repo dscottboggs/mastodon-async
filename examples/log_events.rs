@@ -3,14 +3,12 @@
 mod register;
 
 use futures_util::TryStreamExt;
-use log::{as_serde, info};
 use mastodon_async::Result;
+use tracing::{info, warn};
 
 #[cfg(feature = "toml")]
 async fn run() -> Result<()> {
-    use log::warn;
-
-    femme::with_level(log::LevelFilter::Info);
+    tracing_subscriber::fmt::init();
     let mastodon = register::get_mastodon_data().await?;
     let stream = mastodon.stream_user().await?;
     info!("watching mastodon for events. This will run forever, press Ctrl+C to kill the program.");
@@ -18,7 +16,7 @@ async fn run() -> Result<()> {
         .try_for_each(|(event, _client)| async move {
             match event {
                 // fill in how you want to handle events here.
-                _ => warn!(event = as_serde!(event); "unrecognized event received"),
+                _ => warn!(?event, "unrecognized event received"),
             }
             Ok(())
         })
