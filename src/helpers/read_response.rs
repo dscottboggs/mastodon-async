@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::{time::Duration, fmt::Debug};
 
 use crate::{errors::Result, Error};
 use futures::pin_mut;
@@ -16,7 +16,7 @@ use tracing::{debug, trace, warn};
 /// to parse whatever we got before the timeout.
 pub async fn read_response<T>(response: Response) -> Result<T>
 where
-    T: for<'de> Deserialize<'de> + Serialize,
+    T: for<'de> Deserialize<'de> + Serialize + Debug,
 {
     let mut bytes = vec![];
     let url = response.url().clone();
@@ -59,7 +59,7 @@ where
         let result = serde_json::from_slice(bytes)?;
         debug!(
             url = url.as_str(),
-            //result = result.serialize(),
+            ?result,
             "result parsed successfully"
         );
         Ok(result)
