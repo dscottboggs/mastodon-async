@@ -3,7 +3,7 @@ macro_rules! methods {
         $(
             #[allow(dead_code)]
             #[doc=concat!("Make a ", stringify!($method), " API request, and deserialize the result into T")]
-            async fn $method<T: for<'de> serde::Deserialize<'de> + serde::Serialize>(&self, url: impl AsRef<str>) -> Result<T>
+            async fn $method<T: for<'de> serde::Deserialize<'de> + serde::Serialize + std::fmt::Debug>(&self, url: impl AsRef<str>) -> Result<T>
             {
                 let call_id = uuid::Uuid::new_v4();
                 self.$method_with_call_id(url, call_id).await
@@ -14,7 +14,7 @@ macro_rules! methods {
                     "Make a ", stringify!($method), " API request, and deserialize the result into T.\n\n",
                     "Logging will use the provided UUID, rather than generating one before making the request.",
             )]
-            async fn $method_with_call_id<T: for<'de> serde::Deserialize<'de> + serde::Serialize>(&self, url: impl AsRef<str>, call_id: Uuid) -> Result<T>
+            async fn $method_with_call_id<T: for<'de> serde::Deserialize<'de> + serde::Serialize + std::fmt::Debug>(&self, url: impl AsRef<str>, call_id: Uuid) -> Result<T>
             {
                 use tracing::debug;
 
