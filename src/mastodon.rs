@@ -381,7 +381,7 @@ impl Mastodon {
     }
 
     /// Set the bearer authentication token
-    fn authenticated(&self, request: RequestBuilder) -> RequestBuilder {
+    pub(crate) fn authenticated(&self, request: RequestBuilder) -> RequestBuilder {
         request.bearer_auth(&self.data.token)
     }
 
