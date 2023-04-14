@@ -18,6 +18,7 @@ async fn run() -> Result<()> {
     fmt()
         .with_env_filter(filter)
         .with_writer(non_blocking)
+        .json()
         .init();
 
     register::get_mastodon_data()

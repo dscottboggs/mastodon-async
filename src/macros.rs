@@ -43,12 +43,18 @@ macro_rules! paged_routes {
             "client.", stringify!($name), "();\n",
             "```"
             ),
+            #[tracing::instrument(skip(self), fields(call_id))]
             pub async fn $name(&self) -> Result<Page<$ret>> {
                 use tracing::debug;
                 let url = self.route(concat!("/api/v1/", $url));
                 let call_id = uuid::Uuid::new_v4();
-                debug!(url, method = stringify!($method), ?call_id, "making API request");
-                let response = self.authenticated(self.client.$method(&url)).header("Accept", "application/json").send().await?;
+                tracing::Span::current().record("call_id", &call_id.to_string());
+                debug!(method = stringify!($method), url, "making API request");
+                let response = self
+                    .authenticated(self.client.$method(&url))
+                    .header("Accept", "application/json")
+                    .send()
+                    .await?;
 
                 Page::new(self.clone(), response, call_id).await
             }
@@ -309,7 +315,7 @@ macro_rules! route {
                 let url = &self.route(concat!("/api/v1/", $url));
 
                 debug!(
-                    url method = stringify!($method),
+                    url, method = stringify!($method),
                     multipart_form_data = ?form_data, ?call_id;
                     "making API request"
                 );
@@ -528,12 +534,7 @@ tokio_test::block_on(async {
                 use $crate::event_stream::event_stream;
                 let url = self.route(&format!("/api/v1/streaming/{}", $stream));
                 let response = self.authenticated(self.client.get(&url)).header("Accept", "application/json").send().await?;
-                debug!(
-                    status = %response.status(),
-                    url,
-                    headers = ?response.headers(),
-                    "received API response"
-                );
+                debug!(response = as_value!(response, Response), "received API response");
                 let status = response.status();
                 if status.is_success() {
                      Ok(event_stream(response, url, self))
@@ -580,11 +581,7 @@ tokio_test::block_on(async {
                 url.query_pairs_mut().append_pair(stringify!($param), $param.as_ref());
                 let url = url.to_string();
                 let response = self.authenticated(self.client.get(url.as_str())).header("Accept", "application/json").send().await?;
-                debug!(
-                    status = %response.status(), ?url,
-                    headers = ?response.headers(),
-                    "received API response"
-                );
+                debug!(response = as_value!(response, Response), "received API response");
                 let status = response.status();
                 if status.is_success() {
                      Ok(event_stream(response, url, self))
@@ -631,11 +628,7 @@ tokio_test::block_on(async {
                 }
                 let url = url.to_string();
                 let response = self.authenticated(self.client.get(url.as_str())).header("Accept", "application/json").send().await?;
-                debug!(
-                    status = %response.status(), url = ?url,
-                    headers = ?response.headers(),
-                    "received API response"
-                );
+                debug!(response = as_value!(response, Response), "received API response");
                 let status = response.status();
                 if status.is_success() {
                      Ok(event_stream(response, url, self))
