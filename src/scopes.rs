@@ -178,12 +178,7 @@ impl Scopes {
     /// let read_write = read.and(write);
     /// ```
     pub fn and(self, other: Scopes) -> Scopes {
-        let new_set: HashSet<_> = self
-            .scopes
-            .union(&other.scopes)
-            .into_iter()
-            .copied()
-            .collect();
+        let new_set: HashSet<_> = self.scopes.union(&other.scopes).copied().collect();
         Scopes { scopes: new_set }
     }
 

@@ -47,10 +47,7 @@ fn test_compile_imports() {
     use mastodon_async::event_stream::event_stream as _;
     use mastodon_async::format_err as _;
     use mastodon_async::helpers::cli::authenticate as _;
-    use mastodon_async::helpers::log::Headers as _;
-    use mastodon_async::helpers::log::Status as _;
     use mastodon_async::helpers::read_response::read_response as _;
-    use mastodon_async::log_serde as _;
     use mastodon_async::mastodon::Mastodon as _;
     use mastodon_async::mastodon::MastodonClient as _;
     use mastodon_async::mastodon::MastodonUnauthenticated as _;

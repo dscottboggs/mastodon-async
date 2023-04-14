@@ -1,28 +1,17 @@
 macro_rules! methods {
-    ($($method:ident and $method_with_call_id:ident,)+) => {
+    ($($method:ident,)+) => {
         $(
             doc_comment! {
                 concat!("Make a ", stringify!($method), " API request, and deserialize the result into T"),
-                async fn $method<T: for<'de> serde::Deserialize<'de> + serde::Serialize>(&self, url: impl AsRef<str>) -> Result<T>
+                async fn $method<T>(&self, url: impl AsRef<str>) -> Result<T>
+                where T: for<'de> serde::Deserialize<'de> + serde::Serialize + std::fmt::Debug
                 {
-                    let call_id = uuid::Uuid::new_v4();
-                    self.$method_with_call_id(url, call_id).await
-                }
-            }
-
-            doc_comment! {
-                concat!(
-                    "Make a ", stringify!($method), " API request, and deserialize the result into T.\n\n",
-                    "Logging will use the provided UUID, rather than generating one before making the request.",
-                ),
-                async fn $method_with_call_id<T: for<'de> serde::Deserialize<'de> + serde::Serialize>(&self, url: impl AsRef<str>, call_id: Uuid) -> Result<T>
-                {
-
-                    use log::{debug, as_debug};
-
                     let url = url.as_ref();
-                    debug!(url = url, method = stringify!($method), call_id = as_debug!(call_id); "making API request");
-                    let response = self.authenticated(self.client.$method(url)).header("Accept", "application/json").send().await?;
+                    tracing::debug!(method = stringify!($method), url, "making API request");
+                    let response = self.authenticated(self.client.$method(url))
+                        .header("Accept", "application/json")
+                        .send()
+                        .await?;
                     read_response(response).await
                 }
             }
@@ -46,14 +35,18 @@ macro_rules! paged_routes {
             "client.", stringify!($name), "();\n",
             "```"
             ),
+            #[tracing::instrument(skip(self), fields(call_id = %uuid::Uuid::new_v4()))]
             pub async fn $name(&self) -> Result<Page<$ret>> {
-                use log::{debug, as_debug};
                 let url = self.route(concat!("/api/v1/", $url));
-                let call_id = uuid::Uuid::new_v4();
-                debug!(url = url, method = stringify!($method), call_id = as_debug!(call_id); "making API request");
-                let response = self.authenticated(self.client.$method(&url)).header("Accept", "application/json").send().await?;
+                tracing::debug!(method = stringify!($method), url, "making API request");
 
-                Page::new(self.clone(), response, call_id).await
+                let response = self
+                    .authenticated(self.client.$method(&url))
+                    .header("Accept", "application/json")
+                    .send()
+                    .await?;
+
+                Page::new(self.clone(), response).await
             }
 
         }
@@ -68,12 +61,8 @@ macro_rules! paged_routes {
                 $url,
                 "`\n# Errors\nIf `access_token` is not set."
             ),
+            #[tracing::instrument(skip_all, fields(call_id = %uuid::Uuid::new_v4()))]
             pub async fn $name<'a>(&self, $($param: $typ,)*) -> Result<Page<$ret>> {
-                use serde_urlencoded;
-                use log::{debug, as_debug};
-
-                let call_id = uuid::Uuid::new_v4();
-
                 #[derive(Serialize)]
                 struct Data<'a> {
                     $(
@@ -95,14 +84,13 @@ macro_rules! paged_routes {
                 };
 
                 let qs = serde_urlencoded::to_string(&qs_data)?;
-
                 let url = format!(concat!("/api/v1/", $url, "?{}"), &qs);
-
-                debug!(url = url, method = "get", call_id = as_debug!(call_id); "making API request");
-
-                let response = self.authenticated(self.client.get(&url)).header("Accept", "application/json").send().await?;
-
-                Page::new(self.clone(), response, call_id).await
+                tracing::debug!(method = "get", url, "making API request");
+                let response = self.authenticated(self.client.get(&url))
+                    .header("Accept", "application/json")
+                    .send()
+                    .await?;
+                Page::new(self.clone(), response).await
             }
         }
 
@@ -120,13 +108,8 @@ macro_rules! route_v2 {
                 $url,
                 "`\n# Errors\nIf `access_token` is not set."
             ),
+            #[tracing::instrument(skip(self), fields(call_id = %Uuid::new_v4()))]
             pub async fn $name<'a>(&self, $($param: $typ,)*) -> Result<$ret> {
-                use serde_urlencoded;
-                use log::{debug, as_serde};
-                use uuid::Uuid;
-
-                let call_id = Uuid::new_v4();
-
                 #[derive(Serialize)]
                 struct Data<'a> {
                     $(
@@ -145,12 +128,9 @@ macro_rules! route_v2 {
                 };
 
                 let qs = serde_urlencoded::to_string(&qs_data)?;
-
-                debug!(query_string_data = as_serde!(qs_data); "URL-encoded data to be sent in API request");
-
+                tracing::debug!(query_string_data = ?qs, "URL-encoded data to be sent in API request");
                 let url = format!(concat!("/api/v2/", $url, "?{}"), &qs);
-
-                self.get_with_call_id(self.route(&url), call_id).await
+                self.get(self.route(&url)).await
             }
         }
 
@@ -164,14 +144,9 @@ macro_rules! route_v2 {
                 $url,
                 "`, with a description/alt-text.",
                 "\n# Errors\nIf `access_token` is not set."),
+            #[tracing::instrument(skip_all, fields(call_id = %Uuid::new_v4()))]
             pub async fn $name(&self $(, $param: $typ)*, description: Option<String>) -> Result<$ret> {
-                use reqwest::multipart::Form;
-                use log::{debug, as_debug};
-                use uuid::Uuid;
-
-                let call_id = Uuid::new_v4();
-
-                let form_data = Form::new()
+                let form_data = reqwest::multipart::Form::new()
                     $(
                         .part(stringify!($param), Self::get_form_part($param)?)
                      )*;
@@ -181,19 +156,13 @@ macro_rules! route_v2 {
                 } else { form_data };
 
                 let url = &self.route(concat!("/api/v2/", $url));
-
-                debug!(
-                    url = url, method = stringify!($method),
-                    multipart_form_data = as_debug!(form_data), call_id = as_debug!(call_id);
-                    "making API request"
-                );
+                tracing::debug!(method = "post", url, multipart_form_data = ?form_data, "making API request" );
 
                 let response = self.authenticated(self.client.post(url))
                     .multipart(form_data)
                     .header("Accept", "application/json")
                     .send()
                     .await?;
-
                 read_response(response).await
             }
         }
@@ -207,33 +176,20 @@ macro_rules! route_v2 {
                 "Equivalent to `post /api/v2/",
                 $url,
                 "`\n# Errors\nIf `access_token` is not set."),
+            #[tracing::instrument(skip(self), fields(call_id = %uuid::Uuid::new_v4()))]
             pub async fn $name(&self, $($param: $typ,)*) -> Result<$ret> {
-                use reqwest::multipart::Form;
-                use log::{debug, as_debug};
-                use uuid::Uuid;
-
-
-                let call_id = Uuid::new_v4();
-
-                let form_data = Form::new()
+                let form_data = reqwest::multipart::Form::new()
                     $(
                         .part(stringify!($param), Self::get_form_part($param)?)
                      )*;
 
                 let url = &self.route(concat!("/api/v2/", $url));
-
-                debug!(
-                    url = url, method = stringify!($method),
-                    multipart_form_data = as_debug!(form_data), call_id = as_debug!(call_id);
-                    "making API request"
-                );
-
+                tracing::debug!(method = "post", url, multipart_form_data = ?form_data, "making API request" );
                 let response = self.authenticated(self.client.post(url))
                     .multipart(form_data)
                     .header("Accept", "application/json")
                     .send()
                     .await?;
-
                 read_response(response).await
             }
         }
@@ -251,27 +207,15 @@ macro_rules! route {
                 "Equivalent to `post /api/v1/",
                 $url,
                 "`\n# Errors\nIf `access_token` is not set."),
+            #[tracing::instrument(skip(self), fields(call_id = %uuid::Uuid::new_v4()))]
             pub async fn $name(&self, $($param: $typ,)*) -> Result<$ret> {
-                use reqwest::multipart::Form;
-                use log::{debug, as_debug};
-                use uuid::Uuid;
-
-
-                let call_id = Uuid::new_v4();
-
-                let form_data = Form::new()
+                let url = &self.route(concat!("/api/v1/", $url));
+                let form_data = reqwest::multipart::Form;Form::new()
                     $(
                         .part(stringify!($param), Self::get_form_part($param)?)
                      )*;
 
-                let url = &self.route(concat!("/api/v1/", $url));
-
-                debug!(
-                    url = url, method = stringify!($method),
-                    multipart_form_data = as_debug!(form_data), call_id = as_debug!(call_id);
-                    "making API request"
-                );
-
+                tracing::debug!(method = "post", url, multipart_form_data = ?form_data, "making API request");
                 let response = self.authenticated(self.client.post(url))
                     .multipart(form_data)
                     .header("Accept", "application/json")
@@ -292,15 +236,9 @@ macro_rules! route {
                 $url,
                 "`, with a description/alt-text.",
                 "\n# Errors\nIf `access_token` is not set."),
+            #[tracing::instrument(skip(self), fields(call_id = %uuid::Uuid::new_v4()))]
             pub async fn $name(&self $(, $param: $typ)*, description: Option<String>) -> Result<$ret> {
-                use reqwest::multipart::Form;
-                use log::{debug, as_debug};
-                use uuid::Uuid;
-
-
-                let call_id = Uuid::new_v4();
-
-                let form_data = Form::new()
+                let form_data = reqwest::multipart::Form::new()
                     $(
                         .part(stringify!($param), Self::get_form_part($param)?)
                      )*;
@@ -310,12 +248,7 @@ macro_rules! route {
                 } else { form_data };
 
                 let url = &self.route(concat!("/api/v1/", $url));
-
-                debug!(
-                    url = url, method = stringify!($method),
-                    multipart_form_data = as_debug!(form_data), call_id = as_debug!(call_id);
-                    "making API request"
-                );
+                debug!(method = "post", url, multipart_form_data = ?form_data, "making API request");
 
                 let response = self.authenticated(self.client.post(url))
                     .multipart(form_data)
@@ -328,6 +261,7 @@ macro_rules! route {
         }
         route! { $($rest)* }
     };
+
     ((get ($($param:ident: $typ:ty,)*)) $name:ident: $url:expr => $ret:ty, $($rest:tt)*) => {
         doc_comment! {
             concat!(
@@ -335,13 +269,8 @@ macro_rules! route {
                 $url,
                 "`\n# Errors\nIf `access_token` is not set."
             ),
+            #[tracing::instrument(skip(self), fields(call_id = %Uuid::new_v4()))]
             pub async fn $name<'a>(&self, $($param: $typ,)*) -> Result<$ret> {
-                use serde_urlencoded;
-                use log::{debug, as_serde};
-                use uuid::Uuid;
-
-                let call_id = Uuid::new_v4();
-
                 #[derive(Serialize)]
                 struct Data<'a> {
                     $(
@@ -359,14 +288,10 @@ macro_rules! route {
                     _marker: ::std::marker::PhantomData,
                 };
 
-
                 let qs = serde_urlencoded::to_string(&qs_data)?;
-
-                debug!(query_string_data = as_serde!(qs_data); "URL-encoded data to be sent in API request");
-
+                tracing::debug!(query_string_data = ?qs, "URL-encoded data to be sent in API request");
                 let url = format!(concat!("/api/v1/", $url, "?{}"), &qs);
-
-                self.get_with_call_id(self.route(&url), call_id).await
+                self.get(self.route(&url)).await
             }
         }
 
@@ -380,25 +305,15 @@ macro_rules! route {
                 $url,
                 "`\n# Errors\nIf `access_token` is not set.",
             ),
+            #[tracing::instrument(skip_all, fields(call_id = %Uuid::new_v4()))]
             pub async fn $name(&self, $($param: $typ,)*) -> Result<$ret> {
-                use log::{debug, as_debug, as_serde};
-                use uuid::Uuid;
-
-                let call_id = Uuid::new_v4();
-
                 let form_data = json!({
                     $(
                         stringify!($param): $param,
                     )*
                 });
                 let url = &self.route(concat!("/api/v1/", $url));
-                debug!(
-                    url = url.as_str(), method = stringify!($method),
-                    call_id = as_debug!(call_id),
-                    form_data = as_serde!(&form_data);
-                    "making API request"
-                );
-
+                debug!(method = stringify!($method), url = url.as_str(), ?form_data, "making API request");
                 let response = self.authenticated(self.client.$method(url))
                     .json(&form_data)
                     .header("Accept", "application/json")
@@ -426,6 +341,7 @@ macro_rules! route {
                 "client.", stringify!($name), "();\n",
                 "```"
             ),
+            #[tracing::instrument(skip_all, fields(call_id = %Uuid::new_v4()))]
             pub async fn $name(&self) -> Result<$ret> {
                 self.$method(self.route(concat!("/api/v1/", $url))).await
             }
@@ -456,6 +372,7 @@ macro_rules! route_id {
                     "# }\n",
                     "```"
                 ),
+                #[tracing::instrument(skip_all, fields(call_id = %Uuid::new_v4()))]
                 pub async fn $name(&self, id: &$id_type) -> Result<$ret> {
                     self.$method(self.route(&format!(concat!("/api/v1/", $url), id))).await
                 }
@@ -480,16 +397,12 @@ macro_rules! paged_routes_with_id {
                 "client.", stringify!($name), "(\"some-id\");\n",
                 "```"
             ),
+            #[tracing::instrument(skip_all, fields(call_id = %Uuid::new_v4()))]
             pub async fn $name(&self, id: impl AsRef<str>) -> Result<Page<$ret>> {
-                use log::{debug, as_debug};
-                use uuid::Uuid;
-
-                let call_id = Uuid::new_v4();
                 let url = self.route(&format!(concat!("/api/v1/", $url), id.as_ref()));
-
-                debug!(url = url, method = stringify!($method), call_id = as_debug!(call_id); "making API request");
+                tracing::debug!(method = stringify!($method), url, "making API request");
                 let response = self.authenticated(self.client.$method(&url)).header("Accept", "application/json").send().await?;
-                Page::new(self.clone(), response, call_id).await
+                Page::new(self.clone(), response).await
             }
         }
 
@@ -527,18 +440,17 @@ tokio_test::block_on(async {
     }).await.unwrap();
 });"
             ),
+            #[tracing::instrument(skip(self), fields(call_id = %Uuid::new_v4()))]
             pub async fn $fn_name(&self) -> Result<impl TryStream<Ok=(Event, Mastodon), Error=Error> + '_> {
-                use $crate::event_stream::event_stream;
                 let url = self.route(&format!("/api/v1/streaming/{}", $stream));
-                let response = self.authenticated(self.client.get(&url)).header("Accept", "application/json").send().await?;
-                debug!(
-                    status = log_serde!(response Status), url = &url,
-                    headers = log_serde!(response Headers);
-                    "received API response"
-                );
+                let response = self.authenticated(self.client.get(&url))
+                    .header("Accept", "application/json")
+                    .send()
+                    .await?;
+                debug!(response = as_value!(response, Response), "received API response");
                 let status = response.status();
                 if status.is_success() {
-                     Ok(event_stream(response, url, self))
+                     Ok($crate::event_stream::event_stream(response, url, self))
                 } else {
                     let response = response.json().await?;
                     Err(Error::Api{ status, response })
@@ -576,20 +488,16 @@ tokio_test::block_on(async {
     }).await.unwrap();
 });"
             ),
+            #[tracing::instrument(skip_all, fields(call_id = %Uuid::new_v4()))]
             pub async fn $fn_name(&self, $param: $param_type) -> Result<impl TryStream<Ok=(Event, Mastodon), Error=Error> + '_> {
-                use $crate::event_stream::event_stream;
                 let mut url: Url = self.route(concat!("/api/v1/streaming/", $stream)).parse()?;
                 url.query_pairs_mut().append_pair(stringify!($param), $param.as_ref());
                 let url = url.to_string();
                 let response = self.authenticated(self.client.get(url.as_str())).header("Accept", "application/json").send().await?;
-                debug!(
-                    status = log_serde!(response Status), url = as_debug!(url),
-                    headers = log_serde!(response Headers);
-                    "received API response"
-                );
+                debug!(response = as_value!(response, Response), "received API response");
                 let status = response.status();
                 if status.is_success() {
-                     Ok(event_stream(response, url, self))
+                     Ok($crate::event_stream::event_stream(response, url, self))
                 } else {
                     let response = response.json().await?;
                     Err(Error::Api{ status, response })
@@ -625,22 +533,18 @@ tokio_test::block_on(async {
     }).await.unwrap();
 });"
             ),
+            #[tracing::instrument(skip(self), fields(call_id = %Uuid::new_v4()))]
             pub async fn $fn_name(&self, $param: bool) -> Result<impl TryStream<Ok=(Event, Mastodon), Error=Error> + '_> {
-                use $crate::event_stream::event_stream;
                 let mut url: Url = self.route(concat!("/api/v1/streaming/", $stream)).parse()?;
                 if $param {
                     url.query_pairs_mut().append_key_only(stringify!($param));
                 }
                 let url = url.to_string();
                 let response = self.authenticated(self.client.get(url.as_str())).header("Accept", "application/json").send().await?;
-                debug!(
-                    status = log_serde!(response Status), url = as_debug!(url),
-                    headers = log_serde!(response Headers);
-                    "received API response"
-                );
+                debug!(response = as_value!(response, Response), "received API response");
                 let status = response.status();
                 if status.is_success() {
-                     Ok(event_stream(response, url, self))
+                     Ok(crate::event_stream::event_stream(response, url, self))
                 } else {
                     let response = response.json().await?;
                     Err(Error::Api{ status, response })

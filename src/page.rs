@@ -1,55 +1,41 @@
+use std::fmt::Debug;
+
 use super::{Mastodon, Result};
 use crate::{entities::itemsiter::ItemsIter, helpers::read_response::read_response, Error};
 use futures::Stream;
-use log::{as_debug, as_serde, debug, error, trace};
 use reqwest::{header::LINK, Response, Url};
 use serde::{Deserialize, Serialize};
+use tracing::{debug, error, trace};
 use uuid::Uuid;
-// use url::Url;
 
 macro_rules! pages {
-    ($($direction:ident: $fun:ident),*) => {
+    ($($direction:ident: $method:ident),*) => {
 
         $(
             doc_comment!(concat!(
                     "Method to retrieve the ", stringify!($direction), " page of results"),
-            pub async fn $fun(&mut self) -> Result<Option<Vec<T>>> {
+            #[tracing::instrument(skip(self), fields(call_id = %Uuid::new_v4()))]
+            pub async fn $method(&mut self) -> Result<Option<Vec<T>>> {
                 let url = match self.$direction.take() {
                     Some(s) => s,
                     None => return Ok(None),
                 };
 
-                debug!(
-                    url = url.as_str(), method = "get",
-                    call_id = as_debug!(self.call_id),
-                    direction = stringify!($direction);
-                    "making API request"
-                );
+                debug!(method = "get", url = url.as_str(), direction = stringify!($direction), "making API request");
                 let url: String = url.into(); // <- for logging
                 let response = self.mastodon.client.get(&url).send().await?;
                 match response.error_for_status() {
                     Ok(response) => {
-                        let (prev, next) = get_links(&response, self.call_id)?;
+                        let (prev, next) = get_links(&response)?;
                         let response = read_response(response).await?;
-                        debug!(
-                            url = url, method = "get", next = as_debug!(next),
-                            prev = as_debug!(prev), call_id = as_debug!(self.call_id),
-                            response = as_serde!(response);
-                            "received next pages from API"
-                        );
+                        debug!(method = "get", url, ?next, ?prev, response = ?response, "received next pages from API");
                         self.next = next;
                         self.prev = prev;
-
 
                         Ok(Some(response))
                     }
                     Err(err) => {
-                        error!(
-                            err = as_debug!(err), url = url,
-                            method = stringify!($method),
-                            call_id = as_debug!(self.call_id);
-                            "error making API request"
-                        );
+                        error!( ?err, method = "get", url, "error making API request" );
                         Err(err.into())
                     }
                 }
@@ -89,30 +75,30 @@ macro_rules! pages {
 
 /// Represents a single page of API results
 #[derive(Debug, Clone)]
-pub struct Page<T: for<'de> Deserialize<'de> + Serialize> {
+pub struct Page<T: for<'de> Deserialize<'de> + Serialize + Debug> {
     mastodon: Mastodon,
     next: Option<Url>,
     prev: Option<Url>,
     /// Initial set of items
     pub initial_items: Vec<T>,
-    pub(crate) call_id: Uuid,
 }
 
-impl<'a, T: for<'de> Deserialize<'de> + Serialize> Page<T> {
+impl<'a, T: for<'de> Deserialize<'de> + Serialize + Debug> Page<T> {
     pages! {
         next: next_page,
         prev: prev_page
     }
 
     /// Create a new Page.
-    pub(crate) async fn new(mastodon: Mastodon, response: Response, call_id: Uuid) -> Result<Self> {
+    pub(crate) async fn new(mastodon: Mastodon, response: Response) -> Result<Self> {
         let status = response.status();
         if status.is_success() {
-            let (prev, next) = get_links(&response, call_id)?;
+            let (prev, next) = get_links(&response)?;
             let initial_items = read_response(response).await?;
             debug!(
-                initial_items = as_serde!(initial_items), prev = as_debug!(prev),
-                next = as_debug!(next), call_id = as_debug!(call_id);
+                ?prev,
+                ?next,
+                ?initial_items,
                 "received first page from API call"
             );
             Ok(Page {
@@ -120,7 +106,6 @@ impl<'a, T: for<'de> Deserialize<'de> + Serialize> Page<T> {
                 next,
                 prev,
                 mastodon,
-                call_id,
             })
         } else {
             let response = response.json().await?;
@@ -129,7 +114,7 @@ impl<'a, T: for<'de> Deserialize<'de> + Serialize> Page<T> {
     }
 }
 
-impl<T: Clone + for<'de> Deserialize<'de> + Serialize> Page<T> {
+impl<T: Clone + for<'de> Deserialize<'de> + Serialize + Debug> Page<T> {
     /// Returns an iterator that provides a stream of `T`s
     ///
     /// This abstracts away the process of iterating over each item in a page,
@@ -162,20 +147,20 @@ impl<T: Clone + for<'de> Deserialize<'de> + Serialize> Page<T> {
     }
 }
 
-fn get_links(response: &Response, call_id: Uuid) -> Result<(Option<Url>, Option<Url>)> {
+fn get_links(response: &Response) -> Result<(Option<Url>, Option<Url>)> {
     let mut prev = None;
     let mut next = None;
 
     if let Some(link_header) = response.headers().get(LINK) {
         let link_header = link_header.to_str()?;
         let raw_link_header = link_header.to_string();
-        trace!(link_header = link_header, call_id = as_debug!(call_id); "parsing link header");
+        trace!(%link_header, "parsing link header");
         let link_header = parse_link_header::parse(link_header)?;
         for (rel, link) in link_header.iter() {
             match rel.as_ref().map(|it| it.as_str()) {
                 Some("next") => next = Some(link.uri.clone()),
                 Some("prev") => prev = Some(link.uri.clone()),
-                None => debug!(link = as_debug!(link); "link header with no rel specified"),
+                None => debug!(?link, "link header with no rel specified"),
                 Some(other) => {
                     return Err(Error::UnrecognizedRel {
                         rel: other.to_string(),

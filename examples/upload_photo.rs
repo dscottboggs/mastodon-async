@@ -1,12 +1,14 @@
 #![cfg_attr(not(feature = "toml"), allow(dead_code))]
 #![cfg_attr(not(feature = "toml"), allow(unused_imports))]
 mod register;
+mod tracing;
 use mastodon_async::{Result, StatusBuilder, Visibility};
 
 #[cfg(feature = "toml")]
 async fn run() -> Result<()> {
+    let _guard = crate::tracing::init_default()?;
+
     use register::bool_input;
-    femme::with_level(femme::LevelFilter::Info);
     let mastodon = register::get_mastodon_data().await?;
     let input = register::read_line("Enter the path to the photo you'd like to post: ")?;
     let description = register::read_line("describe the media?  ")?;

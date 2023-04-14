@@ -1,6 +1,7 @@
 use std::{borrow::Cow, ops::Deref, path::Path, sync::Arc};
 
 use crate::{
+    as_value,
     entities::{
         account::Account,
         prelude::*,
@@ -10,15 +11,14 @@ use crate::{
     },
     errors::{Error, Result},
     helpers::read_response::read_response,
-    log_serde,
     polling_time::PollingTime,
     AddFilterRequest, AddPushRequest, Data, NewStatus, Page, StatusesRequest, UpdateCredsRequest,
     UpdatePushRequest,
 };
 use futures::TryStream;
-use log::{as_debug, as_serde, debug, error, trace};
 use mastodon_async_entities::attachment::ProcessedAttachment;
 use reqwest::{multipart::Part, Client, RequestBuilder};
+use tracing::{debug, error, instrument, trace};
 use url::Url;
 use uuid::Uuid;
 
@@ -47,12 +47,13 @@ pub struct MastodonUnauthenticated {
 
 impl From<Data> for Mastodon {
     /// Creates a mastodon instance from the data struct.
+    #[tracing::instrument(skip(data))]
     fn from(data: Data) -> Mastodon {
         Mastodon::new(Client::new(), data)
     }
 }
 impl Mastodon {
-    methods![get and get_with_call_id, post and post_with_call_id, delete and delete_with_call_id,];
+    methods![get, post, delete,];
 
     paged_routes! {
         (get) favourites: "favourites" => Status,
@@ -157,6 +158,7 @@ impl Mastodon {
     }
 
     /// POST /api/v1/filters
+    #[instrument(skip(self), fields(call_id = %Uuid::new_v4()))]
     pub async fn add_filter(&self, request: &mut AddFilterRequest) -> Result<Filter> {
         let response = self
             .client
@@ -169,6 +171,7 @@ impl Mastodon {
     }
 
     /// PUT /api/v1/filters/:id
+    #[instrument(skip(self), fields(call_id = %Uuid::new_v4()))]
     pub async fn update_filter(&self, id: &str, request: &mut AddFilterRequest) -> Result<Filter> {
         let url = self.route(format!("/api/v1/filters/{}", id));
         let response = self.client.put(&url).json(&request).send().await?;
@@ -177,6 +180,7 @@ impl Mastodon {
     }
 
     /// Update the user credentials
+    #[instrument(skip(self), fields(call_id = %Uuid::new_v4()))]
     pub async fn update_credentials(&self, builder: &mut UpdateCredsRequest) -> Result<Account> {
         let changes = builder.build()?;
         let url = self.route("/api/v1/accounts/update_credentials");
@@ -186,6 +190,7 @@ impl Mastodon {
     }
 
     /// Post a new status to the account.
+    #[instrument(skip(self), fields(call_id = %Uuid::new_v4()))]
     pub async fn new_status(&self, status: NewStatus) -> Result<Status> {
         let url = self.route("/api/v1/statuses");
         let response = self
@@ -194,8 +199,7 @@ impl Mastodon {
             .send()
             .await?;
         debug!(
-            status = log_serde!(response Status), url = url,
-            headers = log_serde!(response Headers);
+            response = as_value!(response, Response),
             "received API response"
         );
         read_response(response).await
@@ -203,6 +207,7 @@ impl Mastodon {
 
     /// Get timeline filtered by a hashtag(eg. `#coffee`) either locally or
     /// federated.
+    #[instrument(skip(self), fields(call_id = %Uuid::new_v4()))]
     pub async fn get_tagged_timeline(&self, hashtag: String, local: bool) -> Result<Vec<Status>> {
         let base = "/api/v1/timelines/tag/";
         let url = if local {
@@ -238,26 +243,25 @@ impl Mastodon {
     ///     let statuses = client.statuses(&AccountId::new("user-id"), request).await.unwrap();
     /// });
     /// ```
+    #[instrument(skip(self), fields(call_id = %Uuid::new_v4()))]
     pub async fn statuses<'a, 'b: 'a>(
         &'b self,
         id: &'b AccountId,
         request: StatusesRequest<'a>,
     ) -> Result<Page<Status>> {
-        let call_id = Uuid::new_v4();
         let mut url = format!("{}/api/v1/accounts/{}/statuses", self.data.base, id);
-
         url += request.to_query_string()?.as_str();
 
-        debug!(url = url, method = stringify!($method), call_id = as_debug!(call_id); "making API request");
+        debug!(method = "get", url, "making API request");
         let response = self.client.get(&url).send().await?;
 
-        Page::new(self.clone(), response, call_id).await
+        Page::new(self.clone(), response).await
     }
 
     /// Returns the client account's relationship to a list of other accounts.
     /// Such as whether they follow them or vice versa.
+    #[instrument(skip(self), fields(call_id = %Uuid::new_v4()))]
     pub async fn relationships(&self, ids: &[&AccountId]) -> Result<Page<Relationship>> {
-        let call_id = Uuid::new_v4();
         let mut url = self.route("/api/v1/accounts/relationships?");
 
         if ids.len() == 1 {
@@ -272,26 +276,18 @@ impl Mastodon {
             url.pop();
         }
 
-        debug!(
-            url = url, method = stringify!($method),
-            call_id = as_debug!(call_id), account_ids = as_serde!(ids);
-            "making API request"
-        );
+        debug!(method = "get", url, account_ids = ?ids, "making API request");
         let response = self.client.get(&url).send().await?;
 
-        Page::new(self.clone(), response, call_id).await
+        Page::new(self.clone(), response).await
     }
 
     /// Add a push notifications subscription
+    #[instrument(skip(self), fields(call_id = %Uuid::new_v4()))]
     pub async fn add_push_subscription(&self, request: &AddPushRequest) -> Result<Subscription> {
-        let call_id = Uuid::new_v4();
         let request = request.build()?;
         let url = &self.route("/api/v1/push/subscription");
-        debug!(
-            url = url, method = stringify!($method),
-            call_id = as_debug!(call_id), post_body = as_serde!(request);
-            "making API request"
-        );
+        debug!(method = "post", url, post_body = ?request, "making API request");
         let response = self.client.post(url).json(&request).send().await?;
 
         read_response(response).await
@@ -299,27 +295,24 @@ impl Mastodon {
 
     /// Update the `data` portion of the push subscription associated with this
     /// access token
+    #[instrument(skip(self), fields(call_id = %Uuid::new_v4()))]
     pub async fn update_push_data(&self, request: &UpdatePushRequest) -> Result<Subscription> {
-        let call_id = Uuid::new_v4();
         let request = request.build();
         let url = &self.route("/api/v1/push/subscription");
-        debug!(
-            url = url, method = stringify!($method),
-            call_id = as_debug!(call_id), post_body = as_serde!(request);
-            "making API request"
-        );
+        debug!(method = "post", url, post_body = ?request, "making API request" );
         let response = self.client.post(url).json(&request).send().await?;
-
         read_response(response).await
     }
 
     /// Get all accounts that follow the authenticated user
+    #[instrument(skip(self), fields(call_id = %Uuid::new_v4()))]
     pub async fn follows_me(&self) -> Result<Page<Account>> {
         let me = self.verify_credentials().await?;
         self.followers(&me.id).await
     }
 
     /// Get all accounts that the authenticated user follows
+    #[instrument(skip(self), fields(call_id = %Uuid::new_v4()))]
     pub async fn followed_by_me(&self) -> Result<Page<Account>> {
         let me = self.verify_credentials().await?;
         self.following(&me.id).await
@@ -404,7 +397,7 @@ impl Mastodon {
                 Ok(Part::bytes(data).file_name(Cow::Owned(path.to_string_lossy().to_string())))
             }
             Err(err) => {
-                error!(path = as_debug!(path), error = as_debug!(err); "error reading file contents for multipart form");
+                error!(?path, error = ?err, "error reading file contents for multipart form");
                 Err(err.into())
             }
         }
@@ -412,7 +405,7 @@ impl Mastodon {
 }
 
 impl MastodonUnauthenticated {
-    methods![get and get_with_call_id,];
+    methods![get,];
 
     /// Create a new client for unauthenticated requests to a given Mastodon
     /// instance.
@@ -423,7 +416,7 @@ impl MastodonUnauthenticated {
         } else {
             format!("https://{}", base.trim_start_matches("http://"))
         };
-        trace!(base = base; "creating new mastodon client");
+        trace!(base = base, "creating new mastodon client");
         Ok(MastodonUnauthenticated {
             client: Client::new(),
             base: Url::parse(&base)?,
@@ -435,6 +428,7 @@ impl MastodonUnauthenticated {
     }
 
     /// GET /api/v1/statuses/:id
+    #[instrument(skip(self), fields(call_id = %Uuid::new_v4()))]
     pub async fn get_status(&self, id: &str) -> Result<Status> {
         let route = self.route("/api/v1/statuses")?;
         let route = route.join(id)?;
@@ -442,6 +436,7 @@ impl MastodonUnauthenticated {
     }
 
     /// GET /api/v1/statuses/:id/context
+    #[instrument(skip(self), fields(call_id = %Uuid::new_v4()))]
     pub async fn get_context(&self, id: &str) -> Result<Context> {
         let route = self.route("/api/v1/statuses")?;
         let route = route.join(id)?;
@@ -450,6 +445,7 @@ impl MastodonUnauthenticated {
     }
 
     /// GET /api/v1/statuses/:id/card
+    #[instrument(skip(self), fields(call_id = %Uuid::new_v4()))]
     pub async fn get_card(&self, id: &str) -> Result<Card> {
         let route = self.route("/api/v1/statuses")?;
         let route = route.join(id)?;

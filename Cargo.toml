@@ -45,6 +45,8 @@ percent-encoding = "2.2.0"
 thiserror = "1.0.38"
 derive_deref = "1.1.1"
 derive_is_enum_variant = "0.1.1"
+tracing = { version = "0.1", features = ["valuable"] }
+valuable = {version = "0.1", features = ["derive"] }
 
 [dependencies.parse_link_header]
 version = "0.3.3"
@@ -53,10 +55,6 @@ features = ["url"]
 [dependencies.uuid]
 version = "1.2.2"
 features = ["v4"]
-
-[dependencies.log]
-version = "0.4"
-features = ["kv_unstable", "serde", "std", "kv_unstable_serde", "kv_unstable_std"]
 
 [dependencies.time]
 version = "0.3"
@@ -97,8 +95,10 @@ indoc = "2.0"
 skeptic = "0.13"
 tempfile = "3"
 # for examples:
-femme = "2.2.1"
 html2text = "0.4.4"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json", "valuable"] }
+tracing-appender = "0.2"
+
 [dev-dependencies.criterion]
 version = "0.4.0"
 features = ["async_tokio"]
