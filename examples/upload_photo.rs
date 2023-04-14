@@ -6,7 +6,7 @@ use mastodon_async::{Result, StatusBuilder, Visibility};
 
 #[cfg(feature = "toml")]
 async fn run() -> Result<()> {
-    let _guard = crate::tracing::init_json()?;
+    let _guard = crate::tracing::init_default()?;
 
     use register::bool_input;
     let mastodon = register::get_mastodon_data().await?;

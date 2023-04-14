@@ -9,7 +9,7 @@ async fn run() -> Result<()> {
     use futures_util::StreamExt;
     use mastodon_async::StatusesRequest;
 
-    let _guard = crate::tracing::init_json()?;
+    let _guard = crate::tracing::init_default()?;
 
     let mut filters = StatusesRequest::new();
     filters.limit(3);

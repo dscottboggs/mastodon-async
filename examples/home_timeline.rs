@@ -8,7 +8,7 @@ use mastodon_async::Result;
 
 #[cfg(feature = "toml")]
 async fn run() -> Result<()> {
-    let _guard = crate::tracing::init_json()?;
+    let _guard = crate::tracing::init_default()?;
 
     register::get_mastodon_data()
         .await?

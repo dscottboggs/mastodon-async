@@ -7,7 +7,7 @@ use mastodon_async::{Language, Result, StatusBuilder, Visibility};
 
 #[cfg(feature = "toml")]
 async fn run() -> Result<()> {
-    let _guard = crate::tracing::init_json()?;
+    let _guard = crate::tracing::init_default()?;
 
     let mastodon = register::get_mastodon_data().await?;
     let status = StatusBuilder::new()

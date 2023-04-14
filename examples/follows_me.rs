@@ -8,7 +8,7 @@ use mastodon_async::Result;
 async fn run() -> Result<()> {
     use futures::StreamExt;
 
-    let _guard = crate::tracing::init_json()?;
+    let _guard = crate::tracing::init_default()?;
 
     let mastodon = register::get_mastodon_data().await?;
     mastodon
