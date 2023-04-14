@@ -7,6 +7,7 @@ use uuid::Uuid;
 
 use crate::{
     apps::{App, AppBuilder},
+    as_value,
     helpers::read_response::read_response,
     scopes::Scopes,
     Data, Error, Mastodon, Result,
@@ -364,8 +365,8 @@ impl Registered {
         debug!(url, "completing registration");
         let response = self.client.post(&url).send().await?;
         debug!(
-            status = %response.status(), url,
-            headers = ?response.headers(),
+            url,
+            response = as_value!(response, Response),
             "received API response"
         );
         let token: AccessToken = read_response(response).await?;

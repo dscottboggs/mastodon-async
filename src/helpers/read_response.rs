@@ -1,6 +1,6 @@
 use std::{fmt::Debug, time::Duration};
 
-use crate::{errors::Result, Error};
+use crate::{as_value, errors::Result, Error};
 use futures::pin_mut;
 use futures_util::StreamExt;
 use reqwest::Response;
@@ -19,9 +19,11 @@ where
     T: for<'de> Deserialize<'de> + Serialize + Debug,
 {
     let mut bytes = vec![];
-    let url = response.url().clone();
     let status = response.status();
-    trace!(%status, headers = ?response.headers(), "attempting to stream response");
+    trace!(
+        response = as_value!(response, Response),
+        "attempting to stream response"
+    );
     let stream = response.bytes_stream();
     pin_mut!(stream);
     loop {
@@ -32,32 +34,23 @@ where
             let data = data?;
             // as of here, we did not hit an error while reading the body
             bytes.extend_from_slice(&data);
-            debug!(
-                data = ?String::from_utf8_lossy(&data),
-                url = url.as_str(),
+            trace!(
                 bytes_received_so_far = bytes.len(),
+                data = %String::from_utf8_lossy(&data),
                 "data chunk received"
             );
         } else {
-            warn!(
-                url = url.as_str(),
-                data_received = bytes.len(),
-                "API response timed out"
-            );
+            warn!(data_received = bytes.len(), "API response timed out");
             break;
         }
     }
     // done growing the vec, let's just do this once.
     let bytes = bytes.as_slice();
-    trace!(
-        url = url.as_str(),
-        data = ?String::from_utf8_lossy(bytes),
-        "parsing response"
-    );
+    trace!(data = %String::from_utf8_lossy(bytes), "parsing response");
     if status.is_success() {
         // the the response should deserialize to T
         let result = serde_json::from_slice(bytes)?;
-        debug!(url = url.as_str(), ?result, "result parsed successfully");
+        debug!(?result, "result parsed successfully");
         Ok(result)
     } else {
         // we've received an error message, let's deserialize that instead.

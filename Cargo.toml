@@ -45,7 +45,8 @@ percent-encoding = "2.2.0"
 thiserror = "1.0.38"
 derive_deref = "1.1.1"
 derive_is_enum_variant = "0.1.1"
-tracing = "0.1"
+tracing = { version = "0.1", features = ["valuable"] }
+valuable = {version = "0.1", features = ["derive"] }
 
 [dependencies.parse_link_header]
 version = "0.3.3"
@@ -95,7 +96,7 @@ skeptic = "0.13"
 tempfile = "3"
 # for examples:
 html2text = "0.4.4"
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json", "valuable"] }
 tracing-appender = "0.2"
 
 [dev-dependencies.criterion]
