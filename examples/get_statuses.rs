@@ -1,12 +1,15 @@
 #![cfg_attr(not(feature = "toml"), allow(dead_code))]
 #![cfg_attr(not(feature = "toml"), allow(unused_imports))]
 mod register;
+mod tracing;
 use mastodon_async::Result;
 
 #[cfg(feature = "toml")]
 async fn run() -> Result<()> {
     use futures_util::StreamExt;
     use mastodon_async::StatusesRequest;
+
+    let _guard = crate::tracing::init_json()?;
 
     let mut filters = StatusesRequest::new();
     filters.limit(3);

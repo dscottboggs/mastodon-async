@@ -1,11 +1,14 @@
 #![cfg_attr(not(feature = "toml"), allow(dead_code))]
 #![cfg_attr(not(feature = "toml"), allow(unused_imports))]
 mod register;
+mod tracing;
 
 use mastodon_async::Result;
 
 #[cfg(feature = "toml")]
 async fn run() -> Result<()> {
+    let _guard = crate::tracing::init_json()?;
+
     let mastodon = register::get_mastodon_data().await?;
     let input = register::read_line("Enter the term you'd like to search: ")?;
     let result = mastodon.search(&input, false).await?;

@@ -1,11 +1,14 @@
 #![cfg_attr(not(feature = "toml"), allow(dead_code))]
 #![cfg_attr(not(feature = "toml"), allow(unused_imports))]
 mod register;
+mod tracing;
 
 use mastodon_async::{Language, Result, StatusBuilder, Visibility};
 
 #[cfg(feature = "toml")]
 async fn run() -> Result<()> {
+    let _guard = crate::tracing::init_json()?;
+
     let mastodon = register::get_mastodon_data().await?;
     let status = StatusBuilder::new()
         .status(register::read_line(
