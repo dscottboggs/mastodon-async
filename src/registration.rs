@@ -196,7 +196,7 @@ impl<'a> Registration<'a> {
     #[instrument(skip(self), fields(call_id = %Uuid::new_v4()))]
     async fn send_app(&self, app: &App) -> Result<OAuth> {
         let url = format!("{}/api/v1/apps", self.base);
-        debug!(method = stringify!($method), url, ?app, "registering app");
+        debug!(method = "post", url, ?app, "registering app");
         let response = self.client.post(&url).json(&app).send().await?;
 
         match response.error_for_status() {

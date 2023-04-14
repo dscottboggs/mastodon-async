@@ -252,7 +252,7 @@ impl Mastodon {
         let mut url = format!("{}/api/v1/accounts/{}/statuses", self.data.base, id);
         url += request.to_query_string()?.as_str();
 
-        debug!(method = stringify!($method), url, "making API request");
+        debug!(method = "get", url, "making API request");
         let response = self.client.get(&url).send().await?;
 
         Page::new(self.clone(), response).await
@@ -276,7 +276,7 @@ impl Mastodon {
             url.pop();
         }
 
-        debug!(method = stringify!($method), url, account_ids = ?ids, "making API request");
+        debug!(method = "get", url, account_ids = ?ids, "making API request");
         let response = self.client.get(&url).send().await?;
 
         Page::new(self.clone(), response).await
@@ -287,7 +287,7 @@ impl Mastodon {
     pub async fn add_push_subscription(&self, request: &AddPushRequest) -> Result<Subscription> {
         let request = request.build()?;
         let url = &self.route("/api/v1/push/subscription");
-        debug!(method = stringify!($method), url, post_body = ?request, "making API request");
+        debug!(method = "post", url, post_body = ?request, "making API request");
         let response = self.client.post(url).json(&request).send().await?;
 
         read_response(response).await
@@ -299,7 +299,7 @@ impl Mastodon {
     pub async fn update_push_data(&self, request: &UpdatePushRequest) -> Result<Subscription> {
         let request = request.build();
         let url = &self.route("/api/v1/push/subscription");
-        debug!(method = stringify!($method), url, post_body = ?request, "making API request" );
+        debug!(method = "post", url, post_body = ?request, "making API request" );
         let response = self.client.post(url).json(&request).send().await?;
         read_response(response).await
     }
@@ -445,7 +445,7 @@ impl MastodonUnauthenticated {
     }
 
     /// GET /api/v1/statuses/:id/card
-    #[tracing::instrument(skip(self), fields(call_id = %Uuid::new_v4()))]
+    #[instrument(skip(self), fields(call_id = %Uuid::new_v4()))]
     pub async fn get_card(&self, id: &str) -> Result<Card> {
         let route = self.route("/api/v1/statuses")?;
         let route = route.join(id)?;

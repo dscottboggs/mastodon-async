@@ -156,7 +156,7 @@ macro_rules! route_v2 {
                 } else { form_data };
 
                 let url = &self.route(concat!("/api/v2/", $url));
-                tracing::debug!(method = stringify!($method), url, multipart_form_data = ?form_data, "making API request" );
+                tracing::debug!(method = "post", url, multipart_form_data = ?form_data, "making API request" );
 
                 let response = self.authenticated(self.client.post(url))
                     .multipart(form_data)
@@ -184,7 +184,7 @@ macro_rules! route_v2 {
                      )*;
 
                 let url = &self.route(concat!("/api/v2/", $url));
-                tracing::debug!(method = stringify!($method), url, multipart_form_data = ?form_data, "making API request" );
+                tracing::debug!(method = "post", url, multipart_form_data = ?form_data, "making API request" );
                 let response = self.authenticated(self.client.post(url))
                     .multipart(form_data)
                     .header("Accept", "application/json")
@@ -215,7 +215,7 @@ macro_rules! route {
                         .part(stringify!($param), Self::get_form_part($param)?)
                      )*;
 
-                tracing::debug!(method = stringify!($method), url, multipart_form_data = ?form_data, "making API request");
+                tracing::debug!(method = "post", url, multipart_form_data = ?form_data, "making API request");
                 let response = self.authenticated(self.client.post(url))
                     .multipart(form_data)
                     .header("Accept", "application/json")
@@ -248,7 +248,7 @@ macro_rules! route {
                 } else { form_data };
 
                 let url = &self.route(concat!("/api/v1/", $url));
-                debug!(method = stringify!($method), url, multipart_form_data = ?form_data, "making API request");
+                debug!(method = "post", url, multipart_form_data = ?form_data, "making API request");
 
                 let response = self.authenticated(self.client.post(url))
                     .multipart(form_data)

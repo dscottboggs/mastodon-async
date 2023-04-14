@@ -35,7 +35,7 @@ macro_rules! pages {
                         Ok(Some(response))
                     }
                     Err(err) => {
-                        error!( ?err, method = stringify!($method), url, "error making API request" );
+                        error!( ?err, method = "get", url, "error making API request" );
                         Err(err.into())
                     }
                 }
