@@ -38,7 +38,7 @@ macro_rules! pages {
                 let response = self.mastodon.authenticated(self.mastodon.client.get(&url)).send().await?;
                 match response.error_for_status() {
                     Ok(response) => {
-                        let (prev, next) = get_links(&response, self.call_id)?;
+                        let (prev, next) = get_links(&response)?;
                         let response: Vec<T> = read_response(response).await?;
                         if response.is_empty() && prev.is_none() && next.is_none() {
                             debug!(
@@ -127,7 +127,7 @@ impl<'a, T: for<'de> Deserialize<'de> + Serialize + Debug> Page<T> {
     pub(crate) async fn new(mastodon: Mastodon, response: Response, call_id: Uuid) -> Result<Self> {
         let status = response.status();
         if status.is_success() {
-            let (prev, next) = get_links(&response, call_id)?;
+            let (prev, next) = get_links(&response)?;
             let initial_items = read_response(response).await?;
             debug!(
                 ?initial_items,
@@ -183,14 +183,14 @@ impl<T: Clone + for<'de> Deserialize<'de> + Serialize + Debug> Page<T> {
     }
 }
 
-fn get_links(response: &Response, call_id: Uuid) -> Result<(Option<Url>, Option<Url>)> {
+fn get_links(response: &Response) -> Result<(Option<Url>, Option<Url>)> {
     let mut prev = None;
     let mut next = None;
 
     if let Some(link_header) = response.headers().get(LINK) {
         let link_header = link_header.to_str()?;
         let raw_link_header = link_header.to_string();
-        trace!(link_header = link_header, ?call_id, "parsing link header");
+        trace!(%link_header, "parsing link header");
         let link_header = parse_link_header::parse(link_header)?;
         for (rel, link) in link_header.iter() {
             match rel.as_ref().map(|it| it.as_str()) {

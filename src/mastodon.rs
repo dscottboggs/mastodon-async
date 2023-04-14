@@ -1,7 +1,14 @@
 use std::{borrow::Cow, ops::Deref, path::Path, sync::Arc};
 
 use crate::{
-    entities::prelude::*,
+    as_value,
+    entities::{
+        account::Account,
+        prelude::*,
+        report::Report,
+        status::Status,
+        Empty,
+    },
     errors::{Error, Result},
     helpers::read_response::read_response,
     polling_time::PollingTime,
@@ -39,6 +46,7 @@ pub struct MastodonUnauthenticated {
 
 impl From<Data> for Mastodon {
     /// Creates a mastodon instance from the data struct.
+    #[tracing::instrument(skip(data))]
     fn from(data: Data) -> Mastodon {
         Mastodon::new(Client::new(), data)
     }
@@ -200,8 +208,7 @@ impl Mastodon {
             .send()
             .await?;
         debug!(
-            status = %response.status(), url,
-            headers = ?response.headers(),
+            response = as_value!(response, Response),
             "received API response"
         );
         read_response(response).await

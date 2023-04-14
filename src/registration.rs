@@ -6,6 +6,7 @@ use uuid::Uuid;
 use crate::{
     entities::forms, entities::prelude::*, helpers::read_response::read_response, Data,
     Error, Mastodon, Result,
+    as_value,
 };
 
 const DEFAULT_REDIRECT_URI: &str = "urn:ietf:wg:oauth:2.0:oob";
@@ -360,8 +361,8 @@ impl Registered {
         debug!(url, "completing registration");
         let response = self.client.post(&url).send().await?;
         debug!(
-            status = %response.status(), url,
-            headers = ?response.headers(),
+            url,
+            response = as_value!(response, Response),
             "received API response"
         );
         let token: AccessToken = read_response(response).await?;

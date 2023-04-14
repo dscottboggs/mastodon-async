@@ -40,3 +40,6 @@ pub mod cli;
 /// Adapter for reading JSON data from a response with better logging and a
 /// fail-safe timeout.
 pub mod read_response;
+
+/// Helpers for logging
+pub mod tracing;
