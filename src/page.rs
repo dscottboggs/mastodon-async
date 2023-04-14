@@ -14,45 +14,28 @@ macro_rules! pages {
         $(
             doc_comment!(concat!(
                     "Method to retrieve the ", stringify!($direction), " page of results"),
+            #[tracing::instrument(skip(self), fields(call_id = %Uuid::new_v4()))]
             pub async fn $method(&mut self) -> Result<Option<Vec<T>>> {
                 let url = match self.$direction.take() {
                     Some(s) => s,
                     None => return Ok(None),
                 };
 
-                debug!(
-                    url = url.as_str(),
-                    method = "get",
-                    call_id = ?self.call_id,
-                    direction = stringify!($direction),
-                    "making API request"
-                );
+                debug!(method = "get", url = url.as_str(), direction = stringify!($direction), "making API request");
                 let url: String = url.into(); // <- for logging
                 let response = self.mastodon.client.get(&url).send().await?;
                 match response.error_for_status() {
                     Ok(response) => {
                         let (prev, next) = get_links(&response)?;
                         let response = read_response(response).await?;
-                        debug!(
-                            url, method = "get", ?next,
-                            ?prev, call_id = ?self.call_id,
-                            response = ?response,
-                            "received next pages from API"
-                        );
+                        debug!(method = "get", url, ?next, ?prev, response = ?response, "received next pages from API");
                         self.next = next;
                         self.prev = prev;
-
 
                         Ok(Some(response))
                     }
                     Err(err) => {
-                        error!(
-                            ?err,
-                            url,
-                            method = stringify!($method),
-                            call_id = ?self.call_id,
-                            "error making API request"
-                        );
+                        error!( ?err, method = stringify!($method), url, "error making API request" );
                         Err(err.into())
                     }
                 }
@@ -98,7 +81,6 @@ pub struct Page<T: for<'de> Deserialize<'de> + Serialize + Debug> {
     prev: Option<Url>,
     /// Initial set of items
     pub initial_items: Vec<T>,
-    pub(crate) call_id: Uuid,
 }
 
 impl<'a, T: for<'de> Deserialize<'de> + Serialize + Debug> Page<T> {
@@ -108,16 +90,15 @@ impl<'a, T: for<'de> Deserialize<'de> + Serialize + Debug> Page<T> {
     }
 
     /// Create a new Page.
-    pub(crate) async fn new(mastodon: Mastodon, response: Response, call_id: Uuid) -> Result<Self> {
+    pub(crate) async fn new(mastodon: Mastodon, response: Response) -> Result<Self> {
         let status = response.status();
         if status.is_success() {
             let (prev, next) = get_links(&response)?;
             let initial_items = read_response(response).await?;
             debug!(
-                ?initial_items,
                 ?prev,
                 ?next,
-                ?call_id,
+                ?initial_items,
                 "received first page from API call"
             );
             Ok(Page {
@@ -125,7 +106,6 @@ impl<'a, T: for<'de> Deserialize<'de> + Serialize + Debug> Page<T> {
                 next,
                 prev,
                 mastodon,
-                call_id,
             })
         } else {
             let response = response.json().await?;

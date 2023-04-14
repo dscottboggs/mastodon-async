@@ -2,7 +2,7 @@ use crate::page::Page;
 use futures::{stream::unfold, Stream};
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
-use tracing::{debug, info, warn};
+use tracing::{debug, info, trace, warn};
 
 /// Abstracts away the `next_page` logic into a single stream of items
 ///
@@ -42,7 +42,7 @@ impl<'a, T: Clone + for<'de> Deserialize<'de> + Serialize + Debug> ItemsIter<T> 
 
     fn need_next_page(&self) -> bool {
         if self.buffer.is_empty() || self.cur_idx == self.buffer.len() {
-            debug!(
+            trace!(
                 idx = self.cur_idx,
                 buffer_len = self.buffer.len(),
                 "next page needed"
@@ -88,12 +88,7 @@ impl<'a, T: Clone + for<'de> Deserialize<'de> + Serialize + Debug> ItemsIter<T> 
                     this.cur_idx += 1;
                 }
                 let item = this.page.initial_items[idx].clone();
-                debug!(
-                    ?item,
-                    index = ?idx,
-                    "yielding item from initial items");
-                // let item = Box::pin(item);
-                // pin_mut!(item);
+                trace!(?item, index = ?idx, "yielding item from initial items");
                 Some((item, this))
             } else {
                 if this.need_next_page() {
@@ -102,10 +97,7 @@ impl<'a, T: Clone + for<'de> Deserialize<'de> + Serialize + Debug> ItemsIter<T> 
                 let idx = this.cur_idx;
                 this.cur_idx += 1;
                 let item = this.buffer[idx].clone();
-                debug!(
-                    ?item,
-                    index = ?idx,
-                    "yielding item from initial stream");
+                trace!(?item, index = ?idx, "yielding item from next page");
                 Some((item, this))
             }
         })

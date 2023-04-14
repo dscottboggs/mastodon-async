@@ -20,7 +20,7 @@ where
 {
     let mut bytes = vec![];
     let status = response.status();
-    trace!(
+    debug!(
         response = as_value!(response, Response),
         "attempting to stream response"
     );
@@ -34,11 +34,7 @@ where
             let data = data?;
             // as of here, we did not hit an error while reading the body
             bytes.extend_from_slice(&data);
-            trace!(
-                bytes_received_so_far = bytes.len(),
-                data = %String::from_utf8_lossy(&data),
-                "data chunk received"
-            );
+            trace!(bytes_received_so_far = bytes.len(), data = %String::from_utf8_lossy(&data), "data chunk received");
         } else {
             warn!(data_received = bytes.len(), "API response timed out");
             break;
@@ -50,12 +46,12 @@ where
     if status.is_success() {
         // the the response should deserialize to T
         let result = serde_json::from_slice(bytes)?;
-        debug!(?result, "result parsed successfully");
+        trace!(?result, "result parsed successfully");
         Ok(result)
     } else {
         // we've received an error message, let's deserialize that instead.
         let response = serde_json::from_slice(bytes)?;
-        debug!(?status, ?response, "error received from API");
+        warn!(?status, ?response, "error received from API");
         Err(Error::Api { status, response })
     }
 }

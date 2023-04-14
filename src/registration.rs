@@ -2,7 +2,7 @@ use std::borrow::Cow;
 
 use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
 use reqwest::Client;
-use tracing::{debug, error, trace};
+use tracing::{debug, error, instrument, trace};
 use uuid::Uuid;
 
 use crate::{
@@ -193,33 +193,20 @@ impl<'a> Registration<'a> {
         })
     }
 
+    #[instrument(skip(self), fields(call_id = %Uuid::new_v4()))]
     async fn send_app(&self, app: &App) -> Result<OAuth> {
         let url = format!("{}/api/v1/apps", self.base);
-        let call_id = Uuid::new_v4();
-        debug!(url, ?app, ?call_id, "registering app");
+        debug!(method = stringify!($method), url, ?app, "registering app");
         let response = self.client.post(&url).json(&app).send().await?;
 
         match response.error_for_status() {
             Ok(response) => {
                 let response = read_response(response).await?;
-                debug!(
-                    ?response,
-                    ?app,
-                    ?url,
-                    method = stringify!($method),
-                    ?call_id,
-                    "received API response"
-                );
+                debug!(?response, "received API response");
                 Ok(response)
             }
             Err(err) => {
-                error!(
-                    ?err,
-                    url,
-                    method = stringify!($method),
-                    ?call_id,
-                    "error making API request"
-                );
+                error!(?err, "error making API request");
                 Err(err.into())
             }
         }
@@ -352,6 +339,7 @@ impl Registered {
 
     /// Create an access token from the client id, client secret, and code
     /// provided by the authorization url.
+    #[instrument(skip(self, code), fields(call_id = %Uuid::new_v4()))]
     pub async fn complete<C>(&self, code: C) -> Result<Mastodon>
     where
         C: AsRef<str>,
@@ -362,15 +350,14 @@ impl Registered {
              redirect_uri={}",
             self.base, self.client_id, self.client_secret, code.as_ref(), self.redirect
         );
-        debug!(url, "completing registration");
+        debug!(method = "post", url, "completing registration");
         let response = self.client.post(&url).send().await?;
         debug!(
-            url,
             response = as_value!(response, Response),
             "received API response"
         );
         let token: AccessToken = read_response(response).await?;
-        debug!(url, body = ?token, "parsed response body");
+        debug!(body = ?token, "parsed response body");
         let data = self.registered(token.access_token);
         trace!(auth_data = ?data, "registered");
 
