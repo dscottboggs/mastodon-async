@@ -9,7 +9,10 @@ pub use self::statuses::StatusesRequest;
 
 /// Requests specific to the admin API.
 pub mod admin;
-mod filter;
+
+/// Data structures for v1 and v2 filter methods.
+pub mod filter;
+
 mod push;
 mod report;
 mod statuses;

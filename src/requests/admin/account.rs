@@ -1,6 +1,6 @@
+use crate::entities::{ReportId, WarningPresetId};
 use derive_builder::Builder;
 use derive_is_enum_variant::is_enum_variant;
-use mastodon_async_entities::{ReportId, WarningPresetId};
 use serde_with::skip_serializing_none;
 
 /// Form used to perform an admin action on an account and resolve any open reports

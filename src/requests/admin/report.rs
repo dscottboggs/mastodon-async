@@ -1,5 +1,5 @@
+use crate::entities::{report::Category, RuleId};
 use derive_builder::Builder;
-use mastodon_async_entities::{report::Category, RuleId};
 use serde_with::{serde_as, skip_serializing_none};
 
 /// Change metadata for a report.

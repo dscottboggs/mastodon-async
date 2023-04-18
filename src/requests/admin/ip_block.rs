@@ -1,6 +1,6 @@
+use crate::entities::admin::ip_block::Severity;
 use derive_builder::Builder;
 use ipnet::IpNet;
-use mastodon_async_entities::admin::ip_block::Severity;
 use serde_with::{serde_as, skip_serializing_none, DurationSeconds};
 use time::Duration;
 
@@ -63,8 +63,8 @@ pub struct UpdateIpBlockRequest {
     /// The policy to apply to this IP range.
     #[builder(default)]
     severity: Option<Severity>,
-    #[builder(default)]
     /// The reason for this IP block.
+    #[builder(default)]
     comment: Option<String>,
     /// The number of seconds in which this IP block will expire.
     #[builder(default)]

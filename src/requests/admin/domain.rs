@@ -1,5 +1,5 @@
+use crate::entities::admin::domain::BlockSeverity;
 use derive_builder::Builder;
-use mastodon_async_entities::admin::domain::BlockSeverity;
 use serde_with::skip_serializing_none;
 
 /// Create a new domain allow.

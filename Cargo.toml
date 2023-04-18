@@ -3,6 +3,7 @@ resolver = "2"
 
 members = [
     ".",
+    "derive",
     "entities",
 ]
 
@@ -30,6 +31,10 @@ features = ["all"]
 
 [dependencies.mastodon-async-entities]
 path = "./entities"
+version = "1"
+
+[dependencies.mastodon-async-derive]
+path = "./derive"
 version = "1"
 
 [dependencies]
