@@ -3,6 +3,7 @@ resolver = "2"
 
 members = [
     ".",
+    "derive",
     "entities",
 ]
 
@@ -30,6 +31,10 @@ features = ["all"]
 
 [dependencies.mastodon-async-entities]
 path = "./entities"
+version = "1"
+
+[dependencies.mastodon-async-derive]
+path = "./derive"
 version = "1"
 
 [dependencies]
@@ -74,6 +79,14 @@ optional = true
 version = "2.2"
 features = ["serde"]
 
+[dependencies.hex]
+version = "0.4"
+features = ["serde"]
+
+[dependencies.ipnet]
+version = "2"
+features = ["serde"]
+
 [dependencies.reqwest]
 version = "0.11"
 features = ["multipart", "json", "stream"]
@@ -81,6 +94,10 @@ features = ["multipart", "json", "stream"]
 [dependencies.serde]
 version = "1"
 features = ["derive"]
+
+[dependencies.serde_with]
+version = "2"
+features = ["hex", "time_0_3"]
 
 [dependencies.toml]
 version = "0.7"

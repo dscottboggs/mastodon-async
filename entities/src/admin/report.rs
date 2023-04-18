@@ -12,8 +12,8 @@ pub struct Report {
     /// Whether an action was taken to resolve this report.
     pub action_taken: bool,
     /// When an action was taken, if this report is currently resolved.
-    #[serde(with = "iso8601")]
-    pub action_taken_at: OffsetDateTime,
+    #[serde(with = "iso8601::option")]
+    pub action_taken_at: Option<OffsetDateTime>,
     /// The category under which the report is classified.
     pub category: report::Category,
     /// An optional reason for reporting.

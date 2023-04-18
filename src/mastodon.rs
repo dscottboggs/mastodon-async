@@ -1,12 +1,13 @@
 use std::{borrow::Cow, ops::Deref, path::Path, sync::Arc};
 
 use crate::{
-    entities::prelude::*,
+    entities::{admin, prelude::*},
     errors::{Error, Result},
     helpers::read_response::read_response,
     log_serde,
     polling_time::PollingTime,
-    AddFilterRequest, AddPushRequest, Data, NewStatus, Page, StatusesRequest, UpdatePushRequest,
+    requests, AddFilterRequest, AddPushRequest, AddReportRequest, Data, NewStatus, Page,
+    StatusesRequest, UpdatePushRequest,
 };
 use futures::TryStream;
 use log::{as_debug, as_serde, debug, error, trace};
@@ -75,7 +76,6 @@ impl Mastodon {
         (delete (domain: String,)) unblock_domain: "domain_blocks" => Empty,
         (get) instance: "instance" => Instance,
         (get) verify_credentials: "accounts/verify_credentials" => Account,
-        (post (account_id: &str, status_ids: Vec<&str>, comment: String,)) report: "reports" => Report,
         (post (domain: String,)) block_domain: "domain_blocks" => Empty,
         (post (id: &str,)) authorize_follow_request: "accounts/follow_requests/authorize" => Empty,
         (post (id: &str,)) reject_follow_request: "accounts/follow_requests/reject" => Empty,
@@ -118,6 +118,30 @@ impl Mastodon {
         (post) endorse_user[AccountId]: "accounts/{}/pin" => Relationship,
         (post) unendorse_user[AccountId]: "accounts/{}/unpin" => Relationship,
         (get) attachment[AttachmentId]: "media/{}" => Attachment,
+        (get) get_report[ReportId]: "reports/{}" => Report,
+        (get) admin_get_account[AccountId]: "admin/accounts/{}" => admin::Account,
+        (delete) admin_delete_account[AccountId]: "admin/accounts/{}" => admin::Account,
+        (post) admin_approve_account[AccountId]: "admin/accounts/{}/approve" => admin::Account,
+        (post) admin_reject_account[AccountId]: "admin/accounts/{}/reject" => admin::Account,
+        (post) admin_enable_account[AccountId]: "admin/accounts/{}/enable" => admin::Account,
+        (post) admin_unsilence_account[AccountId]: "admin/accounts/{}/unsilence" => admin::Account,
+        (post) admin_unsuspend_account[AccountId]: "admin/accounts/{}/unsuspend" => admin::Account,
+        (post) admin_unsensitive_account[AccountId]: "admin/accounts/{}/unsensitive" => admin::Account,
+        (get) admin_get_canonical_email_block[CanonicalEmailBlockId]: "admin/canonical_email_blocks/{}" => CanonicalEmailBlock,
+        (delete) admin_delete_canonical_email_block[CanonicalEmailBlockId]: "admin/canonical_email_blocks/{}" => CanonicalEmailBlock,
+        (get) admin_get_domain_allow[DomainAllowId]: "admin/domain_allows/{}" => admin::domain::Allow,
+        (delete) admin_delete_domain_allow[DomainAllowId]: "admin/domain_allows/{}" => admin::domain::Allow,
+        (get) admin_get_domain_block[DomainBlockId]: "admin/domain_blocks/{}" => admin::domain::Block,
+        (delete) admin_delete_domain_block[DomainBlockId]: "admin/domain_blocks/{}" => admin::domain::Block,
+        (get) admin_get_email_domain_block[EmailDomainBlockId]: "admin/email_domain_blocks/{}" => EmailDomainBlock,
+        (delete) admin_delete_email_domain_block[EmailDomainBlockId]: "admin/email_domain_blocks/{}" => EmailDomainBlock,
+        (get) admin_get_ip_block[IpBlockId]: "admin/ip_blocks/{}" => IpBlock,
+        (delete) admin_delete_ip_block[IpBlockId]: "admin/ip_blocks/{}" => IpBlock,
+        (get) admin_get_report[ReportId]: "admin/accounts/{}" => admin::Report,
+        (post) admin_assign_report_to_self[ReportId]: "admin/accounts/{}/assign_to_self" => admin::Report,
+        (post) admin_unassign_report[ReportId]: "admin/accounts/{}/unassign" => admin::Report,
+        (post) admin_resolve_report[ReportId]: "admin/accounts/{}/resolve" => admin::Report,
+        (post) admin_reopen_report[ReportId]: "admin/accounts/{}/reopen" => admin::Report,
     }
 
     streaming! {
@@ -194,6 +218,22 @@ impl Mastodon {
         let response = self
             .authenticated(self.client.post(&url))
             .json(&status)
+            .send()
+            .await?;
+        debug!(
+            status = log_serde!(response Status), url = url,
+            headers = log_serde!(response Headers);
+            "received API response"
+        );
+        read_response(response).await
+    }
+
+    /// Create a report.
+    pub async fn add_report(&self, request: &AddReportRequest) -> Result<Report> {
+        let url = self.route("/api/v1/reports");
+        let response = self
+            .authenticated(self.client.post(&url))
+            .json(&request)
             .send()
             .await?;
         debug!(
@@ -326,6 +366,173 @@ impl Mastodon {
     pub async fn followed_by_me(&self) -> Result<Page<Account>> {
         let me = self.verify_credentials().await?;
         self.following(&me.id).await
+    }
+
+    /// POST /api/v1/admin/accounts/:id/action
+    /// https://docs.joinmastodon.org/methods/admin/accounts/#action
+    pub async fn admin_perform_account_action(
+        &self,
+        id: &AccountId,
+        request: &requests::admin::AccountActionRequest,
+    ) -> Result<admin::Account> {
+        let url = self.route(format!("/api/v1/admin/accounts/{}/action", id));
+        let response = self
+            .authenticated(self.client.post(self.route(url)))
+            .json(request)
+            .send()
+            .await?;
+
+        read_response(response).await
+    }
+
+    /// POST /api/v1/admin/canonical_email_blocks
+    /// https://docs.joinmastodon.org/methods/admin/canonical_email_blocks/#create
+    pub async fn admin_add_canonical_email_block(
+        &self,
+        request: &requests::admin::AddCanonicalEmailBlockRequest,
+    ) -> Result<CanonicalEmailBlock> {
+        let response = self
+            .authenticated(
+                self.client
+                    .post(self.route("/api/v1/admin/canonical_email_blocks")),
+            )
+            .json(request)
+            .send()
+            .await?;
+
+        read_response(response).await
+    }
+
+    /// POST /api/v1/admin/canonical_email_blocks/test
+    /// https://docs.joinmastodon.org/methods/admin/canonical_email_blocks/#test
+    pub async fn admin_test_canonical_email_blocks(
+        &self,
+        request: &requests::admin::TestCanonicalEmailBlocksRequest,
+    ) -> Result<Vec<CanonicalEmailBlock>> {
+        let response = self
+            .authenticated(
+                self.client
+                    .post(self.route("/api/v1/admin/canonical_email_blocks/test")),
+            )
+            .json(request)
+            .send()
+            .await?;
+
+        read_response(response).await
+    }
+
+    /// POST /api/v1/admin/domain_allows
+    /// https://docs.joinmastodon.org/methods/admin/domain_allows/#create
+    pub async fn admin_add_domain_allow(
+        &self,
+        request: &requests::admin::AddDomainAllowRequest,
+    ) -> Result<domain::Allow> {
+        let response = self
+            .authenticated(self.client.post(self.route("/api/v1/admin/domain_allows")))
+            .json(request)
+            .send()
+            .await?;
+
+        read_response(response).await
+    }
+
+    /// POST /api/v1/admin/domain_blocks
+    /// https://docs.joinmastodon.org/methods/admin/domain_blocks/#create
+    pub async fn admin_add_domain_block(
+        &self,
+        request: &requests::admin::AddDomainBlockRequest,
+    ) -> Result<domain::Block> {
+        let response = self
+            .authenticated(self.client.post(self.route("/api/v1/admin/domain_blocks")))
+            .json(request)
+            .send()
+            .await?;
+
+        read_response(response).await
+    }
+
+    /// PUT /api/v1/admin/domain_blocks/:id
+    /// https://docs.joinmastodon.org/methods/admin/domain_blocks/#update
+    pub async fn admin_update_domain_block(
+        &self,
+        id: &DomainBlockId,
+        request: &requests::admin::UpdateDomainBlockRequest,
+    ) -> Result<domain::Block> {
+        let url = self.route(format!("/api/v1/admin/domain_blocks/{}", id));
+        let response = self
+            .authenticated(self.client.put(&url))
+            .json(request)
+            .send()
+            .await?;
+
+        read_response(response).await
+    }
+
+    /// POST /api/v1/admin/email_domain_blocks
+    /// https://docs.joinmastodon.org/methods/admin/email_domain_blocks/#create
+    pub async fn admin_add_email_domain_block(
+        &self,
+        request: &requests::admin::AddEmailDomainBlockRequest,
+    ) -> Result<EmailDomainBlock> {
+        let response = self
+            .authenticated(
+                self.client
+                    .post(self.route("/api/v1/admin/email_domain_blocks")),
+            )
+            .json(request)
+            .send()
+            .await?;
+
+        read_response(response).await
+    }
+
+    /// POST /api/v1/admin/ip_blocks
+    /// https://docs.joinmastodon.org/methods/admin/ip_blocks/#create
+    pub async fn admin_add_ip_block(
+        &self,
+        request: &requests::admin::AddIpBlockRequest,
+    ) -> Result<IpBlock> {
+        let response = self
+            .authenticated(self.client.post(self.route("/api/v1/admin/ip_blocks")))
+            .json(request)
+            .send()
+            .await?;
+
+        read_response(response).await
+    }
+
+    /// PUT /api/v1/admin/ip_blocks/:id
+    /// https://docs.joinmastodon.org/methods/admin/ip_blocks/#update
+    pub async fn admin_update_ip_block(
+        &self,
+        id: &IpBlockId,
+        request: &requests::admin::UpdateIpBlockRequest,
+    ) -> Result<IpBlock> {
+        let url = self.route(format!("/api/v1/admin/ip_blocks/{}", id));
+        let response = self
+            .authenticated(self.client.put(&url))
+            .json(request)
+            .send()
+            .await?;
+
+        read_response(response).await
+    }
+
+    /// PUT /api/v1/admin/reports/:id
+    /// https://docs.joinmastodon.org/methods/admin/reports/#update
+    pub async fn admin_update_report(
+        &self,
+        id: &ReportId,
+        request: &requests::admin::UpdateReportRequest,
+    ) -> Result<admin::Report> {
+        let url = self.route(format!("/api/v1/admin/reports/{}", id));
+        let response = self
+            .authenticated(self.client.put(&url))
+            .json(request)
+            .send()
+            .await?;
+
+        read_response(response).await
     }
 
     /// Wait for the media to be done processing and return it with the URL.

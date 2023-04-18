@@ -96,7 +96,9 @@ pub use mastodon_async_entities::{
     status::NewStatus, status::NewStatusBuilder, visibility::Visibility,
 };
 pub use registration::Registration;
-pub use requests::{AddFilterRequest, AddPushRequest, StatusesRequest, UpdatePushRequest};
+pub use requests::{
+    admin, AddFilterRequest, AddPushRequest, AddReportRequest, StatusesRequest, UpdatePushRequest,
+};
 
 /// Registering your App
 pub mod apps;

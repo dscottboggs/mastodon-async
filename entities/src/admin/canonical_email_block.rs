@@ -1,16 +1,18 @@
-use serde::{Deserialize, Serialize};
-
 use crate::CanonicalEmailBlockId;
+use serde::{Deserialize, Serialize};
+use serde_with::{hex::Hex, serde_as};
 
 /// Represents a canonical email block (hashed).
 ///
 /// See also [the API documentation](https://docs.joinmastodon.org/entities/Admin_CanonicalEmailBlock/)
+#[serde_as]
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CanonicalEmailBlock {
     /// The ID of the email block in the database.
     pub id: CanonicalEmailBlockId,
     /// The SHA256 hash of the canonical email address.
-    pub canonical_email_hash: String,
+    #[serde_as(as = "Hex")]
+    pub canonical_email_hash: Vec<u8>,
 }
 
 impl PartialOrd for CanonicalEmailBlock {
