@@ -1,13 +1,14 @@
 use crate::entities::admin::ip_block::Severity;
 use derive_builder::Builder;
 use ipnet::IpNet;
+use mastodon_async_derive::MandatoryParamBuilder;
 use serde_with::{serde_as, skip_serializing_none, DurationSeconds};
 use time::Duration;
 
 /// Create a new IP range block.
 #[serde_as]
 #[skip_serializing_none]
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Builder)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Builder, MandatoryParamBuilder)]
 #[builder(
     derive(Debug, PartialEq),
     custom_constructor,
@@ -30,29 +31,13 @@ pub struct AddIpBlockRequest {
     pub expires_in: Option<Duration>,
 }
 
-impl AddIpBlockRequest {
-    /// Start building a form for creating a new IP range block.
-    pub fn builder(severity: Severity) -> AddIpBlockRequestBuilder {
-        let mut builder = AddIpBlockRequestBuilder::create_empty();
-        builder.severity(severity);
-        builder
-    }
-}
-
-impl AddIpBlockRequestBuilder {
-    /// Build the form for creating a new IP range block.
-    pub fn build(&self) -> AddIpBlockRequest {
-        self.try_build()
-            .expect("One or more required fields are missing!")
-    }
-}
-
 /// Update an existing IP range block.
 /// Differs from [`AddIpBlockRequest`] only in that all parameters are optional.
 #[serde_as]
 #[skip_serializing_none]
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Builder)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Builder, MandatoryParamBuilder)]
 #[builder(
+    derive(Debug, PartialEq),
     custom_constructor,
     build_fn(private, name = "try_build"),
     setter(into, strip_option)
@@ -70,21 +55,6 @@ pub struct UpdateIpBlockRequest {
     #[builder(default)]
     #[serde_as(as = "Option<DurationSeconds<i64>>")]
     expires_in: Option<Duration>,
-}
-
-impl UpdateIpBlockRequest {
-    /// Start building a form for updating an IP range block.
-    pub fn builder() -> UpdateIpBlockRequestBuilder {
-        UpdateIpBlockRequestBuilder::create_empty()
-    }
-}
-
-impl UpdateIpBlockRequestBuilder {
-    /// Build the form for updating an IP range block.
-    pub fn build(&self) -> UpdateIpBlockRequest {
-        self.try_build()
-            .expect("One or more required fields are missing!")
-    }
 }
 
 #[cfg(test)]

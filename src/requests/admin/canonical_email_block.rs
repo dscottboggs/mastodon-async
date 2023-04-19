@@ -1,3 +1,5 @@
+use derive_builder::Builder;
+use mastodon_async_derive::MandatoryParamBuilder;
 use serde::Serialize;
 use serde_with::{hex::Hex, serde_as, skip_serializing_none};
 
@@ -5,55 +7,35 @@ use serde_with::{hex::Hex, serde_as, skip_serializing_none};
 /// Either the original email or the hash can be submitted.
 #[serde_as]
 #[skip_serializing_none]
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Builder, MandatoryParamBuilder)]
+#[builder(
+    derive(Debug, PartialEq),
+    custom_constructor,
+    build_fn(private, name = "try_build"),
+    setter(into, strip_option)
+)]
 pub struct AddCanonicalEmailBlockRequest {
     /// An email to canonicalize, hash, and block.
+    #[builder(default)]
     pub email: Option<String>,
     /// A pre-hashed email.
+    #[builder(default)]
     #[serde_as(as = "Option<Hex>")]
     pub canonical_email_hash: Option<Vec<u8>>,
 }
 
-impl AddCanonicalEmailBlockRequest {
-    /// Create a block for an email address.
-    pub fn from_email<T>(email: T) -> Self
-    where
-        T: Into<String>,
-    {
-        Self {
-            email: Some(email.into()),
-            canonical_email_hash: None,
-        }
-    }
-
-    /// Create a block for a pre-hashed email address.
-    pub fn from_canonical_email_hash<T>(canonical_email_hash: T) -> Self
-    where
-        T: Into<Vec<u8>>,
-    {
-        Self {
-            email: None,
-            canonical_email_hash: Some(canonical_email_hash.into()),
-        }
-    }
-}
-
 /// Test an email against existing canonical email blocks.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Builder, MandatoryParamBuilder)]
+#[builder(
+    derive(Debug, PartialEq),
+    custom_constructor,
+    build_fn(private, name = "try_build"),
+    setter(into, strip_option)
+)]
 pub struct TestCanonicalEmailBlocksRequest {
-    email: String,
-}
-
-impl TestCanonicalEmailBlocksRequest {
-    /// Create a test request for a given email.
-    pub fn new<T>(email: T) -> Self
-    where
-        T: Into<String>,
-    {
-        Self {
-            email: email.into(),
-        }
-    }
+    /// The email to test.
+    #[builder(private)]
+    pub email: String,
 }
 
 #[cfg(test)]
@@ -63,22 +45,25 @@ mod tests {
 
     #[test]
     fn test_serialize_add_request_email() {
-        let request = AddCanonicalEmailBlockRequest::from_email("horrible.doll@example.org");
+        let request = AddCanonicalEmailBlockRequest::builder()
+            .email("horrible.doll@example.org")
+            .build();
         let ser = serde_json::to_string(&request).expect("Couldn't serialize");
         assert_eq!(ser, r#"{"email":"horrible.doll@example.org"}"#);
     }
 
     #[test]
     fn test_serialize_add_request_hash() {
-        let request =
-            AddCanonicalEmailBlockRequest::from_canonical_email_hash([0x12, 0x34, 0x56, 0x78]);
+        let request = AddCanonicalEmailBlockRequest::builder()
+            .canonical_email_hash([0x12, 0x34, 0x56, 0x78])
+            .build();
         let ser = serde_json::to_string(&request).expect("Couldn't serialize");
         assert_eq!(ser, r#"{"canonical_email_hash":"12345678"}"#);
     }
 
     #[test]
     fn test_serialize_test_request() {
-        let request = TestCanonicalEmailBlocksRequest::new("horrible.doll@example.org");
+        let request = TestCanonicalEmailBlocksRequest::builder("horrible.doll@example.org").build();
         let ser = serde_json::to_string(&request).expect("Couldn't serialize");
         assert_eq!(ser, r#"{"email":"horrible.doll@example.org"}"#);
     }

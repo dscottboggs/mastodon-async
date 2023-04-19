@@ -1,12 +1,13 @@
 use crate::entities::{report::Category, RuleId};
 use derive_builder::Builder;
+use mastodon_async_derive::MandatoryParamBuilder;
 use serde_with::{serde_as, skip_serializing_none};
 
 /// Change metadata for a report.
 /// https://docs.joinmastodon.org/methods/admin/reports/#path-parameters-1
 #[serde_as]
 #[skip_serializing_none]
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Builder)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Builder, MandatoryParamBuilder)]
 #[builder(
     derive(Debug, PartialEq),
     custom_constructor,
@@ -20,22 +21,6 @@ pub struct UpdateReportRequest {
     /// Updated rule IDs for [`Category::Violation`] reports.
     #[builder(default)]
     pub rule_ids: Option<Vec<RuleId>>,
-}
-
-impl UpdateReportRequest {
-    /// Start building a form for changing the metadata of a report.
-    pub fn builder() -> UpdateReportRequestBuilder {
-        let builder = UpdateReportRequestBuilder::create_empty();
-        builder
-    }
-}
-
-impl UpdateReportRequestBuilder {
-    /// Build the form for changing the metadata of a report.
-    pub fn build(&self) -> UpdateReportRequest {
-        self.try_build()
-            .expect("One or more required fields are missing!")
-    }
 }
 
 #[cfg(test)]
