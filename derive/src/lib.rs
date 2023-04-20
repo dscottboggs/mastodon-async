@@ -1,16 +1,56 @@
 use proc_macro::TokenStream;
-use quote::{format_ident, quote};
+use quote::{format_ident, quote, ToTokens};
 use syn::__private::Span;
-use syn::{parse_macro_input, Data, DeriveInput, Field, Fields, Ident, Type};
+use syn::{parse_macro_input, parse_quote, Data, DeriveInput, Field, Fields, Ident, Item, Type};
+
+/// Add attributes to a struct and its fields that set up and invoke `derive(RequestBuilder)` below.
+#[proc_macro_attribute]
+pub fn request_builder(_attr: TokenStream, item: TokenStream) -> TokenStream {
+    let item = parse_macro_input!(item as Item);
+
+    let mut item_struct = match item {
+        Item::Struct(item_struct) => item_struct,
+        _ => {
+            return TokenStream::from(quote! {
+                compile_error!("request_builder attribute can only be applied to structs");
+            });
+        }
+    };
+
+    item_struct.attrs.push(parse_quote! {
+        #[serde_with::skip_serializing_none]
+    });
+    item_struct.attrs.push(parse_quote! {
+        #[derive(Debug, Clone, PartialEq, Eq, Serialize, derive_builder::Builder, mastodon_async_derive::RequestBuilder)]
+    });
+    item_struct.attrs.push(parse_quote! {
+        #[builder(
+            derive(Debug, PartialEq),
+            custom_constructor,
+            build_fn(private, name = "try_build"),
+            setter(into, strip_option)
+        )]
+    });
+
+    for field in item_struct.fields.iter_mut() {
+        if is_mandatory(field) {
+            field.attrs.push(parse_quote! {
+                #[builder(private)]
+            });
+        } else {
+            field.attrs.push(parse_quote! {
+                #[builder(default)]
+            });
+        }
+    }
+
+    Item::Struct(item_struct).into_token_stream().into()
+}
 
 /// Create `Type::builder(…)` and `TypeBuilder::build()` methods.
 /// `Type::builder(…)` will take as params all the non-optional fields of `Type`.
-///
-/// `Type` is expected to derive `Builder` and have `#[builder(custom_constructor, build_fn(private, name = "try_build"), setter(into, strip_option))]`,
-/// with its non-optional fields having `#[builder(private)]`
-/// and optional fields having `#[builder(default)]`.
-#[proc_macro_derive(MandatoryParamBuilder)]
-pub fn derive_mandatory_param_builder(input: TokenStream) -> TokenStream {
+#[proc_macro_derive(RequestBuilder)]
+pub fn derive_request_builder(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
 
     if !(input.generics.lt_token.is_none()
@@ -19,19 +59,19 @@ pub fn derive_mandatory_param_builder(input: TokenStream) -> TokenStream {
         && input.generics.where_clause.is_none())
     {
         return TokenStream::from(quote! {
-            compile_error!("Deriving MandatoryParamBuilder is not implemented for generic types");
+            compile_error!("Deriving RequestBuilder is not implemented for generic types");
         });
     }
 
     let Data::Struct(data_struct) = input.data else {
         return TokenStream::from(quote! {
-            compile_error!("Deriving MandatoryParamBuilder is only implemented for structs");
+            compile_error!("Deriving RequestBuilder is only implemented for structs");
         })
     };
 
     let Fields::Named(fields_named) = data_struct.fields else {
         return TokenStream::from(quote! {
-            compile_error!("Deriving MandatoryParamBuilder is only implemented for named fields");
+            compile_error!("Deriving RequestBuilder is only implemented for named fields");
         })
     };
 
@@ -42,7 +82,7 @@ pub fn derive_mandatory_param_builder(input: TokenStream) -> TokenStream {
     let mandatory_fields = fields_named
         .named
         .iter()
-        .filter(is_mandatory)
+        .filter(|field| is_mandatory(field))
         .collect::<Vec<_>>();
 
     // Slightly hacky, but we would probably be fine with just three of these.
@@ -54,7 +94,7 @@ pub fn derive_mandatory_param_builder(input: TokenStream) -> TokenStream {
 
     if mandatory_fields.len() > type_param_idents.len() {
         return TokenStream::from(quote! {
-            compile_error!("Deriving MandatoryParamBuilder would run out of generic param IDs");
+            compile_error!("Deriving RequestBuilder would run out of generic param IDs");
         });
     }
 
@@ -106,7 +146,7 @@ pub fn derive_mandatory_param_builder(input: TokenStream) -> TokenStream {
             #[doc = #build_doc]
             #vis fn build(&self) -> #ident {
                 self.try_build()
-                    .expect("One or more required fields are missing. This should not happen and probably indicates a MandatoryParamBuilder bug.")
+                    .expect("One or more required fields are missing. This should not happen and probably indicates a RequestBuilder bug.")
             }
         }
     };
@@ -114,7 +154,7 @@ pub fn derive_mandatory_param_builder(input: TokenStream) -> TokenStream {
     TokenStream::from(expanded)
 }
 
-fn is_mandatory(field: &&Field) -> bool {
+fn is_mandatory(field: &Field) -> bool {
     let Type::Path(type_path) = &field.ty else {
         return false;
     };

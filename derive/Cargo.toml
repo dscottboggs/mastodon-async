@@ -11,5 +11,8 @@ edition.workspace = true
 proc-macro = true
 
 [dependencies]
-syn = "2"
 quote = "1"
+
+[dependencies.syn]
+version = "2"
+features = ["full"]
