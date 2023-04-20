@@ -90,7 +90,7 @@ mod tests {
         	"created_at": "2022-09-14T21:23:02.755Z"
         }"#;
         let subject: Allow = serde_json::from_str(example).unwrap();
-        assert_eq!(subject.id, AllowDomainId::new("1"));
+        assert_eq!(subject.id, DomainAllowId::new("1"));
         assert_eq!(subject.domain, "mastodon.social");
     }
 }

@@ -52,7 +52,7 @@ mod tests {
           "expires_at": null
         }"#;
         let subject: IpBlock = serde_json::from_str(example).unwrap();
-        assert_eq!(subject.id, DomainBlockId::new("1"));
+        assert_eq!(subject.id, IpBlockId::new("1"));
         assert_eq!(subject.ip, "8.8.8.8/32".parse().unwrap());
         assert!(subject.severity.is_no_access());
         assert!(subject.comment.is_empty());
