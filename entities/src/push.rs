@@ -44,6 +44,7 @@ pub struct Alerts {
     #[builder(setter(custom))]
     pub admin: AdminAlerts,
 }
+
 /// Admin-related alerts settings
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 pub struct AdminAlerts {
@@ -83,6 +84,7 @@ impl Alerts {
         !self.is_none()
     }
 }
+
 /// Represents a subscription to the push streaming server.
 ///
 /// See also [the API documentation](https://docs.joinmastodon.org/entities/WebPushSubscription/)
@@ -96,52 +98,6 @@ pub struct Subscription {
     pub server_key: String,
     /// Which alerts should be delivered to the endpoint.
     pub alerts: Alerts,
-}
-
-pub mod add_subscription {
-    use serde::Serialize;
-
-    use super::Alerts;
-
-    #[derive(Debug, Clone, PartialEq, Eq, Serialize, Default)]
-    pub struct Form {
-        pub subscription: Subscription,
-        pub data: Option<Data>,
-    }
-
-    #[derive(Debug, Clone, PartialEq, Eq, Serialize, Default)]
-    pub struct Subscription {
-        pub endpoint: String,
-        pub keys: Keys,
-    }
-
-    #[derive(Debug, Clone, PartialEq, Eq, Serialize, Default)]
-    pub struct Keys {
-        pub p256dh: String,
-        pub auth: String,
-    }
-
-    #[derive(Debug, Clone, PartialEq, Eq, Serialize, Default)]
-    pub struct Data {
-        pub alerts: Option<Alerts>,
-    }
-}
-
-pub mod update_data {
-    use serde::Serialize;
-
-    use super::Alerts;
-
-    #[derive(Debug, Clone, PartialEq, Eq, Serialize, Default)]
-    pub struct Data {
-        pub alerts: Option<Alerts>,
-    }
-
-    #[derive(Debug, Clone, PartialEq, Eq, Serialize, Default)]
-    pub struct Form {
-        pub id: String,
-        pub data: Data,
-    }
 }
 
 #[cfg(test)]
