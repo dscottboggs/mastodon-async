@@ -1,10 +1,13 @@
 //! Module containing all info about notifications.
 
-use crate::{admin::Report, NotificationId};
-
-use super::{account::Account, status::Status};
+use crate::{account::Account, admin::Report, status::Status, NotificationId};
 use derive_is_enum_variant::is_enum_variant;
-use serde::{Deserialize, Serialize};
+use enumset::{EnumSet, EnumSetType};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde_with::{DeserializeAs, SerializeAs};
+use std::collections::HashMap;
+use std::str::FromStr;
+use strum::{Display, EnumString};
 use time::{serde::iso8601, OffsetDateTime};
 
 /// Represents a notification of an event relevant to the user.
@@ -17,7 +20,7 @@ pub struct Notification {
     pub id: NotificationId,
     /// The type of event that resulted in the notification..
     #[serde(rename = "type")]
-    pub notification_type: Type,
+    pub notification_type: NotificationType,
     /// The timestamp of the notification.
     #[serde(with = "iso8601")]
     pub created_at: OffsetDateTime,
@@ -33,29 +36,61 @@ pub struct Notification {
 }
 
 /// The type of notification.
-#[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq, is_enum_variant)]
+#[derive(Debug, Deserialize, Serialize, Display, EnumString, EnumSetType, is_enum_variant)]
 #[serde(rename_all = "snake_case")]
-pub enum Type {
-    /// Someone mentioned you in their status
+#[strum(serialize_all = "snake_case")]
+pub enum NotificationType {
+    /// Someone mentioned you in their status.
     Mention,
-    /// Someone you enabled notifications for has posted a status
+    /// Someone you enabled notifications for has posted a status.
     Status,
-    /// Someone boosted one of your statuses
+    /// Someone boosted one of your statuses.
     Reblog,
-    /// Someone favourited one of your statuses
+    /// Someone favourited one of your statuses.
     Favourite,
-    /// Someone followed you
+    /// Someone followed you.
     Follow,
-    /// Someone requested to follow you
+    /// Someone requested to follow you.
     FollowRequest,
-    /// A poll you have voted in or created has ended
+    /// A poll you have voted in or created has ended.
     Poll,
-    /// A status you interacted with has been edited
+    /// A status you interacted with has been edited.
     Update,
-    /// Someone signed up (optionally sent to admins)
+    /// Someone signed up (admins only).
     #[serde(rename = "admin.sign_up")]
-    SignUp,
-    /// A new report has been filed
+    #[strum(serialize = "admin.sign_up")]
+    AdminSignUp,
+    /// A new report has been filed (admins only).
     #[serde(rename = "admin.report")]
-    Report,
+    #[strum(serialize = "admin.report")]
+    AdminReport,
+}
+
+/// Serialization helper for contexts where an `EnumSet<NotificationType>` gets handled as `HashMap<String, bool>`.
+/// Invoke with an `#[serde_as(as = "NotificationTypeMap")]` attribute.
+pub struct NotificationTypeMap;
+
+impl SerializeAs<EnumSet<NotificationType>> for NotificationTypeMap {
+    fn serialize_as<S>(source: &EnumSet<NotificationType>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        source
+            .iter()
+            .map(|notification_type| (notification_type.to_string(), true))
+            .collect::<HashMap<String, bool>>()
+            .serialize(serializer)
+    }
+}
+
+impl<'de> DeserializeAs<'de, EnumSet<NotificationType>> for NotificationTypeMap {
+    fn deserialize_as<D>(deserializer: D) -> Result<EnumSet<NotificationType>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        Ok(HashMap::<String, bool>::deserialize(deserializer)?
+            .into_iter()
+            .flat_map(|(k, v)| NotificationType::from_str(&k).ok().filter(|_| v))
+            .collect::<EnumSet<_>>())
+    }
 }

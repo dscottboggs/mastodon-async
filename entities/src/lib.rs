@@ -105,7 +105,7 @@ pub mod prelude {
         preferences::Preferences,
         push::{
             self, /* for Alerts, AdminAlerts, add_subscription, update_data */
-            Subscription,
+            WebPushSubscription,
         },
         relationship::Relationship,
         report::{self /* for Category */, Report},

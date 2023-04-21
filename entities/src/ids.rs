@@ -116,7 +116,7 @@ define_ids!(
     "a list ID" as ListId,
     "a mention ID" as MentionId,
     "a notification ID" as NotificationId,
-    "a subscription ID" as SubscriptionId,
+    "a web push subscription ID" as WebPushSubscriptionId,
     "a relationship ID" as RelationshipId,
     "a report ID" as ReportId,
     "a status ID" as StatusId,
