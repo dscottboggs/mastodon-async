@@ -11,6 +11,7 @@ version = "1.2.1"
 license = "MIT/Apache-2.0"
 authors = ["Aaron Power <theaaronepower@gmail.com>", "Paul Woolcock <paul@woolcock.us>", "D. Scott Boggs <scott@tams.tech>"]
 edition = "2021"
+rust-version = "1.65"
 
 [package]
 name = "mastodon-async"
@@ -24,6 +25,7 @@ version.workspace = true
 license.workspace = true
 authors.workspace = true
 edition.workspace = true
+rust-version.workspace = true
 
 [package.metadata.docs.rs]
 features = ["all"]
