@@ -1,14 +1,14 @@
 use crate::entities::admin::ip_block::Severity;
 use derive_builder::Builder;
 use ipnet::IpNet;
-use mastodon_async_derive::MandatoryParamBuilder;
+use mastodon_async_derive::RequestBuilder;
 use serde_with::{serde_as, skip_serializing_none, DurationSeconds};
 use time::Duration;
 
 /// Create a new IP range block.
 #[serde_as]
 #[skip_serializing_none]
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Builder, MandatoryParamBuilder)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Builder, RequestBuilder)]
 #[builder(
     derive(Debug, PartialEq),
     custom_constructor,
@@ -35,7 +35,7 @@ pub struct AddIpBlockRequest {
 /// Differs from [`AddIpBlockRequest`] only in that all parameters are optional.
 #[serde_as]
 #[skip_serializing_none]
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Builder, MandatoryParamBuilder)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Builder, RequestBuilder)]
 #[builder(
     derive(Debug, PartialEq),
     custom_constructor,

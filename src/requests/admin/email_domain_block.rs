@@ -1,8 +1,8 @@
 use derive_builder::Builder;
-use mastodon_async_derive::MandatoryParamBuilder;
+use mastodon_async_derive::RequestBuilder;
 
 /// Create a new email domain block.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Builder, MandatoryParamBuilder)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Builder, RequestBuilder)]
 #[builder(
     derive(Debug, PartialEq),
     custom_constructor,

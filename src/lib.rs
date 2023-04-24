@@ -97,7 +97,8 @@ pub use mastodon_async_entities::{
 };
 pub use registration::Registration;
 pub use requests::{
-    admin, AddFilterRequest, AddPushRequest, AddReportRequest, StatusesRequest, UpdatePushRequest,
+    admin, AddFilterRequest, AddPushSubscriptionRequest, AddReportRequest, StatusesRequest,
+    UpdatePushSubscriptionRequest,
 };
 
 /// Registering your App

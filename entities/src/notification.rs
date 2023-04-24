@@ -5,7 +5,7 @@ use derive_is_enum_variant::is_enum_variant;
 use enumset::{EnumSet, EnumSetType};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_with::{DeserializeAs, SerializeAs};
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::str::FromStr;
 use strum::{Display, EnumString};
 use time::{serde::iso8601, OffsetDateTime};
@@ -66,7 +66,7 @@ pub enum NotificationType {
     AdminReport,
 }
 
-/// Serialization helper for contexts where an `EnumSet<NotificationType>` gets handled as `HashMap<String, bool>`.
+/// Serialization helper for contexts where an `EnumSet<NotificationType>` gets handled as `BTreeMap<String, bool>`.
 /// Invoke with an `#[serde_as(as = "NotificationTypeMap")]` attribute.
 pub struct NotificationTypeMap;
 
@@ -78,7 +78,7 @@ impl SerializeAs<EnumSet<NotificationType>> for NotificationTypeMap {
         source
             .iter()
             .map(|notification_type| (notification_type.to_string(), true))
-            .collect::<HashMap<String, bool>>()
+            .collect::<BTreeMap<String, bool>>()
             .serialize(serializer)
     }
 }
@@ -88,7 +88,7 @@ impl<'de> DeserializeAs<'de, EnumSet<NotificationType>> for NotificationTypeMap 
     where
         D: Deserializer<'de>,
     {
-        Ok(HashMap::<String, bool>::deserialize(deserializer)?
+        Ok(BTreeMap::<String, bool>::deserialize(deserializer)?
             .into_iter()
             .flat_map(|(k, v)| NotificationType::from_str(&k).ok().filter(|_| v))
             .collect::<EnumSet<_>>())

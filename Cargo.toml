@@ -97,7 +97,11 @@ features = ["derive"]
 
 [dependencies.serde_with]
 version = "2"
-features = ["hex", "time_0_3"]
+features = ["base64", "hex", "time_0_3"]
+
+[dependencies.enumset]
+version = "1"
+features = ["serde"]
 
 [dependencies.toml]
 version = "0.7"

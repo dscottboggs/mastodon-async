@@ -55,6 +55,6 @@ mod tests {
         assert!(!subject.alerts.contains(NotificationType::Status));
         assert!(!subject.alerts.contains(NotificationType::Follow));
         assert!(!subject.alerts.contains(NotificationType::Update));
-        assert_eq!(subject.server_key, "BCk-QqERU0q-CfYZjcuB6lnyyOYfJ2AifKqfeGIm7Z-HiTU5T9eTG5GxVA0_OH5mMlI4UkkDTpaZwozy0TzdZ2M=");
+        assert_eq!(subject.server_key, VapidKey::new("BCk-QqERU0q-CfYZjcuB6lnyyOYfJ2AifKqfeGIm7Z-HiTU5T9eTG5GxVA0_OH5mMlI4UkkDTpaZwozy0TzdZ2M="));
     }
 }

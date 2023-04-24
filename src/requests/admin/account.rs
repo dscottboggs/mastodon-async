@@ -1,8 +1,6 @@
 use crate::entities::{ReportId, WarningPresetId};
-use derive_builder::Builder;
 use derive_is_enum_variant::is_enum_variant;
-use mastodon_async_derive::MandatoryParamBuilder;
-use serde_with::skip_serializing_none;
+use mastodon_async_derive::request_builder;
 
 /// Form used to perform an admin action on an account and resolve any open reports
 ///
@@ -12,30 +10,18 @@ use serde_with::skip_serializing_none;
 /// use mastodon_async::requests::admin::{AccountAction, AccountActionRequest};
 /// let request = AccountActionRequest::builder(AccountAction::Silence).text("Hush now").build();
 /// ```
-#[skip_serializing_none]
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Builder, MandatoryParamBuilder)]
-#[builder(
-    derive(Debug, PartialEq),
-    custom_constructor,
-    build_fn(private, name = "try_build"),
-    setter(into, strip_option)
-)]
+#[request_builder]
 pub struct AccountActionRequest {
     /// The type of action to be taken.
-    #[builder(private)]
     #[serde(rename = "type")]
     pub action: AccountAction,
     /// The ID of an associated report that caused this action to be taken.
-    #[builder(default)]
     pub report_id: Option<ReportId>,
     /// The ID of a preset warning.
-    #[builder(default)]
     pub warning_preset_id: Option<WarningPresetId>,
     /// Additional clarification for why this action was taken.
-    #[builder(default)]
     pub text: Option<String>,
     /// Should an email be sent to the user with the above information?
-    #[builder(default)]
     pub send_email_notification: Option<bool>,
 }
 

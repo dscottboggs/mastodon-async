@@ -1,5 +1,5 @@
 use derive_builder::Builder;
-use mastodon_async_derive::MandatoryParamBuilder;
+use mastodon_async_derive::RequestBuilder;
 use serde::Serialize;
 use serde_with::{hex::Hex, serde_as, skip_serializing_none};
 
@@ -7,7 +7,7 @@ use serde_with::{hex::Hex, serde_as, skip_serializing_none};
 /// Either the original email or the hash can be submitted.
 #[serde_as]
 #[skip_serializing_none]
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Builder, MandatoryParamBuilder)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Builder, RequestBuilder)]
 #[builder(
     derive(Debug, PartialEq),
     custom_constructor,
@@ -25,7 +25,7 @@ pub struct AddCanonicalEmailBlockRequest {
 }
 
 /// Test an email against existing canonical email blocks.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Builder, MandatoryParamBuilder)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Builder, RequestBuilder)]
 #[builder(
     derive(Debug, PartialEq),
     custom_constructor,

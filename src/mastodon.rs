@@ -6,8 +6,8 @@ use crate::{
     helpers::read_response::read_response,
     log_serde,
     polling_time::PollingTime,
-    requests, AddFilterRequest, AddPushRequest, AddReportRequest, Data, NewStatus, Page,
-    StatusesRequest, UpdatePushRequest,
+    requests, AddFilterRequest, AddPushSubscriptionRequest, AddReportRequest, Data, NewStatus,
+    Page, StatusesRequest, UpdatePushSubscriptionRequest,
 };
 use futures::TryStream;
 use log::{as_debug, as_serde, debug, error, trace};
@@ -83,7 +83,7 @@ impl Mastodon {
         (post (uri: Cow<'static, str>,)) follows: "follows" => Account,
         (post) clear_notifications: "notifications/clear" => Empty,
         (post (id: &str,)) dismiss_notification: "notifications/dismiss" => Empty,
-        (get) get_push_subscription: "push/subscription" => Subscription,
+        (get) get_push_subscription: "push/subscription" => WebPushSubscription,
         (delete) delete_push_subscription: "push/subscription" => Empty,
         (get) get_filters: "filters" => Vec<Filter>,
         (get) get_follow_suggestions: "suggestions" => Vec<Account>,
@@ -326,9 +326,11 @@ impl Mastodon {
     }
 
     /// Add a push notifications subscription
-    pub async fn add_push_subscription(&self, request: &AddPushRequest) -> Result<Subscription> {
+    pub async fn add_push_subscription(
+        &self,
+        request: &AddPushSubscriptionRequest,
+    ) -> Result<WebPushSubscription> {
         let call_id = Uuid::new_v4();
-        let request = request.build();
         let url = &self.route("/api/v1/push/subscription");
         debug!(
             url = url, method = stringify!($method),
@@ -342,9 +344,11 @@ impl Mastodon {
 
     /// Update the `data` portion of the push subscription associated with this
     /// access token
-    pub async fn update_push_data(&self, request: &UpdatePushRequest) -> Result<Subscription> {
+    pub async fn update_push_subscription(
+        &self,
+        request: &UpdatePushSubscriptionRequest,
+    ) -> Result<WebPushSubscription> {
         let call_id = Uuid::new_v4();
-        let request = request.build();
         let url = &self.route("/api/v1/push/subscription");
         debug!(
             url = url, method = stringify!($method),

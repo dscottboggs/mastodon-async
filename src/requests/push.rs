@@ -1,377 +1,135 @@
-use mastodon_async_entities::push::Alerts;
+use derive_is_enum_variant::is_enum_variant;
+use enumset::EnumSet;
+use mastodon_async_derive::request_builder;
+use mastodon_async_entities::notification::{NotificationType, NotificationTypeMap};
+use serde_with::{base64::Base64, serde_as};
 
-use crate::entities::push::{add_subscription, update_data};
-
-/// Container for the key & auth strings for an AddPushRequest
-///
-/// // Example
-///
-/// ```
-/// use mastodon_async::requests::Keys;
-///
-/// let keys = Keys::new("anetohias===", "oeatssah=");
-/// ```
-#[derive(Debug, Default, Clone, PartialEq, Eq)]
-pub struct Keys {
-    pub(crate) p256dh: String,
-    pub(crate) auth: String,
+/// Request for creating a new push subscription.
+#[request_builder]
+pub struct AddPushSubscriptionRequest {
+    /// The subscription itself.
+    pub subscription: PushRequestSubscription,
+    /// Push request preferences.
+    pub data: Option<PushRequestData>,
 }
 
-impl Keys {
-    /// Create the `Keys` container
-    ///
-    /// // Example
-    ///
-    /// ```
-    /// use mastodon_async::requests::Keys;
-    ///
-    /// let keys = Keys::new("anetohias===", "oeatssah=");
-    /// ```
-    pub fn new(p256dh: &str, auth: &str) -> Keys {
-        Keys {
-            p256dh: p256dh.to_string(),
-            auth: auth.to_string(),
-        }
-    }
+/// Request for updating an existing push subscription.
+#[request_builder]
+pub struct UpdatePushSubscriptionRequest {
+    /// Push request preferences.
+    pub data: Option<PushRequestData>,
 }
 
-/// Builder to pass to the Mastodon::add_push_subscription method
-///
-/// // Example
-///
-/// ```no_run
-/// use mastodon_async::{
-///     entities::push::AlertsBuilder,
-///     Mastodon,
-///     Data,
-///     requests::{AddPushRequest, Keys}
-/// };
-///
-/// tokio_test::block_on(async {
-///     let data = Data::default();
-///     let client = Mastodon::from(data);
-///
-///     let keys = Keys::new("stahesuahoei293ise===", "tasecoa,nmeozka==");
-///     let mut request = AddPushRequest::new("http://example.com/push/endpoint", &keys);
-///     request.alerts(
-///         AlertsBuilder::default()
-///             .follow(true)
-///             .reblog(true)
-///             .build()
-///             .unwrap()
-///     );
-///     client.add_push_subscription(&request).await.unwrap();
-/// });
-/// ```
-#[derive(Debug, Default, Clone, PartialEq, Eq)]
-pub struct AddPushRequest {
-    endpoint: String,
-
-    p256dh: String,
-    auth: String,
-
-    alerts: Alerts,
+/// Authorization and endpoint info for a new push subscription.
+#[request_builder]
+pub struct PushRequestSubscription {
+    /// The endpoint URL that is called when a notification event occurs.
+    pub endpoint: String,
+    /// Auth information.
+    pub keys: PushRequestKeys,
 }
 
-impl AddPushRequest {
-    /// Construct a new AddPushRequest
-    ///
-    /// // Example
-    ///
-    /// ```
-    /// use mastodon_async::requests::{AddPushRequest, Keys};
-    /// let keys = Keys::new("abcdef===", "foobar==");
-    /// let push_endpoint = "https://example.com/push/endpoint";
-    /// let request = AddPushRequest::new(push_endpoint, &keys);
-    /// ```
-    pub fn new(endpoint: &str, keys: &Keys) -> AddPushRequest {
-        AddPushRequest {
-            endpoint: endpoint.to_string(),
-            p256dh: keys.p256dh.clone(),
-            auth: keys.auth.clone(),
-            ..Default::default()
-        }
-    }
-
-    /// Set the alerts which should be requested to be notified by this request.
-    pub fn alerts(&mut self, alerts: Alerts) -> &mut Self {
-        self.alerts = alerts;
-        self
-    }
-
-    /// Build the form.
-    pub fn build(&self) -> add_subscription::Form {
-        use crate::entities::push::add_subscription::{Data, Form, Keys, Subscription};
-        let mut form = Form {
-            subscription: Subscription {
-                endpoint: self.endpoint.clone(),
-                keys: Keys {
-                    p256dh: self.p256dh.clone(),
-                    auth: self.auth.clone(),
-                },
-            },
-            data: None,
-        };
-
-        if self.alerts.is_some() {
-            form.data = Some(Data {
-                alerts: Some(self.alerts),
-            });
-        }
-
-        form
-    }
+/// Authorization info for a new push subscription.
+#[request_builder]
+#[serde_as]
+pub struct PushRequestKeys {
+    /// User agent public key: from an ECDH keypair using the `prime256v1` curve.
+    #[serde_as(as = "Base64")]
+    pub p256dh: Vec<u8>,
+    /// Auth secret: 16 bytes of random data.
+    #[serde_as(as = "Base64")]
+    pub auth: Vec<u8>,
 }
 
-/// Builder to pass to the Mastodon::update_push_data method
-///
-/// // Example
-///
-/// ```no_run
-/// use mastodon_async::{
-///     entities::push::AlertsBuilder,
-///     Mastodon,
-///     Data,
-///     requests::UpdatePushRequest
-/// };
-///
-/// let data = Data::default();
-/// let client = Mastodon::from(data);
-///
-/// let mut request = UpdatePushRequest::new("foobar");
-/// request.alerts(
-///     AlertsBuilder::default()
-///         .follow(true)
-///         .reblog(true)
-///         .build()
-///         .unwrap()
-/// );
-/// tokio_test::block_on(async {
-///     client.update_push_data(&request).await.unwrap();
-/// });
-/// ```
-#[derive(Debug, Default, Clone, PartialEq, Eq, Serialize)]
-pub struct UpdatePushRequest {
-    id: String,
-    alerts: Alerts,
+/// Push request preferences.
+#[request_builder]
+#[serde_as]
+#[allow(missing_copy_implementations)]
+pub struct PushRequestData {
+    /// Which events to receive push notifications for.
+    #[serde_as(as = "Option<NotificationTypeMap>")]
+    pub alerts: Option<EnumSet<NotificationType>>,
+    /// Which users to receive push notifications for.
+    pub policy: Option<PushRequestPolicy>,
 }
 
-impl UpdatePushRequest {
-    /// Construct a new UpdatePushRequest
-    ///
-    /// // Example
-    ///
-    /// ```
-    /// let request = mastodon_async::requests::UpdatePushRequest::new("some-id");
-    /// ```
-    pub fn new(id: &str) -> UpdatePushRequest {
-        UpdatePushRequest {
-            id: id.to_string(),
-            ..Default::default()
-        }
-    }
-
-    /// Set alerts which should be enabled or disabled by this update.
-    pub fn alerts(&mut self, alerts: Alerts) -> &mut Self {
-        self.alerts = alerts;
-        self
-    }
-
-    /// Build the form from the update
-    pub fn build(&self) -> update_data::Form {
-        use crate::entities::push::update_data::{Data, Form};
-
-        let mut form = Form {
-            id: self.id.clone(),
-            ..Default::default()
-        };
-
-        if self.alerts.is_some() {
-            form.data = Data {
-                alerts: Some(self.alerts),
-            };
-        }
-        form
-    }
+/// Controls which users you receive push notifications for.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize, is_enum_variant)]
+#[serde(rename_all = "snake_case")]
+pub enum PushRequestPolicy {
+    /// Receive push notifications for all users.
+    All,
+    /// Receive push notifications for users you follow.
+    Followed,
+    /// Receive push notifications for users who follow you.
+    Follower,
+    /// Do not receive push notifications.
+    None,
 }
 
 #[cfg(test)]
 mod tests {
-    use mastodon_async_entities::push::AlertsBuilder;
-
     use super::*;
-    use crate::entities::push::{add_subscription, update_data, Alerts};
+    use enumset::enum_set;
 
     #[test]
-    fn test_keys_new() {
-        let keys = Keys::new("anetohias===", "oeatssah=");
+    fn test_serialize_create_request() {
+        let request = AddPushSubscriptionRequest::builder(
+            PushRequestSubscription::builder(
+                "https://yourdomain.example/listener",
+                PushRequestKeys::builder(
+                    vec![
+                        0x97, 0x4a, 0x4c, 0x76, 0x50, 0x55, 0x49, 0x40, 0x9b, 0x68, 0x64, 0x45,
+                        0x5f, 0x22, 0x7d, 0xbb, 0x0e, 0x27, 0x75, 0x10, 0xf8, 0x61, 0x40, 0x82,
+                        0x8e, 0xf7, 0xa4, 0xc7, 0x24, 0x46, 0x93, 0xd9, 0x92, 0x63, 0x5d, 0xdb,
+                        0xd8, 0xb1, 0x4e, 0x20, 0x95, 0xb3, 0x66, 0x30, 0xb8, 0x76, 0x0d, 0x56,
+                        0x11, 0xce, 0xe4, 0x04, 0x2b, 0xd5, 0x44, 0xf6, 0x97, 0x98, 0xda, 0x20,
+                        0x20, 0x41, 0xb7, 0xab,
+                    ],
+                    vec![
+                        0x2b, 0x44, 0x1b, 0x30, 0xc5, 0x3b, 0x48, 0x37, 0xa9, 0xcd, 0x0c, 0x91,
+                        0x6e, 0xbb, 0x26, 0x25,
+                    ],
+                )
+                .build(),
+            )
+            .build(),
+        )
+        .data(
+            PushRequestData::builder()
+                .alerts(enum_set!(
+                    NotificationType::Mention | NotificationType::AdminReport
+                ))
+                .policy(PushRequestPolicy::All)
+                .build(),
+        )
+        .build();
+        let ser = serde_json::to_string(&request).expect("Couldn't serialize");
         assert_eq!(
-            keys,
-            Keys {
-                p256dh: "anetohias===".to_string(),
-                auth: "oeatssah=".to_string()
-            }
+            ser,
+            r#"{"subscription":{"endpoint":"https://yourdomain.example/listener","keys":{"p256dh":"l0pMdlBVSUCbaGRFXyJ9uw4ndRD4YUCCjvekxyRGk9mSY13b2LFOIJWzZjC4dg1WEc7kBCvVRPaXmNogIEG3qw==","auth":"K0QbMMU7SDepzQyRbrsmJQ=="}},"data":{"alerts":{"admin.report":true,"mention":true},"policy":"all"}}"#
         );
     }
 
     #[test]
-    fn test_add_push_request_new() {
-        let endpoint = "https://example.com/push/endpoint";
-        let keys = Keys::new("anetohias===", "oeatssah=");
-        let req = AddPushRequest::new(endpoint, &keys);
+    fn test_serialize_update_request() {
+        let request = UpdatePushSubscriptionRequest::builder()
+            .data(
+                PushRequestData::builder()
+                    .alerts(enum_set!(
+                        NotificationType::Mention
+                            | NotificationType::Reblog
+                            | NotificationType::Favourite
+                            | NotificationType::Follow
+                    ))
+                    .policy(PushRequestPolicy::All)
+                    .build(),
+            )
+            .build();
+        let ser = serde_json::to_string(&request).expect("Couldn't serialize");
         assert_eq!(
-            req,
-            AddPushRequest {
-                endpoint: "https://example.com/push/endpoint".to_string(),
-                p256dh: "anetohias===".to_string(),
-                auth: "oeatssah=".to_string(),
-                ..Default::default()
-            }
-        );
-    }
-
-    macro_rules! alerts_builder_test {
-        ($name:ident, $set:ident $(; $rest_names:ident, $rest_set:ident)*;) => {
-            #[test]
-            fn $name() {
-                let endpoint = "https://example.com/push/endpoint";
-                let keys = Keys::new("anetohias===", "oeatssah=");
-                let mut req = AddPushRequest::new(endpoint, &keys);
-                req.alerts(AlertsBuilder::default().$set(true).build().unwrap());
-                assert_eq!(
-                    req,
-                    AddPushRequest {
-                        endpoint: "https://example.com/push/endpoint".to_string(),
-                        p256dh: "anetohias===".to_string(),
-                        auth: "oeatssah=".to_string(),
-                        alerts: Alerts {
-                            $set: Some(true),
-                            ..Default::default()
-                        }
-                    }
-                );
-            }
-
-            alerts_builder_test!($($rest_names, $rest_set;)*);
-        };
-        () => {};
-    }
-    alerts_builder_test!(
-        test_add_push_request_follow, follow;
-        test_add_push_request_favourite, favourite;
-        test_add_push_request_reblog, reblog;
-        test_add_push_request_mention, mention;
-    );
-
-    #[test]
-    fn test_add_push_request_build() {
-        let endpoint = "https://example.com/push/endpoint";
-        let keys = Keys::new("anetohias===", "oeatssah=");
-        let mut req = AddPushRequest::new(endpoint, &keys);
-        req.alerts(
-            AlertsBuilder::default()
-                .follow(true)
-                .reblog(true)
-                .build()
-                .unwrap(),
-        );
-        let form = req.build();
-        assert_eq!(
-            form,
-            add_subscription::Form {
-                subscription: add_subscription::Subscription {
-                    endpoint: "https://example.com/push/endpoint".to_string(),
-                    keys: add_subscription::Keys {
-                        p256dh: "anetohias===".to_string(),
-                        auth: "oeatssah=".to_string(),
-                    },
-                },
-                data: Some(add_subscription::Data {
-                    alerts: Some(Alerts {
-                        follow: Some(true),
-                        reblog: Some(true),
-                        ..Default::default()
-                    }),
-                }),
-            }
-        );
-    }
-
-    #[test]
-    fn test_update_push_request_new() {
-        let req = UpdatePushRequest::new("some-id");
-        assert_eq!(
-            req,
-            UpdatePushRequest {
-                id: "some-id".to_string(),
-                ..Default::default()
-            }
-        );
-    }
-
-    macro_rules! test_update_push_request {
-        ($name:ident, $set:ident $(; $rest_names:ident, $rest_set:ident)*;) => {
-            #[test]
-            fn $name() {
-                let mut req = UpdatePushRequest::new("some-id");
-                req.alerts(AlertsBuilder::default().$set(true).build().unwrap());
-                assert_eq!(
-                    req,
-                    UpdatePushRequest {
-                        id: "some-id".to_string(),
-                        alerts: Alerts {
-                            $set: Some(true),
-                            ..Default::default()
-                        }
-                    }
-                );
-            }
-
-            test_update_push_request!($($rest_names, $rest_set;)*);
-        };
-        () => {}
-    }
-
-    test_update_push_request! {
-        test_update_push_request_follow, follow;
-        test_update_push_request_favourite, favourite;
-        test_update_push_request_reblog, reblog;
-        test_update_push_request_mention, mention;
-
-    }
-
-    #[test]
-    fn test_update_push_request_build_no_flags() {
-        let req = UpdatePushRequest::new("some-id");
-        let form = req.build();
-        assert_eq!(
-            form,
-            update_data::Form {
-                id: "some-id".to_string(),
-                data: update_data::Data { alerts: None },
-            }
-        );
-    }
-
-    #[test]
-    fn test_update_push_request_build() {
-        let mut req = UpdatePushRequest::new("some-id");
-        req.alerts(Alerts {
-            favourite: Some(false),
-            ..Default::default()
-        });
-        let form = req.build();
-        assert_eq!(
-            form,
-            update_data::Form {
-                id: "some-id".to_string(),
-                data: update_data::Data {
-                    alerts: Some(Alerts {
-                        favourite: Some(false),
-                        ..Default::default()
-                    }),
-                },
-            }
+            ser,
+            r#"{"data":{"alerts":{"favourite":true,"follow":true,"mention":true,"reblog":true},"policy":"all"}}"#
         );
     }
 }

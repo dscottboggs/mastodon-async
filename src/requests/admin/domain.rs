@@ -1,10 +1,10 @@
 use crate::entities::admin::domain::BlockSeverity;
 use derive_builder::Builder;
-use mastodon_async_derive::MandatoryParamBuilder;
+use mastodon_async_derive::RequestBuilder;
 use serde_with::skip_serializing_none;
 
 /// Create a new domain allow.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Builder, MandatoryParamBuilder)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Builder, RequestBuilder)]
 #[builder(
     derive(Debug, PartialEq),
     custom_constructor,
@@ -19,7 +19,7 @@ pub struct AddDomainAllowRequest {
 
 /// Create a new domain block or update an existing one.
 #[skip_serializing_none]
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Builder, MandatoryParamBuilder)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Builder, RequestBuilder)]
 #[builder(
     derive(Debug, PartialEq),
     custom_constructor,
