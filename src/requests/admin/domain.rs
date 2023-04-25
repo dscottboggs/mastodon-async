@@ -1,52 +1,29 @@
 use crate::entities::admin::domain::BlockSeverity;
-use derive_builder::Builder;
-use mastodon_async_derive::RequestBuilder;
-use serde_with::skip_serializing_none;
+use mastodon_async_derive::request_builder;
 
 /// Create a new domain allow.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Builder, RequestBuilder)]
-#[builder(
-    derive(Debug, PartialEq),
-    custom_constructor,
-    build_fn(private, name = "try_build"),
-    setter(into, strip_option)
-)]
+#[request_builder]
 pub struct AddDomainAllowRequest {
     /// The domain to allow federation with.
-    #[builder(private)]
     pub domain: String,
 }
 
 /// Create a new domain block or update an existing one.
-#[skip_serializing_none]
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Builder, RequestBuilder)]
-#[builder(
-    derive(Debug, PartialEq),
-    custom_constructor,
-    build_fn(private, name = "try_build"),
-    setter(into, strip_option)
-)]
+#[request_builder]
 pub struct AddDomainBlockRequest {
     /// The domain to block federation with.
-    #[builder(private)]
     pub domain: String,
     /// Policy to be applied to the domain.
-    #[builder(default)]
     pub severity: Option<BlockSeverity>,
     /// Whether media attachments should be rejected.
-    #[builder(default)]
     pub reject_media: Option<bool>,
     /// Whether media attachments should be rejected.
-    #[builder(default)]
     pub reject_reports: Option<bool>,
     /// A private note about this domain block, visible only to admins.
-    #[builder(default)]
     pub private_comment: Option<String>,
     /// A public note about this domain block, optionally shown on the about page.
-    #[builder(default)]
     pub public_comment: Option<String>,
     /// Whether to partially censor the domain when shown in public.
-    #[builder(default)]
     pub obfuscate: Option<bool>,
 }
 

@@ -1,17 +1,9 @@
-use derive_builder::Builder;
-use mastodon_async_derive::RequestBuilder;
+use mastodon_async_derive::request_builder;
 
 /// Create a new email domain block.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Builder, RequestBuilder)]
-#[builder(
-    derive(Debug, PartialEq),
-    custom_constructor,
-    build_fn(private, name = "try_build"),
-    setter(into, strip_option)
-)]
+#[request_builder]
 pub struct AddEmailDomainBlockRequest {
     /// The email domain to block signups from.
-    #[builder(private)]
     pub domain: String,
 }
 

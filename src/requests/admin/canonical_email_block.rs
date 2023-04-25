@@ -1,40 +1,23 @@
-use derive_builder::Builder;
-use mastodon_async_derive::RequestBuilder;
+use mastodon_async_derive::request_builder;
 use serde::Serialize;
-use serde_with::{hex::Hex, serde_as, skip_serializing_none};
+use serde_with::{hex::Hex, serde_as};
 
 /// Form to create a new canonical email block.
 /// Either the original email or the hash can be submitted.
 #[serde_as]
-#[skip_serializing_none]
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Builder, RequestBuilder)]
-#[builder(
-    derive(Debug, PartialEq),
-    custom_constructor,
-    build_fn(private, name = "try_build"),
-    setter(into, strip_option)
-)]
+#[request_builder]
 pub struct AddCanonicalEmailBlockRequest {
     /// An email to canonicalize, hash, and block.
-    #[builder(default)]
     pub email: Option<String>,
     /// A pre-hashed email.
-    #[builder(default)]
     #[serde_as(as = "Option<Hex>")]
     pub canonical_email_hash: Option<Vec<u8>>,
 }
 
 /// Test an email against existing canonical email blocks.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Builder, RequestBuilder)]
-#[builder(
-    derive(Debug, PartialEq),
-    custom_constructor,
-    build_fn(private, name = "try_build"),
-    setter(into, strip_option)
-)]
+#[request_builder]
 pub struct TestCanonicalEmailBlocksRequest {
     /// The email to test.
-    #[builder(private)]
     pub email: String,
 }
 

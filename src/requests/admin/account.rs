@@ -27,7 +27,7 @@ pub struct AccountActionRequest {
 
 /// Action to be performed on the account.
 /// https://docs.joinmastodon.org/methods/admin/accounts/#form-data-parameters
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, is_enum_variant)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, is_enum_variant)]
 #[serde(rename_all = "snake_case")]
 pub enum AccountAction {
     /// No action. Can be used to resolve any open reports against the account.

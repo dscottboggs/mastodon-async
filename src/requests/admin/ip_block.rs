@@ -1,32 +1,20 @@
 use crate::entities::admin::ip_block::Severity;
-use derive_builder::Builder;
 use ipnet::IpNet;
-use mastodon_async_derive::RequestBuilder;
-use serde_with::{serde_as, skip_serializing_none, DurationSeconds};
+use mastodon_async_derive::request_builder;
+use serde_with::{serde_as, DurationSeconds};
 use time::Duration;
 
 /// Create a new IP range block.
 #[serde_as]
-#[skip_serializing_none]
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Builder, RequestBuilder)]
-#[builder(
-    derive(Debug, PartialEq),
-    custom_constructor,
-    build_fn(private, name = "try_build"),
-    setter(into, strip_option)
-)]
+#[request_builder]
 pub struct AddIpBlockRequest {
     /// The IP address range that is not allowed to federate.
-    #[builder(default)]
     pub ip: Option<IpNet>,
     /// The policy associated with this IP block.
-    #[builder(private)]
     pub severity: Severity,
     /// The recorded reason for this IP block.
-    #[builder(default)]
     pub comment: Option<String>,
     /// The number of seconds in which this IP block will expire.
-    #[builder(default)]
     #[serde_as(as = "Option<DurationSeconds<i64>>")]
     pub expires_in: Option<Duration>,
 }
@@ -34,25 +22,14 @@ pub struct AddIpBlockRequest {
 /// Update an existing IP range block.
 /// Differs from [`AddIpBlockRequest`] only in that all parameters are optional.
 #[serde_as]
-#[skip_serializing_none]
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Builder, RequestBuilder)]
-#[builder(
-    derive(Debug, PartialEq),
-    custom_constructor,
-    build_fn(private, name = "try_build"),
-    setter(into, strip_option)
-)]
+#[request_builder]
 pub struct UpdateIpBlockRequest {
-    #[builder(default)]
     ip: Option<IpNet>,
     /// The policy to apply to this IP range.
-    #[builder(default)]
     severity: Option<Severity>,
     /// The reason for this IP block.
-    #[builder(default)]
     comment: Option<String>,
     /// The number of seconds in which this IP block will expire.
-    #[builder(default)]
     #[serde_as(as = "Option<DurationSeconds<i64>>")]
     expires_in: Option<Duration>,
 }
