@@ -23,6 +23,11 @@ pub fn request_builder(_attr: TokenStream, item: TokenStream) -> TokenStream {
     item_struct.attrs.push(parse_quote! {
         #[derive(Debug, Clone, PartialEq, Eq, Serialize, derive_builder::Builder, mastodon_async_derive::RequestBuilder)]
     });
+    if item_struct.fields.iter().all(|field| !is_mandatory(field)) {
+        item_struct.attrs.push(parse_quote! {
+            #[derive(Default)]
+        });
+    }
     item_struct.attrs.push(parse_quote! {
         #[builder(
             derive(Debug, PartialEq),
