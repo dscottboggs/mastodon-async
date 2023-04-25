@@ -6,6 +6,10 @@ pub use self::push::{AddPushSubscriptionRequest, PushRequestKeys, UpdatePushSubs
 pub use self::report::AddReportRequest;
 /// Data structure for the MastodonClient::statuses method
 pub use self::statuses::StatusesRequest;
+/// Data structures for MastodonClient timeline methods
+pub use self::timelines::{
+    HashtagTimelineRequest, HomeTimelineRequest, ListTimelineRequest, PublicTimelineRequest,
+};
 
 /// Requests specific to the admin API.
 pub mod admin;
@@ -16,3 +20,4 @@ pub mod filter;
 mod push;
 mod report;
 mod statuses;
+mod timelines;

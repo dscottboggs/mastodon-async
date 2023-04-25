@@ -3,13 +3,14 @@
 use crate::AttachmentId;
 use derive_is_enum_variant::is_enum_variant;
 use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 use url::Url;
 
 /// Represents a file or media attachment that can be added to a status.
 ///
 /// See also [the API documentation](https://docs.joinmastodon.org/entities/MediaAttachment/)
+#[skip_serializing_none]
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
-#[serde(deny_unknown_fields)]
 pub struct Attachment {
     /// ID of the attachment.
     pub id: AttachmentId,
@@ -19,18 +20,17 @@ pub struct Attachment {
     /// The location of the original full-size attachment, if the media has
     /// been processed. Is `None` if the media is still processing on the
     /// server.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub url: Option<Url>,
     /// The location of a scaled-down preview of the attachment.
-    pub preview_url: Url,
+    pub preview_url: Option<Url>,
     /// The location of the full-size original attachment on the remote website.
     pub remote_url: Option<Url>,
+    /// The location of a scaled-down preview of the attachment on the remote website.
+    pub preview_remote_url: Option<Url>,
     /// Shorter URL for the image, for insertion into text
     /// (only present on local images)
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub text_url: Option<Url>,
     /// Meta information about the attachment.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub meta: Option<Meta>,
     /// Noop will be removed.
     pub description: Option<String>,
@@ -55,39 +55,29 @@ impl Attachment {
 
 /// Metadata about some attachment.
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
+#[skip_serializing_none]
 pub struct Meta {
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub length: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub duration: Option<f64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub fps: Option<i64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub size: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub width: Option<i64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub height: Option<i64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub aspect: Option<f64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub audio_encode: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub audio_bitrate: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub audio_channels: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub original: Option<SizeSpecificDetails>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub small: Option<SizeSpecificDetails>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub focus: Option<FocalPoint>,
 }
 
 /// The type of media attachment.
 ///
 /// See also [the API documentation](https://docs.joinmastodon.org/entities/MediaAttachment/#type)
-#[derive(Debug, Deserialize, Serialize, Clone, Copy, PartialEq, Eq, is_enum_variant)]
+#[derive(
+    Debug, Deserialize, Serialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, is_enum_variant,
+)]
 #[serde(rename_all = "lowercase")]
 pub enum MediaType {
     /// Audio track
@@ -103,28 +93,22 @@ pub enum MediaType {
 }
 
 /// Metadata about a video attachment
+#[skip_serializing_none]
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct SizeSpecificDetails {
     /// How many pixels wide the video or image is.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub width: Option<i64>,
     /// How many pixels tall the video is.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub height: Option<i64>,
     /// The frame rate of the video.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub frame_rate: Option<String>,
     /// The duration of the video, in seconds.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub duration: Option<f64>,
     /// The bitrate of the video.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub bitrate: Option<i64>,
     /// The aspect ratio of the video
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub aspect: Option<f64>,
     /// The size of the video, expressed like WIDTHxHEIGHT.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub size: Option<String>,
 }
 
@@ -142,6 +126,7 @@ pub struct FocalPoint {
 }
 
 /// A media attachment which has been processed and has a URL.
+#[skip_serializing_none]
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 pub struct ProcessedAttachment {
     /// ID of the attachment.
@@ -152,19 +137,17 @@ pub struct ProcessedAttachment {
     /// URL of the locally hosted version of the image.
     pub url: Url,
     /// For remote images, the remote URL of the original image.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub remote_url: Option<Url>,
     /// URL of the preview image.
     pub preview_url: Url,
+    /// For remote images, the preview URL of the original image.
+    pub preview_remote_url: Option<Url>,
     /// Shorter URL for the image, for insertion into text
     /// (only present on local images)
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub text_url: Option<Url>,
     /// Meta information about the attachment.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub meta: Option<Meta>,
     /// Noop will be removed.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
 }
 

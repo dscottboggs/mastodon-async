@@ -97,7 +97,8 @@ pub use mastodon_async_entities::{
 };
 pub use registration::Registration;
 pub use requests::{
-    admin, AddFilterRequest, AddPushSubscriptionRequest, AddReportRequest, StatusesRequest,
+    admin, AddFilterRequest, AddPushSubscriptionRequest, AddReportRequest, HashtagTimelineRequest,
+    HomeTimelineRequest, ListTimelineRequest, PublicTimelineRequest, StatusesRequest,
     UpdatePushSubscriptionRequest,
 };
 
@@ -127,8 +128,9 @@ pub mod polling_time;
 /// Automatically import the things you need
 pub mod prelude {
     pub use crate::{
-        entities::prelude::*, Data, Mastodon, NewStatus, NewStatusBuilder, Registration,
-        StatusesRequest, Visibility,
+        entities::prelude::*, Data, HashtagTimelineRequest, HomeTimelineRequest,
+        ListTimelineRequest, Mastodon, NewStatus, NewStatusBuilder, PublicTimelineRequest,
+        Registration, StatusesRequest, Visibility,
     };
     // Legacy alias; TODO remove for 2.0
     pub use super::entities::status::NewStatusBuilder as StatusBuilder;

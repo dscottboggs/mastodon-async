@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use std::{borrow::Cow, ops::Deref, path::Path, sync::Arc};
 
 use crate::{
@@ -6,8 +7,9 @@ use crate::{
     helpers::read_response::read_response,
     log_serde,
     polling_time::PollingTime,
-    requests, AddFilterRequest, AddPushSubscriptionRequest, AddReportRequest, Data, NewStatus,
-    Page, StatusesRequest, UpdatePushSubscriptionRequest,
+    requests, AddFilterRequest, AddPushSubscriptionRequest, AddReportRequest, Data,
+    HashtagTimelineRequest, HomeTimelineRequest, ListTimelineRequest, NewStatus, Page,
+    PublicTimelineRequest, StatusesRequest, UpdatePushSubscriptionRequest,
 };
 use futures::TryStream;
 use log::{as_debug, as_serde, debug, error, trace};
@@ -53,7 +55,6 @@ impl Mastodon {
         (get) domain_blocks: "domain_blocks" => String,
         (get) instance_domain_blocks: "instance/domain_blocks" => DomainBlock,
         (get) follow_requests: "follow_requests" => Account,
-        (get) get_home_timeline: "timelines/home" => Status,
         (get) get_emojis: "custom_emojis" => CustomEmoji,
         (get) mutes: "mutes" => Account,
         (get) notifications: "notifications" => Notification,
@@ -244,19 +245,6 @@ impl Mastodon {
         read_response(response).await
     }
 
-    /// Get timeline filtered by a hashtag(eg. `#coffee`) either locally or
-    /// federated.
-    pub async fn get_tagged_timeline(&self, hashtag: String, local: bool) -> Result<Vec<Status>> {
-        let base = "/api/v1/timelines/tag/";
-        let url = if local {
-            self.route(format!("{}{}?local=1", base, hashtag))
-        } else {
-            self.route(format!("{}{}", base, hashtag))
-        };
-
-        self.get(url).await
-    }
-
     /// Get statuses of a single account by id. Optionally only with pictures
     /// and or excluding replies.
     ///
@@ -276,23 +264,176 @@ impl Mastodon {
     /// tokio_test::block_on(async {
     ///     let data = Data::default();
     ///     let client = Mastodon::from(data);
-    ///     let mut request = StatusesRequest::new();
-    ///     request.only_media();
+    ///     let request = StatusesRequest::builder().only_media(true).build();
     ///     let statuses = client.statuses(&AccountId::new("user-id"), request).await.unwrap();
     /// });
     /// ```
-    pub async fn statuses<'a, 'b: 'a>(
-        &'b self,
-        id: &'b AccountId,
-        request: StatusesRequest<'a>,
+    pub async fn statuses(
+        &self,
+        id: &AccountId,
+        request: &StatusesRequest,
     ) -> Result<Page<Status>> {
         let call_id = Uuid::new_v4();
-        let mut url = format!("{}/api/v1/accounts/{}/statuses", self.data.base, id);
-
-        url += request.to_query_string()?.as_str();
+        let url = format!(
+            "{base}/api/v1/accounts/{id}/statuses?{qs}",
+            base = self.data.base,
+            qs = serde_urlencoded::to_string(request)?
+        );
 
         debug!(url = url, method = stringify!($method), call_id = as_debug!(call_id); "making API request");
-        let response = self.client.get(&url).send().await?;
+        let response = self.authenticated(self.client.get(&url)).send().await?;
+
+        Page::new(self.clone(), response, call_id).await
+    }
+
+    /// Get statuses from the home timeline.
+    ///
+    /// // Example
+    ///
+    /// ```no_run
+    /// use mastodon_async::prelude::*;
+    /// tokio_test::block_on(async {
+    ///     let data = Data::default();
+    ///     let client = Mastodon::from(data);
+    ///     let statuses = client.home_timeline(&Default::default()).await.unwrap();
+    /// });
+    /// ```
+    ///
+    /// ```no_run
+    /// use mastodon_async::prelude::*;
+    /// tokio_test::block_on(async {
+    ///     let data = Data::default();
+    ///     let client = Mastodon::from(data);
+    ///     let request = HomeTimelineRequest::builder().since_id(StatusId::new("status-id")).build();
+    ///     let statuses = client.home_timeline(&request).await.unwrap();
+    /// });
+    /// ```
+    pub async fn home_timeline(&self, request: &HomeTimelineRequest) -> Result<Page<Status>> {
+        let call_id = Uuid::new_v4();
+        let url = format!(
+            "{base}/api/v1/timelines/home?{qs}",
+            base = self.data.base,
+            qs = serde_urlencoded::to_string(request)?
+        );
+
+        debug!(url = url, method = stringify!($method), call_id = as_debug!(call_id); "making API request");
+        let response = self.authenticated(self.client.get(&url)).send().await?;
+
+        Page::new(self.clone(), response, call_id).await
+    }
+
+    /// Get statuses from the public timeline.
+    ///
+    /// // Example
+    ///
+    /// ```no_run
+    /// use mastodon_async::prelude::*;
+    /// tokio_test::block_on(async {
+    ///     let data = Data::default();
+    ///     let client = Mastodon::from(data);
+    ///     let statuses = client.public_timeline(&Default::default()).await.unwrap();
+    /// });
+    /// ```
+    ///
+    /// ```no_run
+    /// use mastodon_async::prelude::*;
+    /// tokio_test::block_on(async {
+    ///     let data = Data::default();
+    ///     let client = Mastodon::from(data);
+    ///     let request = PublicTimelineRequest::builder().since_id(StatusId::new("status-id")).build();
+    ///     let statuses = client.public_timeline(&request).await.unwrap();
+    /// });
+    /// ```
+    pub async fn public_timeline(&self, request: &PublicTimelineRequest) -> Result<Page<Status>> {
+        let call_id = Uuid::new_v4();
+        let url = format!(
+            "{base}/api/v1/timelines/public?{qs}",
+            base = self.data.base,
+            qs = serde_urlencoded::to_string(request)?
+        );
+
+        debug!(url = url, method = stringify!($method), call_id = as_debug!(call_id); "making API request");
+        let response = self.authenticated(self.client.get(&url)).send().await?;
+
+        Page::new(self.clone(), response, call_id).await
+    }
+
+    /// Get statuses from a hashtag timeline.
+    ///
+    /// // Example
+    ///
+    /// ```no_run
+    /// use mastodon_async::prelude::*;
+    /// tokio_test::block_on(async {
+    ///     let data = Data::default();
+    ///     let client = Mastodon::from(data);
+    ///     let statuses = client.hashtag_timeline("cats", &Default::default()).await.unwrap();
+    /// });
+    /// ```
+    ///
+    /// ```no_run
+    /// use mastodon_async::prelude::*;
+    /// tokio_test::block_on(async {
+    ///     let data = Data::default();
+    ///     let client = Mastodon::from(data);
+    ///     let request = HashtagTimelineRequest::builder().since_id(StatusId::new("status-id")).build();
+    ///     let statuses = client.hashtag_timeline("cats", &request).await.unwrap();
+    /// });
+    /// ```
+    pub async fn hashtag_timeline(
+        &self,
+        hashtag: impl AsRef<str> + Display,
+        request: &HashtagTimelineRequest,
+    ) -> Result<Page<Status>> {
+        let call_id = Uuid::new_v4();
+        let url = format!(
+            "{base}/api/v1/timelines/tag/{hashtag}?{qs}",
+            base = self.data.base,
+            qs = serde_urlencoded::to_string(request)?
+        );
+
+        debug!(url = url, method = stringify!($method), call_id = as_debug!(call_id); "making API request");
+        let response = self.authenticated(self.client.get(&url)).send().await?;
+
+        Page::new(self.clone(), response, call_id).await
+    }
+
+    /// Get statuses from a list timeline.
+    ///
+    /// // Example
+    ///
+    /// ```no_run
+    /// use mastodon_async::prelude::*;
+    /// tokio_test::block_on(async {
+    ///     let data = Data::default();
+    ///     let client = Mastodon::from(data);
+    ///     let statuses = client.hashtag_timeline(&ListId::new("list-id"), &Default::default()).await.unwrap();
+    /// });
+    /// ```
+    ///
+    /// ```no_run
+    /// use mastodon_async::prelude::*;
+    /// tokio_test::block_on(async {
+    ///     let data = Data::default();
+    ///     let client = Mastodon::from(data);
+    ///     let request = ListTimelineRequest::builder().since_id(StatusId::new("status-id")).build();
+    ///     let statuses = client.hashtag_timeline(&ListId::new("list-id"), &request).await.unwrap();
+    /// });
+    /// ```
+    pub async fn list_timeline(
+        &self,
+        id: &ListId,
+        request: &ListTimelineRequest,
+    ) -> Result<Page<Status>> {
+        let call_id = Uuid::new_v4();
+        let url = format!(
+            "{base}/api/v1/timelines/list/{id}?{qs}",
+            base = self.data.base,
+            qs = serde_urlencoded::to_string(request)?
+        );
+
+        debug!(url = url, method = stringify!($method), call_id = as_debug!(call_id); "making API request");
+        let response = self.authenticated(self.client.get(&url)).send().await?;
 
         Page::new(self.clone(), response, call_id).await
     }
@@ -576,13 +717,14 @@ impl Mastodon {
     ) -> Result<ProcessedAttachment> {
         let id = attachment.id;
         loop {
-            if let Some(url) = attachment.url {
+            if let (Some(url), Some(preview_url)) = (attachment.url, attachment.preview_url) {
                 return Ok(ProcessedAttachment {
                     id,
                     media_type: attachment.media_type,
                     url,
                     remote_url: attachment.remote_url,
-                    preview_url: attachment.preview_url,
+                    preview_url,
+                    preview_remote_url: attachment.preview_remote_url,
                     text_url: attachment.text_url,
                     meta: attachment.meta,
                     description: attachment.description,

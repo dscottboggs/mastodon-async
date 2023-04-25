@@ -8,7 +8,7 @@ use mastodon_async::Result;
 async fn run() -> Result<()> {
     register::get_mastodon_data()
         .await?
-        .get_home_timeline()
+        .home_timeline(&Default::default())
         .await?
         .items_iter()
         .for_each(|status| async move {
@@ -40,6 +40,6 @@ async fn main() -> Result<()> {
 fn main() {
     println!(
         "examples require the `toml` feature, run this command for this example:\n\ncargo run \
-         --example print_your_profile --features toml\n"
+         --example home_timeline --features toml\n"
     );
 }

@@ -8,13 +8,12 @@ async fn run() -> Result<()> {
     use futures_util::StreamExt;
     use mastodon_async::StatusesRequest;
 
-    let mut filters = StatusesRequest::new();
-    filters.limit(3);
+    let request = StatusesRequest::builder().limit(3).build();
     let mastodon = register::get_mastodon_data().await?;
     let you = mastodon.verify_credentials().await?;
 
     mastodon
-        .statuses(&you.id, filters)
+        .statuses(&you.id, &request)
         .await?
         .items_iter()
         .for_each(|status| async move { println!("{status:?}") })
