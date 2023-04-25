@@ -49,13 +49,15 @@ pub struct Filter {
     /// The action to be taken when a status matches this filter.
     pub filter_action: Action,
     /// The keywords grouped under this filter.
-    pub keywords: Vec<Keyword>,
+    pub keywords: Option<Vec<Keyword>>,
     /// The statuses grouped under this filter.
-    pub statuses: Vec<Status>,
+    pub statuses: Option<Vec<Status>>,
 }
 
 /// Represents the various types of Filter contexts
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, is_enum_variant)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, is_enum_variant,
+)]
 #[serde(rename_all = "lowercase")]
 pub enum FilterContext {
     /// Represents the "home" context
@@ -74,7 +76,7 @@ pub enum FilterContext {
 ///
 /// Please note that the spec requests that any unknown value be interpreted
 /// as "warn".
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, is_enum_variant)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, is_enum_variant)]
 #[serde(rename_all = "lowercase")]
 pub enum Action {
     /// Indicates filtered toots should show up, but with a warning

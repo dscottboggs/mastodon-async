@@ -43,7 +43,7 @@ pub struct Block {
     pub obfuscate: bool,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, is_enum_variant)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, is_enum_variant)]
 #[serde(rename_all = "lowercase")]
 pub enum BlockSeverity {
     /// Account statuses from this domain will be hidden by default

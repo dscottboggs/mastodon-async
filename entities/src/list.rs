@@ -17,7 +17,7 @@ pub struct List {
 }
 
 /// Which replies should be shown in the list.
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq, is_enum_variant)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq, PartialOrd, Ord, is_enum_variant)]
 #[serde(rename_all = "lowercase")]
 pub enum RepliesPolicy {
     /// Show replies to any followed user

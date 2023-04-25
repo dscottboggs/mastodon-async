@@ -36,7 +36,17 @@ pub struct Notification {
 }
 
 /// The type of notification.
-#[derive(Debug, Deserialize, Serialize, Display, EnumString, EnumSetType, is_enum_variant)]
+#[derive(
+    Debug,
+    Deserialize,
+    Serialize,
+    Display,
+    EnumString,
+    EnumSetType,
+    PartialOrd,
+    Ord,
+    is_enum_variant,
+)]
 #[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "snake_case")]
 pub enum NotificationType {

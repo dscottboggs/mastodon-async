@@ -36,7 +36,7 @@ pub struct Report {
     pub target_account: Account,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, is_enum_variant)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, is_enum_variant)]
 #[serde(rename_all = "lowercase")]
 pub enum Category {
     /// Malicious, fake, or repetitive content

@@ -47,7 +47,9 @@ pub struct Card {
 }
 
 /// The type of the preview card.
-#[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq, is_enum_variant)]
+#[derive(
+    Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq, PartialOrd, Ord, is_enum_variant,
+)]
 #[serde(rename_all = "lowercase")]
 pub enum Type {
     /// Link OEmbed

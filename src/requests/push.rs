@@ -54,7 +54,9 @@ pub struct PushRequestData {
 }
 
 /// Controls which users you receive push notifications for.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize, is_enum_variant)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Deserialize, Serialize, is_enum_variant,
+)]
 #[serde(rename_all = "snake_case")]
 pub enum PushRequestPolicy {
     /// Receive push notifications for all users.

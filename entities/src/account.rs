@@ -506,7 +506,7 @@ pub struct Suggestion {
     account: Account,
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, is_enum_variant)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, PartialOrd, Ord, is_enum_variant)]
 #[serde(rename_all = "snake_case")]
 pub enum SuggestionSource {
     Staff,

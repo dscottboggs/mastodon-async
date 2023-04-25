@@ -26,7 +26,9 @@ pub struct IpBlock {
 }
 
 /// The associated policy with some IP block.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, is_enum_variant)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, is_enum_variant,
+)]
 #[serde(rename_all = "snake_case")]
 pub enum Severity {
     /// Any signup from this IP range will create a pending account
