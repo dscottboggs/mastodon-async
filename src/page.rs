@@ -5,18 +5,24 @@ use log::{as_debug, as_serde, debug, error, trace};
 use reqwest::{header::LINK, Response, Url};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-// use url::Url;
 
 macro_rules! pages {
     ($($direction:ident: $fun:ident),*) => {
 
         $(
             doc_comment!(concat!(
-                    "Method to retrieve the ", stringify!($direction), " page of results"),
+                    "Method to retrieve the ", stringify!($direction), " page of results",
+                    "Returns Ok(None) if there is no data in the ", stringify!($direction), " page.\n",
+                "Returns Ok(Some(Vec<T>)) if there are results.\n",
+                "Returns Err(Error) if there is an error.\n",
+                "If there are results, the next and previous page urls are stored.\n",
+                "If there are no results, the next and previous page urls are not stored.\n",
+                "This allows for the next page to be retrieved in the future even when\n",
+                "there are no results.",
+                ),
             pub async fn $fun(&mut self) -> Result<Option<Vec<T>>> {
-                let url = match self.$direction.take() {
-                    Some(s) => s,
-                    None => return Ok(None),
+                let Some(ref url) = self.$direction else {
+                    return Ok(None);
                 };
 
                 debug!(
@@ -25,22 +31,30 @@ macro_rules! pages {
                     direction = stringify!($direction);
                     "making API request"
                 );
-                let url: String = url.into(); // <- for logging
+                let url: String = url.to_string();
                 let response = self.mastodon.authenticated(self.mastodon.client.get(&url)).send().await?;
                 match response.error_for_status() {
                     Ok(response) => {
                         let (prev, next) = get_links(&response, self.call_id)?;
-                        let response = read_response(response).await?;
+                        let response: Vec<T> = read_response(response).await?;
+                        if response.is_empty() && prev.is_none() && next.is_none() {
+                            debug!(
+                                url = url, method = "get", call_id = as_debug!(self.call_id),
+                                direction = stringify!($direction);
+                                "received an empty page with no links"
+                            );
+                            return Ok(None);
+                        }
                         debug!(
-                            url = url, method = "get", next = as_debug!(next),
-                            prev = as_debug!(prev), call_id = as_debug!(self.call_id),
+                            url = url, method = "get",call_id = as_debug!(self.call_id),
+                            direction = stringify!($direction),
+                            prev = as_debug!(prev),
+                            next = as_debug!(next),
                             response = as_serde!(response);
                             "received next pages from API"
                         );
                         self.next = next;
                         self.prev = prev;
-
-
                         Ok(Some(response))
                     }
                     Err(err) => {
@@ -91,8 +105,10 @@ macro_rules! pages {
 #[derive(Debug, Clone)]
 pub struct Page<T: for<'de> Deserialize<'de> + Serialize> {
     mastodon: Mastodon,
-    next: Option<Url>,
-    prev: Option<Url>,
+    /// next url
+    pub next: Option<Url>,
+    /// prev url
+    pub prev: Option<Url>,
     /// Initial set of items
     pub initial_items: Vec<T>,
     pub(crate) call_id: Uuid,
