@@ -69,7 +69,7 @@ macro_rules! define_ids {
     ($doc:literal as $name:ident,) => {
         paste! {
             #[doc = "Wrapper type for " $doc ]
-            #[derive(Debug, Clone, Serialize, PartialEq, Eq)]
+            #[derive(Debug, Clone, Serialize, PartialEq, Eq, PartialOrd, Ord, Hash)]
             #[serde(transparent)]
             pub struct $name(String);
         }
