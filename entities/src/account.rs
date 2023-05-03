@@ -112,9 +112,9 @@ pub struct Account {
     #[serde(default = "Vec::new")]
     pub fields: Vec<MetadataField>,
     /// The number of followers for the account. See also [the API reference](https://docs.joinmastodon.org/entities/Account/#followers_count)
-    pub followers_count: u64,
+    pub followers_count: i64,
     /// The number of accounts the given account is following. See also [the API reference](https://docs.joinmastodon.org/entities/Account/#following_count)
-    pub following_count: u64,
+    pub following_count: i64,
     /// Indicates that the account represents a Group actor. See also [the API reference](https://docs.joinmastodon.org/entities/Account/#group)
     #[serde(default)]
     pub group: bool,
@@ -149,7 +149,7 @@ pub struct Account {
     /// a user
     pub source: Option<Source>,
     /// How many statuses are attached to this account. See also [the API reference](https://docs.joinmastodon.org/entities/Account/#statuses_count)
-    pub statuses_count: u64,
+    pub statuses_count: i64,
     /// An extra attribute returned only when an account is suspended. See also [the API reference](https://docs.joinmastodon.org/entities/Account/#suspended)
     #[serde(default)]
     pub suspended: bool,

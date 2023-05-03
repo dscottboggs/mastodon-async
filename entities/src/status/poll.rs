@@ -20,10 +20,10 @@ pub struct Poll {
     /// Does the poll allow multiple-choice answers?
     pub multiple: bool,
     /// How many votes have been received.
-    pub votes_count: u64,
+    pub votes_count: i64,
     /// How many unique accounts have voted on a multiple-choice poll. `None`
     /// if [`multiple`](Poll::multiple) is `false`.
-    pub voters_count: Option<u64>,
+    pub voters_count: Option<i64>,
     /// Possible answers for the poll.
     pub options: Vec<PollOption>,
     /// Custom emoji to be used for rendering poll options.

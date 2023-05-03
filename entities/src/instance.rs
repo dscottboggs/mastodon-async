@@ -124,14 +124,14 @@ pub struct Activity {
     /// UNIX Timestamp at midnight at the first day of the week.
     pub week: String,
     /// The number of Statuses created since the week began (cast from an integer)
-    #[serde(with = "conversion::string_to::u64")]
-    pub statuses: u64,
+    #[serde(with = "conversion::string_to::i64")]
+    pub statuses: i64,
     /// The number of user logins since the week began (cast from an integer)
-    #[serde(with = "conversion::string_to::u64")]
-    pub logins: u64,
+    #[serde(with = "conversion::string_to::i64")]
+    pub logins: i64,
     /// The number of user registrations since the week began (cast from an integer)
-    #[serde(with = "conversion::string_to::u64")]
-    pub registrations: u64,
+    #[serde(with = "conversion::string_to::i64")]
+    pub registrations: i64,
 }
 
 /// Configured values and limits for this website.
@@ -231,11 +231,11 @@ pub mod v1 {
     #[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq)]
     pub struct Stats {
         /// Total users on this instance.
-        pub user_count: u64,
+        pub user_count: i64,
         /// Total statuses on this instance.
-        pub status_count: u64,
+        pub status_count: i64,
         /// Total domains discovered by this instance.
-        pub domain_count: u64,
+        pub domain_count: i64,
     }
 
     #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]

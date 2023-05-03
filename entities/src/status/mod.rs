@@ -56,11 +56,11 @@ pub struct Status {
     /// Custom emoji to be used when rendering status content.
     pub emojis: Vec<CustomEmoji>,
     /// The number of replies to this status.
-    pub replies_count: u64,
+    pub replies_count: i64,
     /// How many boosts this status has received.
-    pub reblogs_count: u64,
+    pub reblogs_count: i64,
     /// The number of favourites for the status.
-    pub favourites_count: u64,
+    pub favourites_count: i64,
     /// Whether the application client has reblogged the status.
     pub reblogged: Option<bool>,
     /// Whether the application client has favourited the status.
@@ -138,7 +138,7 @@ pub struct FeaturedTag {
     /// A link to all statuses by a user that contain this hashtag.
     pub url: Url,
     /// The number of authored statuses containing this hashtag.
-    pub statuses_count: u64,
+    pub statuses_count: i64,
     /// The timestamp of the last authored status containing this hashtag.
     #[serde(with = "iso8601")]
     pub last_status_at: OffsetDateTime,

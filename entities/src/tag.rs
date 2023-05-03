@@ -26,11 +26,11 @@ pub struct History {
     #[serde(with = "conversion::date_from_timestamp")]
     pub day: Date,
     /// The counted usage of the tag within that day.
-    #[serde(with = "conversion::string_to::u64")]
-    pub uses: u64,
+    #[serde(with = "conversion::string_to::i64")]
+    pub uses: i64,
     /// The total of accounts using the tag within that day.
-    #[serde(with = "conversion::string_to::u64")]
-    pub accounts: u64,
+    #[serde(with = "conversion::string_to::i64")]
+    pub accounts: i64,
 }
 
 #[cfg(test)]
