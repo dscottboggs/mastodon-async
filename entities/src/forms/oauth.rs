@@ -1,8 +1,21 @@
+mod token;
+
 use derive_builder::Builder;
+use derive_is_enum_variant::is_enum_variant;
 use isolang::Language;
 use serde::{Deserialize, Serialize};
 
 use crate::{prelude::Scopes, ClientId};
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, is_enum_variant, Default)]
+#[serde(rename_all = "lowercase")]
+/// The value for the `response_type` field of [`AuthorizationRequest`]. At the
+/// time of writing, only the value `"code"` is valid; if other values become
+/// valid they should be added to this enum.
+pub enum AuthorizationResponseType {
+    #[default]
+    Code,
+}
 
 /// Form to be submitted by [`Mastodon::request_oauth_authorization`]
 ///
@@ -15,8 +28,8 @@ use crate::{prelude::Scopes, ClientId};
 )]
 pub struct AuthorizationRequest {
     /// Should be set equal to `"code"`.
-    #[builder(setter(into), default = r#"String::from("code")"#)]
-    pub response_type: String,
+    #[builder(default)]
+    pub response_type: AuthorizationResponseType,
     /// The client ID, obtained during app registration.
     #[builder(private)]
     pub client_id: ClientId,
@@ -66,7 +79,7 @@ mod tests {
     fn test_builder() {
         let mut builder = AuthorizationRequest::builder(ClientId::new("client_id"));
         let req = builder.build();
-        assert_eq!(req.response_type, "code");
+        assert!(req.response_type.is_code());
         assert_eq!(req.client_id.as_ref(), "client_id");
         assert_eq!(req.redirect_uri, "urn:ietf:wg:oauth:2.0:oob");
         assert!(req.scope.is_none());
@@ -74,16 +87,12 @@ mod tests {
         assert!(req.lang.is_none());
         let esperanto = Language::from_639_1("eo").unwrap();
         builder
-            .response_type("this is actually invalid and you probably shouldn't do this")
             .redirect_uri("redirect_uri")
             .scope(Scopes::read_all())
             .force_login(true)
             .lang(esperanto);
         let req = builder.build();
-        assert_eq!(
-            req.response_type,
-            "this is actually invalid and you probably shouldn't do this"
-        );
+        assert!(req.response_type.is_code()); // can't be anything else as of writing
         assert_eq!(req.client_id.as_ref(), "client_id");
         assert_eq!(req.redirect_uri, "redirect_uri");
         assert_eq!(Some(Scopes::read_all()), req.scope);
