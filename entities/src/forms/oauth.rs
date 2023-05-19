@@ -1,0 +1,93 @@
+use derive_builder::Builder;
+use isolang::Language;
+use serde::{Deserialize, Serialize};
+
+use crate::{prelude::Scopes, ClientId};
+
+/// Form to be submitted by [`Mastodon::request_oauth_authorization`]
+///
+/// See also [the API reference](https://docs.joinmastodon.org/methods/oauth/#authorize)
+#[derive(Clone, Builder, Debug, Serialize, Deserialize, PartialEq)]
+#[builder(
+    custom_constructor,
+    derive(Debug, PartialEq),
+    build_fn(error = "crate::Error", private, name = "try_build")
+)]
+pub struct AuthorizationRequest {
+    /// Should be set equal to `"code"`.
+    #[builder(setter(into), default = r#"String::from("code")"#)]
+    pub response_type: String,
+    /// The client ID, obtained during app registration.
+    #[builder(private)]
+    pub client_id: ClientId,
+    /// Set a URI to redirect the user to. If this parameter is set to
+    /// `"urn:ietf:wg:oauth:2.0:oob"` (the default) then the authorization code
+    /// will be shown instead. Must match one of the `redirect_uris` declared
+    /// during app registration.
+    #[builder(setter(into), default = r#"String::from("urn:ietf:wg:oauth:2.0:oob")"#)]
+    pub redirect_uri: String,
+    /// List of requested OAuth scopes, separated by spaces (or by pluses, if
+    /// using query parameters). Must be a subset of scopes declared during app
+    /// registration. If not provided, defaults to read.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(setter(strip_option), default)]
+    pub scope: Option<Scopes>,
+    /// Forces the user to re-login, which is necessary for authorizing with
+    /// multiple accounts from the same instance.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(setter(strip_option), default)]
+    pub force_login: Option<bool>,
+    /// The ISO 639-1 two-letter language code to use while rendering the authorization form.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(setter(strip_option), default)]
+    pub lang: Option<Language>,
+}
+
+impl AuthorizationRequest {
+    pub fn builder(client_id: ClientId) -> AuthorizationRequestBuilder {
+        let mut it = AuthorizationRequestBuilder::create_empty();
+        it.client_id(client_id);
+        it
+    }
+}
+
+impl AuthorizationRequestBuilder {
+    pub fn build(&self) -> AuthorizationRequest {
+        self.try_build()
+            .expect("One or more required fields are missing!")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_builder() {
+        let mut builder = AuthorizationRequest::builder(ClientId::new("client_id"));
+        let req = builder.build();
+        assert_eq!(req.response_type, "code");
+        assert_eq!(req.client_id.as_ref(), "client_id");
+        assert_eq!(req.redirect_uri, "urn:ietf:wg:oauth:2.0:oob");
+        assert!(req.scope.is_none());
+        assert!(req.force_login.is_none());
+        assert!(req.lang.is_none());
+        let esperanto = Language::from_639_1("eo").unwrap();
+        builder
+            .response_type("this is actually invalid and you probably shouldn't do this")
+            .redirect_uri("redirect_uri")
+            .scope(Scopes::read_all())
+            .force_login(true)
+            .lang(esperanto);
+        let req = builder.build();
+        assert_eq!(
+            req.response_type,
+            "this is actually invalid and you probably shouldn't do this"
+        );
+        assert_eq!(req.client_id.as_ref(), "client_id");
+        assert_eq!(req.redirect_uri, "redirect_uri");
+        assert_eq!(Some(Scopes::read_all()), req.scope);
+        assert_eq!(req.force_login, Some(true));
+        assert_eq!(req.lang, Some(esperanto));
+    }
+}
