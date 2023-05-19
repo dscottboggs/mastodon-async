@@ -331,8 +331,7 @@ impl Mastodon {
         let request = request.build();
         let url = &self.route("/api/v1/push/subscription");
         debug!(
-            url, method = stringify!($method),
-            ?call_id, post_body = ?request,
+            url = url, method = "post", ?call_id, post_body = ?request,
             "making API request"
         );
         let response = self.client.post(url).json(&request).send().await?;
@@ -435,6 +434,37 @@ impl Mastodon {
                 Err(err.into())
             }
         }
+    }
+
+    /// Displays an authorization form to the user. If approved, it will create
+    /// and return an authorization code, then redirect to the desired
+    /// redirect_uri, or show the authorization code if urn:ietf:wg:oauth:2.0:oob
+    /// was requested. The authorization code can be used while requesting a
+    /// token to obtain access to user-level methods.
+    ///
+    /// ### Response
+    /// The authorization code will be returned as a query parameter named code.
+    ///
+    /// ```text
+    /// redirect_uri?code=qDFUEaYrRK5c-HNmTCJbAzazwLRInJ7VHFat0wcMgCU
+    /// ```
+    ///
+    /// See also [the API reference](https://docs.joinmastodon.org/methods/oauth/#authorize)
+    pub async fn request_oauth_authorization(
+        &self,
+        request: forms::oauth::AuthorizationRequest,
+    ) -> Result<String> {
+        let call_id = Uuid::new_v4();
+        let query = serde_urlencoded::to_string(request)?;
+        let url = self.route(format!("/oauth/authorize?{query}"));
+        debug!(
+            url = url, method = "get",
+            call_id = as_debug!(call_id), query = query;
+            "making API request"
+        );
+        let response = self.client.get(url).send().await?;
+        trace!(status = log_serde!(response Status), headers = log_serde!(response Headers); "API response received");
+        Ok(response.text().await?)
     }
 }
 
