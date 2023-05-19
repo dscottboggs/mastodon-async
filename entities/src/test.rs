@@ -1,4 +1,4 @@
-#[macro_export(crate)]
+#[macro_export]
 macro_rules! serde_value_test {
     ($fn_name:ident($ty:ty): $example:literal) => {
         #[test]

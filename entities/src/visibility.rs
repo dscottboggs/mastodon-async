@@ -3,7 +3,7 @@ use serde::Deserialize;
 use serde::Serialize;
 
 /// The visibility of a status.
-#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq, is_enum_variant)]
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq, is_enum_variant, Default)]
 #[serde(rename_all = "lowercase")]
 pub enum Visibility {
     /// A Direct message to a user
@@ -13,13 +13,8 @@ pub enum Visibility {
     /// Not shown in public timelines
     Unlisted,
     /// Posted to public timelines
+    #[default]
     Public,
-}
-
-impl Default for Visibility {
-    fn default() -> Self {
-        Visibility::Public
-    }
 }
 
 impl std::str::FromStr for Visibility {
