@@ -1,30 +1,28 @@
 macro_rules! methods {
     ($($method:ident and $method_with_call_id:ident,)+) => {
         $(
-            doc_comment! {
-                concat!("Make a ", stringify!($method), " API request, and deserialize the result into T"),
-                async fn $method<T: for<'de> serde::Deserialize<'de> + serde::Serialize>(&self, url: impl AsRef<str>) -> Result<T>
-                {
-                    let call_id = uuid::Uuid::new_v4();
-                    self.$method_with_call_id(url, call_id).await
-                }
+            #[allow(dead_code)]
+            #[doc=concat!("Make a ", stringify!($method), " API request, and deserialize the result into T")]
+            async fn $method<T: for<'de> serde::Deserialize<'de> + serde::Serialize>(&self, url: impl AsRef<str>) -> Result<T>
+            {
+                let call_id = uuid::Uuid::new_v4();
+                self.$method_with_call_id(url, call_id).await
             }
 
-            doc_comment! {
-                concat!(
+            #[allow(dead_code)]
+            #[doc=concat!(
                     "Make a ", stringify!($method), " API request, and deserialize the result into T.\n\n",
                     "Logging will use the provided UUID, rather than generating one before making the request.",
-                ),
-                async fn $method_with_call_id<T: for<'de> serde::Deserialize<'de> + serde::Serialize>(&self, url: impl AsRef<str>, call_id: Uuid) -> Result<T>
-                {
+            )]
+            async fn $method_with_call_id<T: for<'de> serde::Deserialize<'de> + serde::Serialize>(&self, url: impl AsRef<str>, call_id: Uuid) -> Result<T>
+            {
 
-                    use log::{debug, as_debug};
+                use log::{debug, as_debug};
 
-                    let url = url.as_ref();
-                    debug!(url = url, method = stringify!($method), call_id = as_debug!(call_id); "making API request");
-                    let response = self.authenticated(self.client.$method(url)).header("Accept", "application/json").send().await?;
-                    read_response(response).await
-                }
+                let url = url.as_ref();
+                debug!(url = url, method = stringify!($method), call_id = as_debug!(call_id); "making API request");
+                let response = self.authenticated(self.client.$method(url)).header("Accept", "application/json").send().await?;
+                read_response(response).await
             }
          )+
     };
