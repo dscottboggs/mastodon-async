@@ -33,7 +33,7 @@ macro_rules! define_ids {
                 write!(f, "{}", self.0)
             }
         }
-        
+
         impl From<$from_t> for $name {
             fn from(it: $from_t) -> $name {
                 $name(it)
