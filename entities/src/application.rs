@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::VapidKey;
+use crate::{ClientId, ClientSecret, VapidKey};
 
 /// Represents an application that interfaces with the REST API to access
 /// accounts or post statuses.
@@ -14,9 +14,26 @@ pub struct Application {
     /// to [`Subscription::server_key`](crate::push::Subscription::server_key)
     pub vapid_key: VapidKey,
     /// Client ID key, to be used for obtaining OAuth tokens
-    pub client_id: Option<String>,
+    pub client_id: Option<ClientId>,
     ///  Client secret key, to be used for obtaining OAuth tokens
-    pub client_secret: Option<String>,
+    pub client_secret: Option<ClientSecret>,
+}
+
+/// Represents an authenticated application that interfaces with the REST API to
+/// access accounts or post statuses.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct AuthenticatedApplication {
+    /// The name of your application.
+    pub name: String,
+    /// The website associated with your application
+    pub website: Option<String>,
+    /// Used for Push Streaming API. Returned with POST /api/v1/apps. Equivalent
+    /// to [`Subscription::server_key`](crate::push::Subscription::server_key)
+    pub vapid_key: VapidKey,
+    /// Client ID key, to be used for obtaining OAuth tokens
+    pub client_id: ClientId,
+    ///  Client secret key, to be used for obtaining OAuth tokens
+    pub client_secret: ClientSecret,
 }
 
 #[cfg(test)]

@@ -643,3 +643,24 @@ tokio_test::block_on(async {
     };
     () => {}
 }
+
+macro_rules! query_form_route {
+    {
+        $desc:tt ($method:ident $form:ident: $form_type:ty) $fn_name:ident: $route:literal => $return_type:ty,
+        $($desc_rest:tt ($method_rest:ident $form_rest:ident: $form_type_rest:ty) $fn_name_rest:ident: $route_rest:literal => $return_type_rest:ty,)*
+    } => {
+        #[doc = $desc]
+        pub async fn $fn_name(&self, $form: $form_type) -> Result<$return_type> {
+            let form = serde_urlencoded::to_string($form)?;
+            let url = self.route(concat!("/api/v1/", $route));
+
+            self.$method(format!("{url}?{form}")).await
+        }
+
+        $(
+            query_form_route!(
+                $desc_rest ($method_rest $form_rest: $form_type_rest) $fn_name_rest: $route_rest => $return_type_rest,
+            );
+        )*
+    };
+}

@@ -1,11 +1,12 @@
-mod token;
+pub mod token;
+pub use token::{TokenRequest, TokenRequestBuilder};
 
 use derive_builder::Builder;
 use derive_is_enum_variant::is_enum_variant;
 use isolang::Language;
 use serde::{Deserialize, Serialize};
 
-use crate::{prelude::Scopes, ClientId};
+use crate::{error::Result, prelude::Scopes, ClientId, Error};
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, is_enum_variant, Default)]
 #[serde(rename_all = "lowercase")]
@@ -54,13 +55,26 @@ pub struct AuthorizationRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(setter(strip_option), default)]
     pub lang: Option<Language>,
+
+    #[serde(skip)]
+    #[builder(private)]
+    pub instance: String,
 }
 
 impl AuthorizationRequest {
-    pub fn builder(client_id: ClientId) -> AuthorizationRequestBuilder {
+    pub fn builder(instance: String, client_id: ClientId) -> AuthorizationRequestBuilder {
         let mut it = AuthorizationRequestBuilder::create_empty();
-        it.client_id(client_id);
+        it.client_id(client_id).instance(instance);
         it
+    }
+
+    /// The URL the user needs to visit to authorize the application.
+    pub fn url(&self) -> Result<String> {
+        let base = &self.instance;
+        match serde_urlencoded::to_string(self) {
+            Ok(query) => Ok(format!("{base}?{query}")),
+            Err(error) => Err(Error::UrlEncodingError(error)),
+        }
     }
 }
 
@@ -77,7 +91,8 @@ mod tests {
 
     #[test]
     fn test_builder() {
-        let mut builder = AuthorizationRequest::builder(ClientId::new("client_id"));
+        let mut builder =
+            AuthorizationRequest::builder("https://tams.tech".into(), ClientId::new("client_id"));
         let req = builder.build();
         assert!(req.response_type.is_code());
         assert_eq!(req.client_id.as_ref(), "client_id");

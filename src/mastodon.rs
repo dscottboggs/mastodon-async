@@ -2,14 +2,16 @@ use std::{borrow::Cow, ops::Deref, path::Path, sync::Arc};
 
 use crate::{
     as_value,
-    entities::{account::Account, prelude::*, report::Report, status::Status, Empty},
+    entities::{
+        account::Account, application::AuthenticatedApplication, attachment::ProcessedAttachment,
+        prelude::*, report::Report, status::Status, Empty,
+    },
     errors::{Error, Result},
     helpers::read_response::read_response,
     polling_time::PollingTime,
     AddFilterRequest, AddPushRequest, Data, NewStatus, Page, StatusesRequest, UpdatePushRequest,
 };
 use futures::TryStream;
-use mastodon_async_entities::attachment::ProcessedAttachment;
 use reqwest::{multipart::Part, Client, RequestBuilder};
 use tracing::{debug, error, trace};
 use url::Url;
@@ -146,6 +148,11 @@ impl Mastodon {
         stream_list(list: impl AsRef<str>, like "12345")@"list",
         "Updates to direct conversations."
         stream_direct@"direct",
+    }
+
+    query_form_route! {
+        "Obtain an access token, to be used during API calls that are not public."
+        (post token_form: forms::oauth::TokenRequest) get_auth_token: "oauth/token" => Token,
     }
 
     /// A new instance.
@@ -469,7 +476,7 @@ impl Mastodon {
 }
 
 impl MastodonUnauthenticated {
-    methods![get and get_with_call_id,];
+    methods![get and get_with_call_id, post and post_with_call_id, ];
 
     /// Create a new client for unauthenticated requests to a given Mastodon
     /// instance.
@@ -487,30 +494,29 @@ impl MastodonUnauthenticated {
         })
     }
 
-    fn route(&self, url: &str) -> Result<Url> {
-        Ok(self.base.join(url)?)
+    fn route(&self, url: &str) -> String {
+        format!("{}{url}", self.base.as_str())
+    }
+
+    route! {
+        (post (app: forms::Application,)) create_app: "apps" => AuthenticatedApplication,
     }
 
     /// GET /api/v1/statuses/:id
     pub async fn get_status(&self, id: &StatusId) -> Result<Status> {
-        let route = self.route("/api/v1/statuses")?;
-        let route = route.join(id.as_ref())?;
+        let route = self.route(&format!("/api/v1/statuses/{id}"));
         self.get(route.as_str()).await
     }
 
     /// GET /api/v1/statuses/:id/context
     pub async fn get_context(&self, id: &StatusId) -> Result<Context> {
-        let route = self.route("/api/v1/statuses")?;
-        let route = route.join(id.as_ref())?;
-        let route = route.join("context")?;
+        let route = self.route(&format!("/api/v1/statuses/{id}/context"));
         self.get(route.as_str()).await
     }
 
     /// GET /api/v1/statuses/:id/card
     pub async fn get_card(&self, id: &StatusId) -> Result<Card> {
-        let route = self.route("/api/v1/statuses")?;
-        let route = route.join(id.as_ref())?;
-        let route = route.join("card")?;
+        let route = self.route(&format!("/api/v1/statuses/{id}/card"));
         self.get(route.as_str()).await
     }
 
@@ -518,6 +524,18 @@ impl MastodonUnauthenticated {
     /// `RequestBuilder` unmodified.
     fn authenticated(&self, request: RequestBuilder) -> RequestBuilder {
         request
+    }
+
+    /// Return an authenticated [`Mastodon`] client.
+    pub fn authorized(&self, app: AuthenticatedApplication, oauth_token: OAuthToken) -> Mastodon {
+        let data = Data::builder(
+            self.base.as_ref().to_owned(),
+            app.client_id,
+            app.client_secret,
+            oauth_token.as_ref(),
+        )
+        .build();
+        Mastodon::new(reqwest::Client::new(), data)
     }
 }
 impl Deref for Mastodon {

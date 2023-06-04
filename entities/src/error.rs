@@ -9,4 +9,8 @@ pub enum Error {
     UnknownScope(String),
     #[error(transparent)]
     Builder(#[from] derive_builder::UninitializedFieldError),
+    #[error(transparent)]
+    UrlEncodingError(serde_urlencoded::ser::Error),
 }
+
+pub type Result<T> = std::result::Result<T, Error>;
