@@ -4,9 +4,8 @@ use tracing::{debug, error, trace};
 use uuid::Uuid;
 
 use crate::{
-    entities::forms, entities::prelude::*, helpers::read_response::read_response, Data,
+    as_value, entities::forms, entities::prelude::*, helpers::read_response::read_response, Data,
     Error, Mastodon, Result,
-    as_value,
 };
 
 const DEFAULT_REDIRECT_URI: &str = "urn:ietf:wg:oauth:2.0:oob";

@@ -2,13 +2,7 @@ use std::{borrow::Cow, ops::Deref, path::Path, sync::Arc};
 
 use crate::{
     as_value,
-    entities::{
-        account::Account,
-        prelude::*,
-        report::Report,
-        status::Status,
-        Empty,
-    },
+    entities::{account::Account, prelude::*, report::Report, status::Status, Empty},
     errors::{Error, Result},
     helpers::read_response::read_response,
     polling_time::PollingTime,
