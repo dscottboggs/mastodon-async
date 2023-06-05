@@ -9,7 +9,6 @@ use url::Url;
 ///
 /// See also [the API documentation](https://docs.joinmastodon.org/entities/MediaAttachment/)
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
-#[serde(deny_unknown_fields)]
 pub struct Attachment {
     /// ID of the attachment.
     pub id: AttachmentId,
