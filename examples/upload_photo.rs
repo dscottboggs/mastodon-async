@@ -2,11 +2,24 @@
 #![cfg_attr(not(feature = "toml"), allow(unused_imports))]
 mod register;
 use mastodon_async::{prelude::*, Result};
+use std::fs::File;
+use tracing_subscriber::{fmt, EnvFilter};
 
 #[cfg(feature = "toml")]
 async fn run() -> Result<()> {
+    let file = File::create("logfile.txt")?;
+    let (non_blocking, _guard) = tracing_appender::non_blocking(file);
+    let filter = EnvFilter::default()
+        .add_directive("hyper=info".parse().unwrap())
+        .add_directive("reqwest=info".parse().unwrap())
+        .add_directive("mastodon_async=trace".parse().unwrap());
+    fmt()
+        .with_env_filter(filter)
+        .with_writer(non_blocking)
+        .json()
+        .init();
+
     use register::bool_input;
-    femme::with_level(femme::LevelFilter::Info);
     let mastodon = register::get_mastodon_data().await?;
     let input = register::read_line("Enter the path to the photo you'd like to post: ")?;
     let description = register::read_line("describe the media?  ")?;
