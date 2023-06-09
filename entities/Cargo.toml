@@ -25,7 +25,7 @@ version = "1"
 features = ["derive"]
 
 [dependencies.time]
-version = "0.3"
+version = ">=0.3.16"
 features = ["parsing", "serde", "formatting"]
 
 [dev-dependencies]
