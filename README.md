@@ -25,6 +25,14 @@ Alternatively, run the following command:
 $ cargo add mastodon-async
 ~~~
 
+### Use Rustls instead of OpenSSL
+
+To use Rustls instead of OpenSSL for HTTPS request, define the dependency as follows
+
+```toml
+mastodon-async = { version = "1", default-features = false, features = ["rustls-tls"] }
+```
+
 ## A Note on Debugging
 This library offers structured logging. To get better information about bugs or
 how something is working, I recommend adding the femme crate as a dependency,
