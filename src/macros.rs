@@ -97,6 +97,7 @@ macro_rules! paged_routes {
                 let qs = serde_urlencoded::to_string(&qs_data)?;
 
                 let url = format!(concat!("/api/v1/", $url, "?{}"), &qs);
+                let url = self.route(url);
 
                 debug!(url = url, method = "get", call_id = as_debug!(call_id); "making API request");
 
