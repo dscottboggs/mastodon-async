@@ -56,6 +56,7 @@ impl Mastodon {
 
     paged_routes! {
         (get) favourites: "favourites" => Status,
+        (get) bookmarks: "bookmarks" => Status,
         (get) blocks: "blocks" => Account,
         (get) domain_blocks: "domain_blocks" => String,
         (get) follow_requests: "follow_requests" => Account,
