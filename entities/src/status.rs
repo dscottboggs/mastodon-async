@@ -62,8 +62,61 @@ pub struct Status {
     pub language: Option<String>,
     /// Whether this is the pinned status for the account that posted it.
     pub pinned: Option<bool>,
+    /// If the current token has an authorized user: Have you muted notifications
+    pub muted: Option<bool>,
+    /// If the current token has an authorized user: Have you bookmarked this status?
+    pub bookmarked: Option<bool>,
+    /// Plain-text source of a status. Returned instead of content when status is deleted, so the user may redraft from the source text without the client having to reverse-engineer the original text from the HTML content.
+    pub text: Option<String>,
+    /// The poll attached to the status.
+    pub poll: Option<Poll>,
+    /// If the current token has an authorized user: The filter and keywords that matched this status.
+    pub filtered: Option<Vec<FilterResult>>,
 }
 
+/// A Filter from the status
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct FilterResult {
+    /// The filter that was matched.
+    pub filter: Filter,
+    /// The keyword within the filter that was matched.
+    pub keyword_mattches: Option<Vec<String>>,
+    /// The status ID within the filter that was matched.
+    pub status_matches: Option<String>,
+}
+
+/// A poll from the status
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+
+pub struct Poll {
+    /// The ID of the poll in the database.
+    pub id: StatusId,
+    /// Is the poll currently expired?
+    pub expired: bool,
+    /// Does the poll allow multiple-choice answers?
+    pub multiple: bool,
+    /// How many votes have been received.
+    pub votes_count: u64,
+    /// How many unique accounts have voted on a multiple-choice poll.
+    pub vorets_count: Option<u64>,
+    /// Possible answers for the poll.
+    pub options: Vec<PollOption>,
+    /// Custom emoji to be used for rendering poll options.
+    pub emojis: Vec<Emoji>,
+    /// When called with a user token, has the authorized user voted?
+    pub voted: Option<bool>,
+    /// When called with a user token, which options has the authorized user chosen? Contains an array of index values for options
+    pub omw_votes: Option<Vec<u64>>,
+}
+
+/// Option in a poll
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct PollOption {
+    /// The text value of the poll option.
+    pub title: String,
+    /// The total number of received votes for this option.
+    votes_count: Option<u64>,
+}
 /// A mention of another user.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Mention {
