@@ -46,7 +46,7 @@ impl From<Data> for Mastodon {
     }
 }
 impl Mastodon {
-    methods![get and get_with_call_id, post and post_with_call_id, delete and delete_with_call_id,];
+    methods![get and get_with_call_id, post and post_with_call_id, put and put_with_call_id, delete and delete_with_call_id,];
 
     paged_routes! {
         (get) favourites: "favourites" => Status,
@@ -192,6 +192,22 @@ impl Mastodon {
 
         read_response(response).await
     }
+
+    /// Edit existing status
+    pub async fn edit_status(&self, id: &StatusId, status: NewStatus) -> Result<Status> {
+        let route = self.route(format!("/api/v1/statuses/{}", id));
+        let response = self
+            .authenticated(self.client.put(route))
+            .json(&status)
+            .send()
+            .await?;
+        debug!(
+            response = as_value!(response, Response),
+            "received API response"
+        );
+        read_response(response).await
+    }
+
 
     /// Post a new status to the account.
     pub async fn new_status(&self, status: NewStatus) -> Result<Status> {
