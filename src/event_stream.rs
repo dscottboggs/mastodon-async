@@ -83,6 +83,6 @@ pub(crate) fn make_event(lines: &[String]) -> Result<Event> {
             Event::Delete(data)
         }
         "filters_changed" => Event::FiltersChanged,
-        _ => return Err(Error::Other(format!("Unknown event `{}`", event))),
+        _ => return Err(Error::Other(format!("Unknown event `{event}`"))),
     })
 }

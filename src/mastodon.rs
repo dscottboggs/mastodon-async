@@ -171,7 +171,7 @@ impl Mastodon {
 
     /// PUT /api/v1/filters/:id
     pub async fn update_filter(&self, id: &str, request: &mut AddFilterRequest) -> Result<Filter> {
-        let url = self.route(format!("/api/v1/filters/{}", id));
+        let url = self.route(format!("/api/v1/filters/{id}"));
         let response = self.client.put(&url).json(&request).send().await?;
 
         read_response(response).await
@@ -213,9 +213,9 @@ impl Mastodon {
     pub async fn get_tagged_timeline(&self, hashtag: String, local: bool) -> Result<Vec<Status>> {
         let base = "/api/v1/timelines/tag/";
         let url = if local {
-            self.route(format!("{}{}?local=1", base, hashtag))
+            self.route(format!("{base}{hashtag}?local=1"))
         } else {
-            self.route(format!("{}{}", base, hashtag))
+            self.route(format!("{base}{hashtag}"))
         };
 
         self.get(url).await
@@ -251,7 +251,7 @@ impl Mastodon {
         request: StatusesRequest<'a>,
     ) -> Result<Page<Status>> {
         let call_id = Uuid::new_v4();
-        let mut url = format!("{}/api/v1/accounts/{}/statuses", self.data.base, id);
+        let mut url = format!("{}/api/v1/accounts/{id}/statuses", self.data.base);
 
         url += request.to_query_string()?.as_str();
 

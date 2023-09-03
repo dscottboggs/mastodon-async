@@ -15,8 +15,7 @@ pub struct CanonicalEmailBlock {
 
 impl PartialOrd for CanonicalEmailBlock {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        self.canonical_email_hash
-            .partial_cmp(&other.canonical_email_hash)
+        Some(self.cmp(other))
     }
 }
 impl Ord for CanonicalEmailBlock {

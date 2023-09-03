@@ -50,7 +50,7 @@ impl Serialize for Scopes {
     where
         S: Serializer,
     {
-        let repr = format!("{}", self);
+        let repr = format!("{self}");
         serializer.serialize_str(&repr)
     }
 }
@@ -88,7 +88,7 @@ impl Scopes {
     /// use mastodon_async_entities::prelude::*;
     ///
     /// let scope = Scopes::all();
-    /// assert_eq!(&format!("{}", scope), "read write follow push");
+    /// assert_eq!(&format!("{scope}"), "read write follow push");
     /// ```
     pub fn all() -> Scopes {
         Scopes::read_all() | Scopes::write_all() | Scopes::follow() | Scopes::push()
@@ -100,7 +100,7 @@ impl Scopes {
     /// use mastodon_async_entities::prelude::*;
     ///
     /// let scope = Scopes::read_all();
-    /// assert_eq!(&format!("{}", scope), "read");
+    /// assert_eq!(&format!("{scope}"), "read");
     /// ```
     pub fn read_all() -> Scopes {
         Scopes::_read(None)
@@ -112,7 +112,7 @@ impl Scopes {
     /// use mastodon_async_entities::auth::scopes::{Read, Scopes};
     ///
     /// let scope = Scopes::read(Read::Accounts);
-    /// assert_eq!(&format!("{}", scope), "read:accounts");
+    /// assert_eq!(&format!("{scope}"), "read:accounts");
     /// ```
     pub fn read(subscope: Read) -> Scopes {
         Scopes::_read(Some(subscope))
@@ -124,7 +124,7 @@ impl Scopes {
     /// use mastodon_async_entities::prelude::*;
     ///
     /// let scope = Scopes::write_all();
-    /// assert_eq!(&format!("{}", scope), "write");
+    /// assert_eq!(&format!("{scope}"), "write");
     /// ```
     pub fn write_all() -> Scopes {
         Scopes::_write(None)
@@ -136,7 +136,7 @@ impl Scopes {
     /// use mastodon_async_entities::auth::scopes::{Scopes, Write};
     ///
     /// let scope = Scopes::write(Write::Accounts);
-    /// assert_eq!(&format!("{}", scope), "write:accounts");
+    /// assert_eq!(&format!("{scope}"), "write:accounts");
     /// ```
     pub fn write(subscope: Write) -> Scopes {
         Scopes::_write(Some(subscope))
@@ -148,7 +148,7 @@ impl Scopes {
     /// use mastodon_async_entities::prelude::*;
     ///
     /// let scope = Scopes::follow();
-    /// assert_eq!(&format!("{}", scope), "follow");
+    /// assert_eq!(&format!("{scope}"), "follow");
     /// ```
     pub fn follow() -> Scopes {
         Scopes::new(Scope::Follow)
@@ -160,7 +160,7 @@ impl Scopes {
     /// use mastodon_async_entities::prelude::*;
     ///
     /// let scope = Scopes::push();
-    /// assert_eq!(&format!("{}", scope), "push");
+    /// assert_eq!(&format!("{scope}"), "push");
     /// ```
     pub fn push() -> Scopes {
         Scopes::new(Scope::Push)
@@ -343,7 +343,7 @@ impl fmt::Display for Scope {
             Follow => "follow",
             Push => "push",
         };
-        write!(f, "{}", s)
+        write!(f, "{s}")
     }
 }
 
@@ -410,8 +410,8 @@ impl PartialOrd for Read {
 
 impl Ord for Read {
     fn cmp(&self, other: &Read) -> Ordering {
-        let a = format!("{:?}", self);
-        let b = format!("{:?}", other);
+        let a = format!("{self:?}");
+        let b = format!("{other:?}");
         a.cmp(&b)
     }
 }
@@ -495,8 +495,8 @@ impl PartialOrd for Write {
 
 impl Ord for Write {
     fn cmp(&self, other: &Write) -> Ordering {
-        let a = format!("{:?}", self);
-        let b = format!("{:?}", other);
+        let a = format!("{self:?}");
+        let b = format!("{other:?}");
         a.cmp(&b)
     }
 }
@@ -694,7 +694,7 @@ mod tests {
         ];
 
         for (a, b) in &tests {
-            assert_eq!(&format!("{}", a), b);
+            assert_eq!(&format!("{a}"), b);
         }
     }
 
@@ -710,7 +710,7 @@ mod tests {
 
         for (a, b) in &tests {
             let ser = serde_json::to_string(&a).expect("Couldn't serialize Scopes");
-            let expected = format!("\"{}\"", b);
+            let expected = format!("\"{b}\"");
             assert_eq!(&ser, &expected);
 
             let des: Scopes = serde_json::from_str(&ser).expect("Couldn't deserialize Scopes");
@@ -762,7 +762,7 @@ mod tests {
     fn test_scopes_str_round_trip() {
         let original = "read write follow push";
         let scopes = Scopes::from_str(original).expect("Couldn't convert to Scopes");
-        let result = format!("{}", scopes);
+        let result = format!("{scopes}");
         assert_eq!(original, result);
     }
 }

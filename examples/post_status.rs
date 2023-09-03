@@ -12,7 +12,7 @@ async fn run() -> Result<()> {
         .status(register::read_line(
             "Enter a status to post privately (enter to send): ",
         )?)
-        .visibility(Visibility::Unlisted)
+        .visibility(Visibility::Private)
         .language(Language::Eng)
         .build()?;
 
