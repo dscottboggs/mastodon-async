@@ -7,16 +7,26 @@
 //! use futures_util::StreamExt;
 //!
 //! tokio_test::block_on(async {
-//!     let registration = Registration::new("https://botsin.space")
-//!         .client_name("mastodon-async_test")
+//!     let instance = "https://botsin.space";
+//!     let client = MastodonUnauthenticated::new(instance).unwrap();
+//!     let app = forms::Application::builder()
+//!         .client_name("mastodon-async-example")
+//!         .scopes(Scopes::all())
+//!         .website("https://github.com/dscottboggs/mastodon-async")
 //!         .build()
-//!         .await
 //!         .unwrap();
-//!     let mastodon = cli::authenticate(registration).await.unwrap();
+//!     let app = client.create_app(app).await.unwrap();
+//!     let authorization_request =
+//!         forms::oauth::AuthorizationRequest::builder(instance.into(), app.client_id.clone())
+//!             .force_login(true)
+//!             .scope(Scopes::all())
+//!             .build();
+//!     let auth = cli::get_oauth_token(authorization_request).await.unwrap();
+//!     let client = client.authorized(app, auth);
 //!
 //!     println!(
 //!         "{:?}",
-//!         mastodon
+//!         client
 //!             .get_home_timeline()
 //!             .await
 //!             .unwrap()
@@ -122,8 +132,8 @@ pub mod polling_time;
 /// Automatically import the things you need
 pub mod prelude {
     pub use crate::{
-        entities::prelude::*, Data, Mastodon, NewStatus, NewStatusBuilder, Registration,
-        StatusesRequest, Visibility,
+        entities::prelude::*, Data, Mastodon, MastodonUnauthenticated, NewStatus, NewStatusBuilder,
+        Registration, StatusesRequest, Visibility,
     };
     // Legacy alias; TODO remove for 2.0
     pub use super::entities::status::NewStatusBuilder as StatusBuilder;

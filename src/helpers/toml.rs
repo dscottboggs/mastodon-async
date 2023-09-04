@@ -96,8 +96,8 @@ mod tests {
             desered,
             Data {
                 base: "https://example.com".into(),
-                client_id: "adbc01234".into(),
-                client_secret: "0987dcba".into(),
+                client_id: String::from("adbc01234").into(),
+                client_secret: String::from("0987dcba").into(),
                 redirect: "urn:ietf:wg:oauth:2.0:oob".into(),
                 token: "fedc5678".into(),
             }
@@ -111,8 +111,8 @@ mod tests {
             desered,
             Data {
                 base: "https://example.com".into(),
-                client_id: "adbc01234".into(),
-                client_secret: "0987dcba".into(),
+                client_id: String::from("adbc01234").into(),
+                client_secret: String::from("0987dcba").into(),
                 redirect: "urn:ietf:wg:oauth:2.0:oob".into(),
                 token: "fedc5678".into(),
             }
@@ -127,8 +127,8 @@ mod tests {
             desered,
             Data {
                 base: "https://example.com".into(),
-                client_id: "adbc01234".into(),
-                client_secret: "0987dcba".into(),
+                client_id: String::from("adbc01234").into(),
+                client_secret: String::from("0987dcba").into(),
                 redirect: "urn:ietf:wg:oauth:2.0:oob".into(),
                 token: "fedc5678".into(),
             }
@@ -143,8 +143,8 @@ mod tests {
             desered,
             Data {
                 base: "https://example.com".into(),
-                client_id: "adbc01234".into(),
-                client_secret: "0987dcba".into(),
+                client_id: String::from("adbc01234").into(),
+                client_secret: String::from("0987dcba").into(),
                 redirect: "urn:ietf:wg:oauth:2.0:oob".into(),
                 token: "fedc5678".into(),
             }
@@ -154,8 +154,8 @@ mod tests {
     fn test_to_string() {
         let data = Data {
             base: "https://example.com".into(),
-            client_id: "adbc01234".into(),
-            client_secret: "0987dcba".into(),
+            client_id: String::from("adbc01234").into(),
+            client_secret: String::from("0987dcba").into(),
             redirect: "urn:ietf:wg:oauth:2.0:oob".into(),
             token: "fedc5678".into(),
         };
@@ -167,8 +167,8 @@ mod tests {
     fn test_to_vec() {
         let data = Data {
             base: "https://example.com".into(),
-            client_id: "adbc01234".into(),
-            client_secret: "0987dcba".into(),
+            client_id: String::from("adbc01234").into(),
+            client_secret: String::from("0987dcba").into(),
             redirect: "urn:ietf:wg:oauth:2.0:oob".into(),
             token: "fedc5678".into(),
         };
@@ -180,8 +180,8 @@ mod tests {
     fn test_to_writer() {
         let data = Data {
             base: "https://example.com".into(),
-            client_id: "adbc01234".into(),
-            client_secret: "0987dcba".into(),
+            client_id: String::from("adbc01234").into(),
+            client_secret: String::from("0987dcba").into(),
             redirect: "urn:ietf:wg:oauth:2.0:oob".into(),
             token: "fedc5678".into(),
         };
@@ -195,8 +195,8 @@ mod tests {
     fn test_to_file() {
         let data = Data {
             base: "https://example.com".into(),
-            client_id: "adbc01234".into(),
-            client_secret: "0987dcba".into(),
+            client_id: String::from("adbc01234").into(),
+            client_secret: String::from("0987dcba").into(),
             redirect: "urn:ietf:wg:oauth:2.0:oob".into(),
             token: "fedc5678".into(),
         };
@@ -210,8 +210,8 @@ mod tests {
     fn test_to_file_with_options() {
         let data = Data {
             base: "https://example.com".into(),
-            client_id: "adbc01234".into(),
-            client_secret: "0987dcba".into(),
+            client_id: String::from("adbc01234").into(),
+            client_secret: String::from("0987dcba").into(),
             redirect: "urn:ietf:wg:oauth:2.0:oob".into(),
             token: "fedc5678".into(),
         };

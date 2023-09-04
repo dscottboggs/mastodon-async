@@ -53,3 +53,16 @@ impl DataBuilder {
             .expect("One or more required fields are missing!")
     }
 }
+
+impl Default for Data {
+    /// Only for demonstration purposes and to shorten documentation. Not useful!
+    fn default() -> Self {
+        Self {
+            client_id: String::default().into(),
+            client_secret: String::default().into(),
+            base: String::default(),
+            redirect: String::default(),
+            token: String::default(),
+        }
+    }
+}

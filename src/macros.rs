@@ -74,6 +74,7 @@ macro_rules! paged_routes {
             pub async fn $name<'a>(&self, $($param: $typ,)*) -> Result<Page<$ret>> {
                 use serde_urlencoded;
                 use tracing::debug;
+                use serde::Serialize;
 
                 let call_id = uuid::Uuid::new_v4();
 
@@ -128,6 +129,7 @@ macro_rules! route_v2 {
                 use serde_urlencoded;
                 use tracing::debug;
                 use uuid::Uuid;
+                use serde::Serialize;
 
                 let call_id = Uuid::new_v4();
 
@@ -343,6 +345,7 @@ macro_rules! route {
                 use serde_urlencoded;
                 use tracing::debug;
                 use uuid::Uuid;
+                use serde::Serialize;
 
                 let call_id = Uuid::new_v4();
 

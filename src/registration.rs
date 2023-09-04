@@ -337,10 +337,10 @@ impl Registered {
     /// Construct authentication data once token is known
     fn registered(&self, token: String) -> Data {
         Data {
-            base: self.base.clone().into(),
+            base: self.base.clone(),
             client_id: self.client_id.clone().into(),
             client_secret: self.client_secret.clone().into(),
-            redirect: self.redirect.clone().into(),
+            redirect: self.redirect.clone(),
             token: token.into(),
         }
     }

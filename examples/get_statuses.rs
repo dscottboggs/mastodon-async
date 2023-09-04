@@ -17,6 +17,7 @@ async fn run() -> Result<()> {
         .statuses(&you.id, filters)
         .await?
         .items_iter()
+        .take(4)
         .for_each(|status| async move { println!("{status:?}") })
         .await;
     Ok(())

@@ -73,8 +73,6 @@ pub fn bool_input(message: impl AsRef<str>, default: bool) -> Result<bool> {
 fn main() {}
 
 async fn register() -> Result<Mastodon> {
-    use mastodon_async::MastodonUnauthenticated;
-
     let instance = read_line("What is your instance URL?")?;
     let client = MastodonUnauthenticated::new(&instance)?;
     let app = forms::Application::builder()

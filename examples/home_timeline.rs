@@ -26,6 +26,7 @@ async fn run() -> Result<()> {
         .get_home_timeline()
         .await?
         .items_iter()
+        .take(4)
         .for_each(|status| async move {
             print!(
                 "\ttoot from {}:\n{}",

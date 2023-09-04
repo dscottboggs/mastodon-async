@@ -37,7 +37,7 @@ static_assertions::assert_impl_all!(Mastodon: Send, Sync);
 pub struct MastodonUnauthenticated {
     client: Client,
     /// Which Mastodon instance to contact
-    pub base: Url,
+    pub base: String,
 }
 
 impl From<Data> for Mastodon {
@@ -165,7 +165,7 @@ impl Mastodon {
     }
 
     /// POST /api/v1/filters
-    pub async fn add_filter(&self, request: &mut AddFilterRequest) -> Result<Filter> {
+    pub async fn add_filter(&self, request: &AddFilterRequest) -> Result<Filter> {
         let response = self
             .client
             .post(self.route("/api/v1/filters"))
@@ -177,7 +177,7 @@ impl Mastodon {
     }
 
     /// PUT /api/v1/filters/:id
-    pub async fn update_filter(&self, id: &str, request: &mut AddFilterRequest) -> Result<Filter> {
+    pub async fn update_filter(&self, id: &str, request: &AddFilterRequest) -> Result<Filter> {
         let url = self.route(format!("/api/v1/filters/{id}"));
         let response = self.client.put(&url).json(&request).send().await?;
 
@@ -443,6 +443,81 @@ impl Mastodon {
         }
     }
 
+    /// Access public (unauthenticated) endpoints.
+    ///
+    /// This clones this client's client and base URL, so if it's possible,
+    /// keep the pre-authentication [`MastodonUnauthenticated`] around instead.
+    pub fn public_api(&self) -> MastodonUnauthenticated {
+        MastodonUnauthenticated {
+            client: self.client.clone(),
+            base: self.data.base.clone(),
+        }
+    }
+}
+
+impl MastodonUnauthenticated {
+    methods![get and get_with_call_id, post and post_with_call_id, ];
+
+    /// Create a new client for unauthenticated requests to a given Mastodon
+    /// instance.
+    pub fn new(base: impl AsRef<str>) -> Result<Self> {
+        let base = base.as_ref();
+        let base = if base.starts_with("https://") {
+            base.to_string()
+        } else {
+            format!("https://{}", base.trim_start_matches("http://"))
+        };
+        trace!(base = base, "creating new mastodon client");
+        Ok(Self {
+            client: Client::new(),
+            base,
+        })
+    }
+
+    fn route(&self, url: impl std::fmt::Display) -> String {
+        format!("{}{url}", self.base.as_str())
+    }
+
+    route! {
+        (post (app: forms::Application,)) create_app: "apps" => AuthenticatedApplication,
+    }
+
+    /// GET /api/v1/statuses/:id
+    pub async fn get_status(&self, id: &StatusId) -> Result<Status> {
+        let route = self.route(format!("/api/v1/statuses/{id}"));
+        self.get(route.as_str()).await
+    }
+
+    /// GET /api/v1/statuses/:id/context
+    pub async fn get_context(&self, id: &StatusId) -> Result<Context> {
+        let route = self.route(format!("/api/v1/statuses/{id}/context"));
+        self.get(route.as_str()).await
+    }
+
+    /// GET /api/v1/statuses/:id/card
+    pub async fn get_card(&self, id: &StatusId) -> Result<Card> {
+        let route = self.route(format!("/api/v1/statuses/{id}/card"));
+        self.get(route.as_str()).await
+    }
+
+    /// Since this client needs no authentication, this returns the
+    /// `RequestBuilder` unmodified.
+    fn authenticated(&self, request: RequestBuilder) -> RequestBuilder {
+        request
+    }
+
+    /// Return an authenticated [`Mastodon`] client.
+    pub fn authorized(&self, app: AuthenticatedApplication, oauth_token: OAuthToken) -> Mastodon {
+        let data = Data::builder(
+            self.base.clone(),
+            app.client_id,
+            app.client_secret,
+            oauth_token.as_ref(),
+        )
+        .build();
+        Mastodon::new(reqwest::Client::new(), data)
+    }
+
     /// Displays an authorization form to the user. If approved, it will create
     /// and return an authorization code, then redirect to the desired
     /// redirect_uri, or show the authorization code if urn:ietf:wg:oauth:2.0:oob
@@ -464,80 +539,16 @@ impl Mastodon {
         let call_id = Uuid::new_v4();
         let query = serde_urlencoded::to_string(request)?;
         let url = self.route(format!("/oauth/authorize?{query}"));
-        debug!(
-            url = url, method = "get",
-            call_id = as_debug!(call_id), query = query;
-            "making API request"
-        );
+        debug!(?url, method = "get", ?call_id, ?query, "making API request");
         let response = self.client.get(url).send().await?;
-        trace!(status = log_serde!(response Status), headers = log_serde!(response Headers); "API response received");
+        trace!(
+            response = as_value!(response, Response),
+            "API response received"
+        );
         Ok(response.text().await?)
     }
 }
 
-impl MastodonUnauthenticated {
-    methods![get and get_with_call_id, post and post_with_call_id, ];
-
-    /// Create a new client for unauthenticated requests to a given Mastodon
-    /// instance.
-    pub fn new(base: impl AsRef<str>) -> Result<MastodonUnauthenticated> {
-        let base = base.as_ref();
-        let base = if base.starts_with("https://") {
-            base.to_string()
-        } else {
-            format!("https://{}", base.trim_start_matches("http://"))
-        };
-        trace!(base = base, "creating new mastodon client");
-        Ok(MastodonUnauthenticated {
-            client: Client::new(),
-            base: Url::parse(&base)?,
-        })
-    }
-
-    fn route(&self, url: &str) -> String {
-        format!("{}{url}", self.base.as_str())
-    }
-
-    route! {
-        (post (app: forms::Application,)) create_app: "apps" => AuthenticatedApplication,
-    }
-
-    /// GET /api/v1/statuses/:id
-    pub async fn get_status(&self, id: &StatusId) -> Result<Status> {
-        let route = self.route(&format!("/api/v1/statuses/{id}"));
-        self.get(route.as_str()).await
-    }
-
-    /// GET /api/v1/statuses/:id/context
-    pub async fn get_context(&self, id: &StatusId) -> Result<Context> {
-        let route = self.route(&format!("/api/v1/statuses/{id}/context"));
-        self.get(route.as_str()).await
-    }
-
-    /// GET /api/v1/statuses/:id/card
-    pub async fn get_card(&self, id: &StatusId) -> Result<Card> {
-        let route = self.route(&format!("/api/v1/statuses/{id}/card"));
-        self.get(route.as_str()).await
-    }
-
-    /// Since this client needs no authentication, this returns the
-    /// `RequestBuilder` unmodified.
-    fn authenticated(&self, request: RequestBuilder) -> RequestBuilder {
-        request
-    }
-
-    /// Return an authenticated [`Mastodon`] client.
-    pub fn authorized(&self, app: AuthenticatedApplication, oauth_token: OAuthToken) -> Mastodon {
-        let data = Data::builder(
-            self.base.as_ref().to_owned(),
-            app.client_id,
-            app.client_secret,
-            oauth_token.as_ref(),
-        )
-        .build();
-        Mastodon::new(reqwest::Client::new(), data)
-    }
-}
 impl Deref for Mastodon {
     type Target = Arc<MastodonClient>;
 

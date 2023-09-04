@@ -19,6 +19,10 @@ pub enum GrantType {
     derive(Debug, PartialEq),
     build_fn(error = "crate::Error", private, name = "try_build")
 )]
+/// A form which can be built to obtain an access token, to be used during API
+/// calls that are not public.
+///
+/// See also [the API documentation](https://docs.joinmastodon.org/methods/oauth/#token)
 pub struct TokenRequest {
     /// Set equal to [`GrantType::AuthorizationCode`] if code is provided in
     /// order to gain user-level access. Otherwise, set equal to
