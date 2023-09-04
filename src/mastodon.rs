@@ -46,7 +46,7 @@ impl From<Data> for Mastodon {
     }
 }
 impl Mastodon {
-    methods![get and get_with_call_id, post and post_with_call_id, put and put_with_call_id, delete and delete_with_call_id,];
+    methods![get and get_with_call_id, post and post_with_call_id, delete and delete_with_call_id,];
 
     paged_routes! {
         (get) favourites: "favourites" => Status,
