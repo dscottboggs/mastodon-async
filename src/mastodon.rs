@@ -195,7 +195,7 @@ impl Mastodon {
 
     /// Edit existing status
     pub async fn update_status(&self, id: &StatusId, status: NewStatus) -> Result<Status> {
-        let url = self.route(format!("/api/v1/statuses/{}", id));
+        let url = self.route(format!("/api/v1/statuses/{id}"));
         let response = self
             .authenticated(self.client.put(&url))
             .json(&status)
