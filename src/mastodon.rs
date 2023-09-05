@@ -202,7 +202,7 @@ impl Mastodon {
             .send()
             .await?;
         debug!(
-            response = as_value!(response, Response),
+            response = as_value!(response, Response), updated_status_id = ?id, ?status,
             "received API response"
         );
         read_response(response).await
