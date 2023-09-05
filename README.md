@@ -34,21 +34,38 @@ mastodon-async = { version = "1", default-features = false, features = ["rustls-
 ```
 
 ## A Note on Debugging
-This library offers structured logging. To get better information about bugs or
-how something is working, I recommend adding the femme crate as a dependency,
-then adding this line to the beginning of your main() function:
+This library offers structured logging, through the `tracing` crate. See the
+[`home_timeline` example](examples/home_timeline.rs) for an example of usage.
 
-```rust,ignore
-femme::with_level(log::LevelFilter::Trace);
+This feature is still an unstable part of the dependant crates. This means that
+unless `--cfg tracing_unstable` is passed to `rustc`, you'll see an error like
+this:
+
+```
+error[E0277]: the trait bound `valuable::Value<'_>: tracing::Value` is not satisfied
+ --> src/main.rs:5:5
+  |
+5 | /     debug!(
+6 | |         example = valuable::Valuable::as_value(&tracing_value::Example::from("Hello, world")),
+7 | |         "test"
+8 | |     );
+  | |_____^ the trait `tracing::Value` is not implemented for `valuable::Value<'_>`
+  |
+  = help: the following other types implement trait `tracing::Value`:
+...
 ```
 
-When compiling for the debug target, this offers a mostly-human-readable output
-with a lot of details about what's happening. When targeting release, JSON-
-structured metadata is offered, which can be filtered and manipulated with
-scripts or at the shell with jq.
+Until tracing [stabilizes this feature](https://docs.rs/tracing/latest/tracing/index.html#unstable-features),
+it's necessary to either run cargo commands with `RUSTFLAGS="--cfg tracing_unstable"`,
+or to create a file at `.cargo/config` relative to the root of your dependent
+crate with the following contents:
 
-There are other crates which make use of the log crate's new (unstable) kv
-features, this is just the one that works for me for now.
+```toml
+[build]
+rustflags = ["--cfg", "tracing_unstable"]
+```
+
+See also #117.
 
 ## Example
 
