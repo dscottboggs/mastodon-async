@@ -96,10 +96,10 @@ mod tests {
             desered,
             Data {
                 base: "https://example.com".into(),
-                client_id: "adbc01234".into(),
-                client_secret: "0987dcba".into(),
+                client_id: String::from("adbc01234").into(),
+                client_secret: String::from("0987dcba").into(),
                 redirect: "urn:ietf:wg:oauth:2.0:oob".into(),
-                token: "fedc5678".into(),
+                token: String::from("fedc5678").into(),
             }
         );
     }
@@ -111,10 +111,10 @@ mod tests {
             desered,
             Data {
                 base: "https://example.com".into(),
-                client_id: "adbc01234".into(),
-                client_secret: "0987dcba".into(),
+                client_id: String::from("adbc01234").into(),
+                client_secret: String::from("0987dcba").into(),
                 redirect: "urn:ietf:wg:oauth:2.0:oob".into(),
-                token: "fedc5678".into(),
+                token: String::from("fedc5678").into(),
             }
         );
     }
@@ -127,10 +127,10 @@ mod tests {
             desered,
             Data {
                 base: "https://example.com".into(),
-                client_id: "adbc01234".into(),
-                client_secret: "0987dcba".into(),
+                client_id: String::from("adbc01234").into(),
+                client_secret: String::from("0987dcba").into(),
                 redirect: "urn:ietf:wg:oauth:2.0:oob".into(),
-                token: "fedc5678".into(),
+                token: String::from("fedc5678").into(),
             }
         );
     }
@@ -143,10 +143,10 @@ mod tests {
             desered,
             Data {
                 base: "https://example.com".into(),
-                client_id: "adbc01234".into(),
-                client_secret: "0987dcba".into(),
+                client_id: String::from("adbc01234").into(),
+                client_secret: String::from("0987dcba").into(),
                 redirect: "urn:ietf:wg:oauth:2.0:oob".into(),
-                token: "fedc5678".into(),
+                token: String::from("fedc5678").into(),
             }
         );
     }
@@ -154,10 +154,10 @@ mod tests {
     fn test_to_string() {
         let data = Data {
             base: "https://example.com".into(),
-            client_id: "adbc01234".into(),
-            client_secret: "0987dcba".into(),
+            client_id: String::from("adbc01234").into(),
+            client_secret: String::from("0987dcba").into(),
             redirect: "urn:ietf:wg:oauth:2.0:oob".into(),
-            token: "fedc5678".into(),
+            token: String::from("fedc5678").into(),
         };
         let s = to_string(&data).expect("Couldn't serialize Data");
         let desered = from_str(&s).expect("Couldn't deserialize Data");
@@ -167,10 +167,10 @@ mod tests {
     fn test_to_vec() {
         let data = Data {
             base: "https://example.com".into(),
-            client_id: "adbc01234".into(),
-            client_secret: "0987dcba".into(),
+            client_id: String::from("adbc01234").into(),
+            client_secret: String::from("0987dcba").into(),
             redirect: "urn:ietf:wg:oauth:2.0:oob".into(),
-            token: "fedc5678".into(),
+            token: String::from("fedc5678").into(),
         };
         let v = to_vec(&data).expect("Couldn't write to vec");
         let desered = from_slice(&v).expect("Couldn't deserialize data");
@@ -180,10 +180,10 @@ mod tests {
     fn test_to_writer() {
         let data = Data {
             base: "https://example.com".into(),
-            client_id: "adbc01234".into(),
-            client_secret: "0987dcba".into(),
+            client_id: String::from("adbc01234").into(),
+            client_secret: String::from("0987dcba").into(),
             redirect: "urn:ietf:wg:oauth:2.0:oob".into(),
-            token: "fedc5678".into(),
+            token: String::from("fedc5678").into(),
         };
         let mut buffer = Vec::new();
         to_writer(&data, &mut buffer).expect("Couldn't write to writer");
@@ -195,10 +195,10 @@ mod tests {
     fn test_to_file() {
         let data = Data {
             base: "https://example.com".into(),
-            client_id: "adbc01234".into(),
-            client_secret: "0987dcba".into(),
+            client_id: String::from("adbc01234").into(),
+            client_secret: String::from("0987dcba").into(),
             redirect: "urn:ietf:wg:oauth:2.0:oob".into(),
-            token: "fedc5678".into(),
+            token: String::from("fedc5678").into(),
         };
         let tempdir = tempdir().expect("Couldn't create tempdir");
         let filename = tempdir.path().join("mastodon-data.toml");
@@ -210,10 +210,10 @@ mod tests {
     fn test_to_file_with_options() {
         let data = Data {
             base: "https://example.com".into(),
-            client_id: "adbc01234".into(),
-            client_secret: "0987dcba".into(),
+            client_id: String::from("adbc01234").into(),
+            client_secret: String::from("0987dcba").into(),
             redirect: "urn:ietf:wg:oauth:2.0:oob".into(),
-            token: "fedc5678".into(),
+            token: String::from("fedc5678").into(),
         };
         let file = NamedTempFile::new().expect("Couldn't create tempfile");
         let mut options = OpenOptions::new();

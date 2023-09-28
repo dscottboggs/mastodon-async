@@ -73,4 +73,7 @@ define_ids!(
 
 As [`Application`](crate::application::Application) doesn't have an ID, I'm not sure what you're supposed to compare this to." as ApplicationId(from i64, as i64 ref),
     "a role ID" as RoleId(from i64, as i64 ref),
+    "an OAuth client ID" as ClientId(from String, as str ref),
+    "a client secret, obtained during registration" as ClientSecret(from String, as str ref),
+    "an OAuth authorization token" as OAuthToken(from String, as str ref),
 );

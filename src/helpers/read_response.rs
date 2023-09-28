@@ -29,7 +29,9 @@ where
     loop {
         if let Ok(data) = timeout(Duration::from_secs(10), stream.next()).await {
             // as of here, we did not time out
-            let Some(data) = data else { break; };
+            let Some(data) = data else {
+                break;
+            };
             // as of here, we have not hit the end of the stream yet
             let data = data?;
             // as of here, we did not hit an error while reading the body

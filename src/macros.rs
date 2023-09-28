@@ -74,6 +74,7 @@ macro_rules! paged_routes {
             pub async fn $name<'a>(&self, $($param: $typ,)*) -> Result<Page<$ret>> {
                 use serde_urlencoded;
                 use tracing::debug;
+                use serde::Serialize;
 
                 let call_id = uuid::Uuid::new_v4();
 
@@ -128,6 +129,7 @@ macro_rules! route_v2 {
                 use serde_urlencoded;
                 use tracing::debug;
                 use uuid::Uuid;
+                use serde::Serialize;
 
                 let call_id = Uuid::new_v4();
 
@@ -343,6 +345,7 @@ macro_rules! route {
                 use serde_urlencoded;
                 use tracing::debug;
                 use uuid::Uuid;
+                use serde::Serialize;
 
                 let call_id = Uuid::new_v4();
 
@@ -642,4 +645,25 @@ tokio_test::block_on(async {
         streaming! { $($rest)* }
     };
     () => {}
+}
+
+macro_rules! query_form_route {
+    {
+        $desc:tt ($method:ident $form:ident: $form_type:ty) $fn_name:ident: $route:literal => $return_type:ty,
+        $($desc_rest:tt ($method_rest:ident $form_rest:ident: $form_type_rest:ty) $fn_name_rest:ident: $route_rest:literal => $return_type_rest:ty,)*
+    } => {
+        #[doc = $desc]
+        pub async fn $fn_name(&self, $form: $form_type) -> Result<$return_type> {
+            let form = serde_urlencoded::to_string($form)?;
+            let url = self.route(concat!("/api/v1/", $route));
+
+            self.$method(format!("{url}?{form}")).await
+        }
+
+        $(
+            query_form_route!(
+                $desc_rest ($method_rest $form_rest: $form_type_rest) $fn_name_rest: $route_rest => $return_type_rest,
+            );
+        )*
+    };
 }

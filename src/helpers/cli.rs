@@ -1,11 +1,14 @@
 use std::io::{self, BufRead, Write};
 
-use crate::{errors::Result, registration::Registered, Mastodon};
+use mastodon_async_entities::{forms, ids::OAuthToken};
 
-/// Finishes the authentication process for the given `Registered` object,
-/// using the command-line
-pub async fn authenticate(registration: Registered) -> Result<Mastodon> {
-    let url = registration.authorize_url()?;
+use crate::errors::Result;
+
+/// Ask the user to get you an authorized OAuth token
+pub async fn get_oauth_token(
+    authorization_request: forms::oauth::AuthorizationRequest,
+) -> Result<OAuthToken> {
+    let url = authorization_request.url()?;
 
     let code = {
         let stdout = io::stdout();
@@ -22,23 +25,5 @@ pub async fn authenticate(registration: Registered) -> Result<Mastodon> {
         stdin.read_line(&mut input)?;
         input
     };
-    let code = code.trim();
-
-    registration.complete(code).await
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn send_sync() {
-        fn assert_send_sync(_: impl Send + Sync) {}
-
-        let mock_reg = || -> Registered { unimplemented!() };
-        let no_run = || async move {
-            let _ = authenticate(mock_reg()).await;
-        };
-        assert_send_sync(no_run());
-    }
+    Ok(code.trim().to_owned().into())
 }

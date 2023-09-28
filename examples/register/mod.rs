@@ -35,24 +35,7 @@ pub async fn get_mastodon_data() -> Result<Mastodon> {
     }
 }
 
-#[cfg(feature = "toml")]
-pub async fn register() -> Result<Mastodon> {
-    let website = read_line("Please enter your mastodon instance url:")?;
-    let registration = Registration::new(website.trim())
-        .client_name("elefren-examples")
-        .scopes(Scopes::all())
-        .website("https://github.com/dscottboggs/mastodon-async")
-        .build()
-        .await?;
-    let mastodon = cli::authenticate(registration).await?;
-
-    // Save app data for using on the next run.
-    toml::to_file(&mastodon.data, "mastodon-data.toml")?;
-
-    Ok(mastodon)
-}
-
-#[cfg(feature = "toml")]
+#[allow(dead_code)]
 pub fn read_line(message: impl AsRef<str>) -> Result<String> {
     use std::io::Write;
 
@@ -65,7 +48,6 @@ pub fn read_line(message: impl AsRef<str>) -> Result<String> {
     Ok(input.trim().to_string())
 }
 
-#[cfg(feature = "toml")]
 #[allow(dead_code)]
 pub fn bool_input(message: impl AsRef<str>, default: bool) -> Result<bool> {
     let input = read_line(message.as_ref())?;
@@ -89,3 +71,21 @@ pub fn bool_input(message: impl AsRef<str>, default: bool) -> Result<bool> {
 
 #[cfg(not(feature = "toml"))]
 fn main() {}
+
+async fn register() -> Result<Mastodon> {
+    let instance = read_line("What is your instance URL?")?;
+    let client = MastodonUnauthenticated::new(&instance)?;
+    let app = forms::Application::builder()
+        .client_name("mastodon-async-examples")
+        .scopes(Scopes::all())
+        .website("https://github.com/dscottboggs/mastodon-async")
+        .build()?;
+    let app = client.create_app(app).await?;
+    let authorization_request =
+        forms::oauth::AuthorizationRequest::builder(instance, app.client_id.clone())
+            .force_login(true)
+            .scope(Scopes::all())
+            .build();
+
+    Ok(client.authorized(app, cli::get_oauth_token(authorization_request).await?))
+}
