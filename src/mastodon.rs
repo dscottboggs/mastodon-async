@@ -512,7 +512,7 @@ impl MastodonUnauthenticated {
             self.base.clone(),
             app.client_id,
             app.client_secret,
-            oauth_token.as_ref(),
+            oauth_token,
         )
         .build();
         Mastodon::new(reqwest::Client::new(), data)

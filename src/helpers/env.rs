@@ -58,7 +58,7 @@ mod tests {
                 client_id: String::from("adbc01234").into(),
                 client_secret: String::from("0987dcba").into(),
                 redirect: "urn:ietf:wg:oauth:2.0:oob".into(),
-                token: "fedc5678".into(),
+                token: String::from("fedc5678").into(),
             }
         );
     }
@@ -73,7 +73,7 @@ mod tests {
                 client_id: String::from("adbc01234").into(),
                 client_secret: String::from("0987dcba").into(),
                 redirect: "urn:ietf:wg:oauth:2.0:oob".into(),
-                token: "fedc5678".into(),
+                token: String::from("fedc5678").into(),
             }
         );
     }

@@ -99,7 +99,7 @@ mod tests {
                 client_id: String::from("adbc01234").into(),
                 client_secret: String::from("0987dcba").into(),
                 redirect: "urn:ietf:wg:oauth:2.0:oob".into(),
-                token: "fedc5678".into(),
+                token: String::from("fedc5678").into(),
             }
         );
     }
@@ -114,7 +114,7 @@ mod tests {
                 client_id: String::from("adbc01234").into(),
                 client_secret: String::from("0987dcba").into(),
                 redirect: "urn:ietf:wg:oauth:2.0:oob".into(),
-                token: "fedc5678".into(),
+                token: String::from("fedc5678").into(),
             }
         );
     }
@@ -130,7 +130,7 @@ mod tests {
                 client_id: String::from("adbc01234").into(),
                 client_secret: String::from("0987dcba").into(),
                 redirect: "urn:ietf:wg:oauth:2.0:oob".into(),
-                token: "fedc5678".into(),
+                token: String::from("fedc5678").into(),
             }
         );
     }
@@ -146,7 +146,7 @@ mod tests {
                 client_id: String::from("adbc01234").into(),
                 client_secret: String::from("0987dcba").into(),
                 redirect: "urn:ietf:wg:oauth:2.0:oob".into(),
-                token: "fedc5678".into(),
+                token: String::from("fedc5678").into(),
             }
         );
     }
@@ -157,7 +157,7 @@ mod tests {
             client_id: String::from("adbc01234").into(),
             client_secret: String::from("0987dcba").into(),
             redirect: "urn:ietf:wg:oauth:2.0:oob".into(),
-            token: "fedc5678".into(),
+            token: String::from("fedc5678").into(),
         };
         let s = to_string(&data).expect("Couldn't serialize Data");
         let desered = from_str(&s).expect("Couldn't deserialize Data");
@@ -170,7 +170,7 @@ mod tests {
             client_id: String::from("adbc01234").into(),
             client_secret: String::from("0987dcba").into(),
             redirect: "urn:ietf:wg:oauth:2.0:oob".into(),
-            token: "fedc5678".into(),
+            token: String::from("fedc5678").into(),
         };
         let v = to_vec(&data).expect("Couldn't write to vec");
         let desered = from_slice(&v).expect("Couldn't deserialize data");
@@ -183,7 +183,7 @@ mod tests {
             client_id: String::from("adbc01234").into(),
             client_secret: String::from("0987dcba").into(),
             redirect: "urn:ietf:wg:oauth:2.0:oob".into(),
-            token: "fedc5678".into(),
+            token: String::from("fedc5678").into(),
         };
         let mut buffer = Vec::new();
         to_writer(&data, &mut buffer).expect("Couldn't write to writer");
@@ -198,7 +198,7 @@ mod tests {
             client_id: String::from("adbc01234").into(),
             client_secret: String::from("0987dcba").into(),
             redirect: "urn:ietf:wg:oauth:2.0:oob".into(),
-            token: "fedc5678".into(),
+            token: String::from("fedc5678").into(),
         };
         let tempdir = tempdir().expect("Couldn't create tempdir");
         let filename = tempdir.path().join("mastodon-data.toml");
@@ -213,7 +213,7 @@ mod tests {
             client_id: String::from("adbc01234").into(),
             client_secret: String::from("0987dcba").into(),
             redirect: "urn:ietf:wg:oauth:2.0:oob".into(),
-            token: "fedc5678".into(),
+            token: String::from("fedc5678").into(),
         };
         let file = NamedTempFile::new().expect("Couldn't create tempfile");
         let mut options = OpenOptions::new();

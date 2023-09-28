@@ -1,5 +1,5 @@
 use derive_builder::Builder;
-use mastodon_async_entities::{ClientId, ClientSecret};
+use mastodon_async_entities::{ClientId, ClientSecret, OAuthToken};
 use serde::{Deserialize, Serialize};
 
 /// Raw data about mastodon app. Save `Data` using `serde` to prevent needing
@@ -25,7 +25,7 @@ pub struct Data {
     pub redirect: String,
     #[builder(private, setter(into))]
     /// The client's access token.
-    pub token: String,
+    pub token: OAuthToken,
 }
 
 impl Data {
@@ -34,7 +34,7 @@ impl Data {
         base: impl Into<String>,
         client_id: ClientId,
         client_secret: ClientSecret,
-        token: impl Into<String>,
+        token: OAuthToken,
     ) -> DataBuilder {
         let mut builder = DataBuilder::create_empty();
         builder
@@ -62,7 +62,7 @@ impl Default for Data {
             client_secret: String::default().into(),
             base: String::default(),
             redirect: String::default(),
-            token: String::default(),
+            token: String::default().into(),
         }
     }
 }
