@@ -166,13 +166,13 @@ impl<T: Clone + for<'de> Deserialize<'de> + Serialize + Debug> Page<T> {
     /// ```no_run
     /// use mastodon_async::prelude::*;
     /// use futures_util::StreamExt;
+    /// use std::default::Default;
     ///
     /// let data = Data::default();
     /// let mastodon = Mastodon::from(data);
-    /// let req = StatusesRequest::new();
     ///
     /// tokio_test::block_on(async {
-    ///     let resp = mastodon.statuses(&AccountId::new("some-id"), req).await.unwrap();
+    ///     let resp = mastodon.statuses(&AccountId::new("some-id"), Default::default()).await.unwrap();
     ///     resp.items_iter().for_each(|status| async move {
     ///         // do something with status
     ///     }).await;

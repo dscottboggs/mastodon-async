@@ -106,7 +106,7 @@ pub use mastodon_async_entities::{
     status::NewStatus, status::NewStatusBuilder, visibility::Visibility,
 };
 pub use registration::Registration;
-pub use requests::{AddFilterRequest, AddPushRequest, StatusesRequest, UpdatePushRequest};
+pub use requests::{AddFilterRequest, AddPushRequest, UpdatePushRequest};
 
 /// Contains the struct that holds the client auth data
 pub mod data;
@@ -133,7 +133,7 @@ pub mod polling_time;
 pub mod prelude {
     pub use crate::{
         entities::prelude::*, Data, Mastodon, MastodonUnauthenticated, NewStatus, NewStatusBuilder,
-        Registration, StatusesRequest, Visibility,
+        Registration, Visibility,
     };
     // Legacy alias; TODO remove for 2.0
     pub use super::entities::status::NewStatusBuilder as StatusBuilder;

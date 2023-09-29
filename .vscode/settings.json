@@ -11,6 +11,7 @@
     "isolang",
     "querystring",
     "reblog",
+    "reblogs",
     "repr",
     "reqwest",
     "subscope",

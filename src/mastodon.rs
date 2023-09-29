@@ -9,7 +9,7 @@ use crate::{
     errors::{Error, Result},
     helpers::read_response::read_response,
     polling_time::PollingTime,
-    AddFilterRequest, AddPushRequest, Data, NewStatus, Page, StatusesRequest, UpdatePushRequest,
+    AddFilterRequest, AddPushRequest, Data, NewStatus, Page, UpdatePushRequest,
 };
 use futures::TryStream;
 use reqwest::{multipart::Part, Client, RequestBuilder};
@@ -249,20 +249,20 @@ impl Mastodon {
     /// tokio_test::block_on(async {
     ///     let data = Data::default();
     ///     let client = Mastodon::from(data);
-    ///     let mut request = StatusesRequest::new();
-    ///     request.only_media();
-    ///     let statuses = client.statuses(&AccountId::new("user-id"), request).await.unwrap();
+    ///     let mut options = forms::status_request::Options::builder();
+    ///     options.only_media(true);
+    ///     let statuses = client.statuses(&AccountId::new("user-id"), options.build()).await.unwrap();
     /// });
     /// ```
-    pub async fn statuses<'a, 'b: 'a>(
-        &'b self,
-        id: &'b AccountId,
-        request: StatusesRequest<'a>,
+    pub async fn statuses(
+        &self,
+        id: &AccountId,
+        options: forms::status_request::Options,
     ) -> Result<Page<Status>> {
         let call_id = Uuid::new_v4();
         let mut url = format!("{}/api/v1/accounts/{id}/statuses", self.data.base);
 
-        url += request.to_query_string()?.as_str();
+        url += options.to_query_string()?.as_str();
 
         debug!(
             url,
