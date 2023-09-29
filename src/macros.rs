@@ -667,3 +667,36 @@ macro_rules! query_form_route {
         )*
     };
 }
+
+macro_rules! post_route {
+    {
+        $desc:tt
+        [$http_method:ident] $method_name:ident($body_type:ty)@$route:literal -> $return_type:ty,
+        $(
+            $desc_rest:tt
+            [$http_method_rest:ident] $method_name_rest:ident($body_type_rest:ty)@$route_rest:literal -> $return_type_rest:ty,
+        )*
+    } => {
+        #[doc=$desc]
+        pub async fn $method_name(
+            &self,
+            post_body: $body_type,
+        ) -> Result<$return_type> {
+            let url = self.route($route);
+            let response = self
+                .client
+                .$http_method(&url)
+                .json(&post_body)
+                .send()
+                .await?;
+
+            read_response(response).await
+        }
+        $(
+            post_route! {
+                $desc_rest
+                [$http_method_rest] $method_name_rest($body_type_rest)@$route_rest -> $return_type_rest,
+            }
+        )*
+    };
+}

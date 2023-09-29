@@ -184,20 +184,11 @@ impl Mastodon {
         read_response(response).await
     }
 
-    /// Update the user credentials
-    pub async fn update_credentials(
-        &self,
-        changes: account::CredentialsBuilder,
-    ) -> Result<Account> {
-        let url = self.route("/api/v1/accounts/update_credentials");
-        let response = self
-            .client
-            .patch(&url)
-            .json(&changes.build()?)
-            .send()
-            .await?;
-
-        read_response(response).await
+    post_route! {
+        "Update the user credentials"
+        [patch] update_credentials(account::Credentials)@"/api/v1/accounts/update_credentials" -> Account,
+        "Post a new status to the account."
+        [post] new_status(NewStatus)@"/api/v1/statuses" -> Status,
     }
 
     /// Edit existing status
@@ -210,21 +201,6 @@ impl Mastodon {
             .await?;
         debug!(
             response = as_value!(response, Response), updated_status_id = ?id, ?status,
-            "received API response"
-        );
-        read_response(response).await
-    }
-
-    /// Post a new status to the account.
-    pub async fn new_status(&self, status: NewStatus) -> Result<Status> {
-        let url = self.route("/api/v1/statuses");
-        let response = self
-            .authenticated(self.client.post(&url))
-            .json(&status)
-            .send()
-            .await?;
-        debug!(
-            response = as_value!(response, Response),
             "received API response"
         );
         read_response(response).await
