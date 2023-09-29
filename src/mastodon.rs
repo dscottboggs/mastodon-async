@@ -192,6 +192,7 @@ impl Mastodon {
         "Creates a user and account records."
         [post] create_account(forms::account::Creation)@"accounts" -> Token,
     }
+
     ///Revoke an access token to make it no longer valid for use.
     pub async fn revoke_auth(
         &self,
