@@ -682,7 +682,7 @@ macro_rules! post_route {
             &self,
             post_body: $body_type,
         ) -> Result<$return_type> {
-            let url = self.route($route);
+            let url = self.route(concat!("/api/v1/", $route));
             let response = self
                 .client
                 .$http_method(&url)

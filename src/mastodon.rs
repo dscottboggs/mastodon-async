@@ -186,13 +186,21 @@ impl Mastodon {
 
     post_route! {
         "Update the user credentials"
-        [patch] update_credentials(account::Credentials)@"/api/v1/accounts/update_credentials" -> Account,
+        [patch] update_credentials(account::Credentials)@"accounts/update_credentials" -> Account,
         "Post a new status to the account."
-        [post] new_status(NewStatus)@"/api/v1/statuses" -> Status,
-        "Revoke an access token to make it no longer valid for use."
-        [post] revoke_auth(forms::oauth::token::Revocation)@"/oauth/revoke" -> auth::RevocationResponse,
+        [post] new_status(NewStatus)@"statuses" -> Status,
+        "Creates a user and account records."
+        [post] create_account(forms::account::Creation)@"accounts" -> Token,
     }
-
+    ///Revoke an access token to make it no longer valid for use.
+    pub async fn revoke_auth(
+        &self,
+        post_body: forms::oauth::token::Revocation,
+    ) -> Result<auth::RevocationResponse> {
+        let url = self.route("/oauth/revoke");
+        let response = self.client.post(&url).json(&post_body).send().await?;
+        read_response(response).await
+    }
     /// Edit existing status
     pub async fn update_status(&self, id: &StatusId, status: NewStatus) -> Result<Status> {
         let url = self.route(format!("/api/v1/statuses/{id}"));
