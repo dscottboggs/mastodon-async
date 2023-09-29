@@ -189,6 +189,8 @@ impl Mastodon {
         [patch] update_credentials(account::Credentials)@"/api/v1/accounts/update_credentials" -> Account,
         "Post a new status to the account."
         [post] new_status(NewStatus)@"/api/v1/statuses" -> Status,
+        "Revoke an access token to make it no longer valid for use."
+        [post] revoke_auth(forms::oauth::token::Revocation)@"/oauth/revoke" -> auth::RevocationResponse,
     }
 
     /// Edit existing status
