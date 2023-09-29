@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::string::FromUtf8Error;
 use std::{error, fmt, io::Error as IoError, num::TryFromIntError};
 
@@ -6,7 +7,7 @@ use derive_is_enum_variant::is_enum_variant;
 #[cfg(feature = "env")]
 use envy::Error as EnvyError;
 use reqwest::{header::ToStrError as HeaderStrError, Error as HttpError, StatusCode};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::Error as SerdeError;
 use serde_urlencoded::ser::Error as UrlEncodedError;
 #[cfg(feature = "toml")]
@@ -116,6 +117,8 @@ pub struct ApiError {
     pub error: String,
     /// A longer description of the error, mainly provided with the OAuth API.
     pub error_description: Option<String>,
+    /// Details about the error. See this note in the docs https://docs.joinmastodon.org/methods/accounts/#422-unprocessable-entity
+    pub details: Option<HashMap<String, Vec<ApiErrorDetail>>>,
 }
 
 impl fmt::Display for ApiError {
@@ -134,6 +137,49 @@ macro_rules! format_err {
             $crate::Error::Other(format!($($arg)*))
         }
     }
+}
+
+/// Details about the error. See this note in the docs https://docs.joinmastodon.org/methods/accounts/#422-unprocessable-entity
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct ApiErrorDetail {
+    error: ApiErrorDetailType,
+    description: String,
+}
+
+/// The type of error detail.
+#[derive(Debug, Serialize, Deserialize, Copy, Clone)]
+pub enum ApiErrorDetailType {
+    /// When e-mail provider is not allowed
+    #[serde(rename = "ERR_BLOCKED")]
+    Blocked,
+    /// When e-mail address does not resolve to any IP via DNS (MX, A, AAAA)
+    #[serde(rename = "ERR_UNREACHABLE")]
+    Unreachable,
+    /// When username or e-mail are already taken
+    #[serde(rename = "ERR_TAKEN")]
+    Taken,
+    /// When a username is reserved, e.g. “webmaster” or “admin”
+    #[serde(rename = "ERR_RESERVED")]
+    Reserved,
+    /// When agreement has not been accepted
+    #[serde(rename = "ERR_ACCEPTED")]
+    Accepted,
+    /// When a required attribute is blank
+    #[serde(rename = "ERR_BLANK")]
+    Blank,
+    /// When an attribute is malformed, e.g. wrong characters or invalid e-mail address
+    #[serde(rename = "ERR_INVALID")]
+    Invalid,
+    /// When an attribute is over the character limit
+    #[serde(rename = "ERR_TOO_LONG")]
+    TooLong,
+    /// When an attribute is under the character requirement
+    #[serde(rename = "ERR_TOO_SHORT")]
+    TooShort,
+    /// When an attribute is not one of the allowed values, e.g. unsupported locale:qa
+    ///
+    #[serde(rename = "ERR_INCLUSION")]
+    Inclusion,
 }
 
 #[cfg(test)]
