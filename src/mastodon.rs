@@ -157,6 +157,9 @@ impl Mastodon {
     query_form_route! {
         "Obtain an access token, to be used during API calls that are not public."
         (post token_form: forms::oauth::TokenRequest) get_auth_token: "oauth/token" => Token,
+        "Returns the client account's relationship to a list of other accounts. \
+         Such as whether they follow them or vice versa."
+        (get ids: forms::account::IdList) relationships: "accounts/relationships" => Vec<Relationship>,
     }
 
     /// A new instance.
@@ -311,34 +314,6 @@ impl Mastodon {
             url,
             method = stringify!($method),
             ?call_id,
-            "making API request"
-        );
-        let response = self.client.get(&url).send().await?;
-
-        Page::new(self.clone(), response, call_id).await
-    }
-
-    /// Returns the client account's relationship to a list of other accounts.
-    /// Such as whether they follow them or vice versa.
-    pub async fn relationships(&self, ids: &[&AccountId]) -> Result<Page<Relationship>> {
-        let call_id = Uuid::new_v4();
-        let mut url = self.route("/api/v1/accounts/relationships?");
-
-        if ids.len() == 1 {
-            url += "id=";
-            url += ids[0].as_ref();
-        } else {
-            for id in ids {
-                url += "id[]=";
-                url += id.as_ref();
-                url += "&";
-            }
-            url.pop();
-        }
-
-        debug!(
-            url, method = stringify!($method),
-            ?call_id, account_ids = ?ids,
             "making API request"
         );
         let response = self.client.get(&url).send().await?;
