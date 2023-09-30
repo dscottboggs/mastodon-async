@@ -72,7 +72,7 @@ macro_rules! paged_routes {
                 "`\n# Errors\nIf `access_token` is not set."
             ),
             pub async fn $name<'a>(&self, $($param: $typ,)*) -> Result<Page<$ret>> {
-                use serde_urlencoded;
+                use serde_qs;
                 use tracing::debug;
                 use serde::Serialize;
 
@@ -98,7 +98,7 @@ macro_rules! paged_routes {
                     _marker: ::std::marker::PhantomData,
                 };
 
-                let qs = serde_urlencoded::to_string(&qs_data)?;
+                let qs = serde_qs::to_string(&qs_data)?;
 
                 let url = format!(concat!("/api/v1/", $url, "?{}"), &qs);
                 let url = self.route(url);
@@ -126,7 +126,6 @@ macro_rules! route_v2 {
                 "`\n# Errors\nIf `access_token` is not set."
             ),
             pub async fn $name<'a>(&self, $($param: $typ,)*) -> Result<$ret> {
-                use serde_urlencoded;
                 use tracing::debug;
                 use uuid::Uuid;
                 use serde::Serialize;
@@ -150,7 +149,7 @@ macro_rules! route_v2 {
                     _marker: ::std::marker::PhantomData,
                 };
 
-                let qs = serde_urlencoded::to_string(&qs_data)?;
+                let qs = serde_qs::to_string(&qs_data)?;
 
                 debug!(query_string_data = ?qs, "URL-encoded data to be sent in API request");
 
@@ -342,7 +341,6 @@ macro_rules! route {
                 "`\n# Errors\nIf `access_token` is not set."
             ),
             pub async fn $name<'a>(&self, $($param: $typ,)*) -> Result<$ret> {
-                use serde_urlencoded;
                 use tracing::debug;
                 use uuid::Uuid;
                 use serde::Serialize;
@@ -367,7 +365,7 @@ macro_rules! route {
                 };
 
 
-                let qs = serde_urlencoded::to_string(&qs_data)?;
+                let qs = serde_qs::to_string(&qs_data)?;
 
                 debug!(query_string_data = ?qs, "URL-encoded data to be sent in API request");
 
@@ -654,7 +652,7 @@ macro_rules! query_form_route {
     } => {
         #[doc = $desc]
         pub async fn $fn_name(&self, $form: $form_type) -> Result<$return_type> {
-            let form = serde_urlencoded::to_string($form)?;
+            let form = serde_qs::to_string(&$form)?;
             let url = self.route(concat!("/api/v1/", $route));
 
             self.$method(format!("{url}?{form}")).await

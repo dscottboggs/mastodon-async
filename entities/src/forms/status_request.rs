@@ -59,7 +59,7 @@ pub struct Options {
 
 impl Options {
     pub fn to_query_string(&self) -> Result<String> {
-        Ok(format!("&{}", serde_urlencoded::to_string(self)?))
+        Ok(format!("&{}", serde_qs::to_string(self)?))
     }
     pub fn builder() -> OptionsBuilder {
         OptionsBuilder::default()

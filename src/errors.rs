@@ -9,7 +9,6 @@ use envy::Error as EnvyError;
 use reqwest::{header::ToStrError as HeaderStrError, Error as HttpError, StatusCode};
 use serde::{Deserialize, Serialize};
 use serde_json::Error as SerdeError;
-use serde_urlencoded::ser::Error as UrlEncodedError;
 #[cfg(feature = "toml")]
 use tomlcrate::de::Error as TomlDeError;
 #[cfg(feature = "toml")]
@@ -35,9 +34,9 @@ pub enum Error {
     /// the Mastodon API
     #[error("error from serde")]
     Serde(#[from] SerdeError),
-    /// Error serializing to url-encoded string
-    #[error("error serializing to url-encoded string")]
-    UrlEncoded(#[from] UrlEncodedError),
+    /// Error serializing to (or from) url-encoded string
+    #[error(transparent)]
+    UrlEncoded(#[from] serde_qs::Error),
     /// Error encountered in the HTTP backend while requesting a route.
     #[error("Error encountered in the HTTP backend while requesting a route.")]
     Http(#[from] HttpError),
@@ -219,7 +218,7 @@ mod tests {
 
     #[test]
     fn from_url_encoded_error() {
-        let err: UrlEncodedError = serde_urlencoded::ser::Error::Custom("error".into());
+        let err: serde_qs::Error = serde_qs::Error::Custom("error".into());
         let err: Error = Error::from(err);
         assert_is!(err, Error::UrlEncoded(..));
     }

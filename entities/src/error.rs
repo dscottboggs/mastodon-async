@@ -10,10 +10,7 @@ pub enum Error {
     #[error(transparent)]
     Builder(#[from] derive_builder::UninitializedFieldError),
     #[error(transparent)]
-    UrlEncodingError(serde_urlencoded::ser::Error),
-    /// Error serializing to url-encoded string
-    #[error("error serializing to url-encoded string")]
-    UrlEncoded(#[from] serde_urlencoded::ser::Error),
+    UrlEncodingError(#[from] serde_qs::Error),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;

@@ -526,7 +526,7 @@ impl MastodonUnauthenticated {
         request: forms::oauth::AuthorizationRequest,
     ) -> Result<String> {
         let call_id = Uuid::new_v4();
-        let query = serde_urlencoded::to_string(request)?;
+        let query = serde_qs::to_string(&request)?;
         let url = self.route(format!("/oauth/authorize?{query}"));
         debug!(?url, method = "get", ?call_id, ?query, "making API request");
         let response = self.client.get(url).send().await?;
