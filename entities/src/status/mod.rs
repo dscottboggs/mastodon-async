@@ -1,5 +1,3 @@
-//! Module containing all info relating to a status.
-
 pub mod edit;
 /// For building a new status
 pub mod new;
@@ -124,24 +122,6 @@ pub struct Application {
     pub name: String,
     /// Homepage URL of the application.
     pub website: Option<String>,
-}
-
-/// Represents a hashtag that is featured on a profile.
-///
-/// See also [the API documentation](https://docs.joinmastodon.org/entities/FeaturedTag/)
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct FeaturedTag {
-    /// The internal ID of the featured tag in the database.
-    pub id: TagId,
-    /// The name of the hashtag being featured.
-    pub name: String,
-    /// A link to all statuses by a user that contain this hashtag.
-    pub url: Url,
-    /// The number of authored statuses containing this hashtag.
-    pub statuses_count: u64,
-    /// The timestamp of the last authored status containing this hashtag.
-    #[serde(with = "iso8601")]
-    pub last_status_at: OffsetDateTime,
 }
 
 #[cfg(test)]
@@ -335,27 +315,4 @@ mod tests {
         assert!(status.poll.is_none());
     }
 
-    #[test]
-    fn test_featured_tag() {
-        let example = r#"{
-            "id": "627",
-            "name": "nowplaying",
-            "url": "https://mastodon.social/@trwnh/tagged/nowplaying",
-            "statuses_count": 70,
-            "last_status_at": "2022-08-29T12:03:35.061Z"
-        }"#;
-        let subject: FeaturedTag = serde_json::from_str(example).expect("deserialize");
-        assert_eq!(subject.id, TagId::new("627"));
-        assert_eq!(subject.name, "nowplaying");
-        assert_eq!(
-            subject.url.as_ref(),
-            "https://mastodon.social/@trwnh/tagged/nowplaying"
-        );
-        assert_eq!(subject.statuses_count, 70);
-        assert_eq!(
-            subject.last_status_at,
-            OffsetDateTime::parse("2022-08-29T12:03:35.061Z", &Iso8601::PARSING)
-                .expect("parse test time")
-        );
-    }
 }
