@@ -221,6 +221,27 @@ impl Mastodon {
         read_response(response).await
     }
 
+    /// Add a private note about an account
+    pub async fn add_note_to_account(
+        &self,
+        account: AccountId,
+        comment: String,
+    ) -> Result<Relationship> {
+        #[derive(Serialize)]
+        struct Note {
+            comment: String,
+        }
+        let url = self.route(format!("/api/v1/accounts/{account}/note"));
+        let note = Note { comment };
+        let response = self
+            .authenticated(self.client.post(&url))
+            .json(&note)
+            .send()
+            .await?;
+        debug!(response = as_value!(response, Response), ?account, comment=?note.comment, "received API response");
+        read_response(response).await
+    }
+
     /// Follow an account, or update your follow preferences
     pub async fn follow(
         &self,
