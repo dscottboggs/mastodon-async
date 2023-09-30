@@ -110,6 +110,8 @@ impl Mastodon {
         (post) unblock[AccountId]: "accounts/{}/unblock" => Relationship,
         (get) mute[AccountId]: "accounts/{}/mute" => Relationship,
         (get) unmute[AccountId]: "accounts/{}/unmute" => Relationship,
+        (post) feature_account[AccountId]: "accounts/{}/pin" => Relationship,
+        (post) stop_featuring_account[AccountId]: "accounts/{}/unpin" => Relationship,
         (get) featured_tags[AccountId]: "accounts/{}/featured_tags" => Vec<tag::Featured>,
         (get) in_lists[AccountId]: "accounts/{}/lists" => Vec<List>,
         (get) get_notification[NotificationId]: "notifications/{}" => Notification,
