@@ -104,7 +104,6 @@ impl Mastodon {
 
     route_id! {
         (get) get_account[AccountId]: "accounts/{}" => Account,
-        (post) follow[AccountId]: "accounts/{}/follow" => Relationship,
         (post) unfollow[AccountId]: "accounts/{}/unfollow" => Relationship,
         (post) block[AccountId]: "accounts/{}/block" => Relationship,
         (post) unblock[AccountId]: "accounts/{}/unblock" => Relationship,
@@ -214,6 +213,24 @@ impl Mastodon {
             .await?;
         debug!(
             response = as_value!(response, Response), updated_status_id = ?id, ?status,
+            "received API response"
+        );
+        read_response(response).await
+    }
+
+    /// Follow an account, or update your follow preferences
+    pub async fn follow(
+        &self,
+        id: &AccountId,
+        options: forms::account::FollowOptions,
+    ) -> Result<Relationship> {
+        let url = self.route(format!(
+            "/api/v1/accounts/{id}/follow?{}",
+            serde_qs::to_string(&options)?
+        ));
+        let response = self.authenticated(self.client.post(&url)).send().await?;
+        debug!(
+            response = as_value!(response, Response), followed_account = ?id, ?options,
             "received API response"
         );
         read_response(response).await
