@@ -66,7 +66,7 @@ impl Mastodon {
         (get) instance_activity: "instance/activity" => instance::Activity,
         (get) instance_rules: "instance/rules" => instance::Rule,
         (get) reports: "reports" => Report,
-        (get (q: &'a str, #[serde(skip_serializing_if = "Option::is_none")] limit: Option<u64>, following: bool,)) search_accounts: "accounts/search" => Account,
+        (get::<forms::account::Search>) search_accounts: "accounts/search" => Account,
         (get) get_endorsements: "endorsements" => Account,
     }
 

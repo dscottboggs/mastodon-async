@@ -64,6 +64,32 @@ macro_rules! paged_routes {
         paged_routes!{$($rest)*}
     };
 
+    ((get::<$form_type:ty>) $name:ident: $url:expr => $ret:ty, $($rest:tt)*) => {
+        doc_comment! {
+            concat!(
+                "Equivalent to `get /api/v1/",
+                $url,
+                "`\n# Errors\nIf `access_token` is not set."
+            ),
+            pub async fn $name<'a>(&self, form: &$form_type) -> Result<Page<$ret>> {
+                use tracing::debug;
+
+                let call_id = uuid::Uuid::new_v4();
+
+                let qs = serde_qs::to_string(&form)?;
+
+                let url = format!(concat!("/api/v1/", $url, "?{}"), &qs);
+                let url = self.route(url);
+
+                debug!(url, method = "get", ?call_id, "making API request");
+
+                let response = self.authenticated(self.client.get(&url)).header("Accept", "application/json").send().await?;
+
+                Page::new(self.clone(), response, call_id).await
+            }
+        }
+        paged_routes!{$($rest)*}
+    };
     ((get ($($(#[$m:meta])* $param:ident: $typ:ty,)*)) $name:ident: $url:expr => $ret:ty, $($rest:tt)*) => {
         doc_comment! {
             concat!(
