@@ -105,6 +105,7 @@ impl Mastodon {
     route_id! {
         (get) get_account[AccountId]: "accounts/{}" => Account,
         (post) unfollow[AccountId]: "accounts/{}/unfollow" => Relationship,
+        (post) remove_from_followers[AccountId]: "accounts/{}/remove_from_followers" => Relationship,
         (post) block[AccountId]: "accounts/{}/block" => Relationship,
         (post) unblock[AccountId]: "accounts/{}/unblock" => Relationship,
         (get) mute[AccountId]: "accounts/{}/mute" => Relationship,
