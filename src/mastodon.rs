@@ -81,6 +81,7 @@ impl Mastodon {
         (delete (domain: String,)) unblock_domain: "domain_blocks" => Empty,
         (get) instance: "instance" => Instance,
         (get) verify_credentials: "accounts/verify_credentials" => Account,
+        (get (acct: &'a str,)) lookup_account: "accounts/lookup" => Account,
         (post (account_id: &str, status_ids: Vec<&str>, comment: String,)) report: "reports" => Report,
         (post (domain: String,)) block_domain: "domain_blocks" => Empty,
         (post (id: &str,)) authorize_follow_request: "accounts/follow_requests/authorize" => Empty,
