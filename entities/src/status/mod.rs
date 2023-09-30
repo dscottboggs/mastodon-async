@@ -314,5 +314,4 @@ mod tests {
         assert!(card.embed_url.is_none());
         assert!(status.poll.is_none());
     }
-
 }

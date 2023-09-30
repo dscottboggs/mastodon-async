@@ -54,8 +54,8 @@ pub struct Featured {
 
 #[cfg(test)]
 mod tests {
-    use time::{Month, format_description::well_known::Iso8601};
-    
+    use time::{format_description::well_known::Iso8601, Month};
+
     use super::*;
 
     #[test]

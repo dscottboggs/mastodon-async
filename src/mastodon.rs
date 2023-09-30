@@ -111,6 +111,7 @@ impl Mastodon {
         (get) mute[AccountId]: "accounts/{}/mute" => Relationship,
         (get) unmute[AccountId]: "accounts/{}/unmute" => Relationship,
         (get) featured_tags[AccountId]: "accounts/{}/featured_tags" => Vec<tag::Featured>,
+        (get) in_lists[AccountId]: "accounts/{}/lists" => Vec<List>,
         (get) get_notification[NotificationId]: "notifications/{}" => Notification,
         (get) get_status[StatusId]: "statuses/{}" => Status,
         (get) get_context[StatusId]: "statuses/{}/context" => Context,
