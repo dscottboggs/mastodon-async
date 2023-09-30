@@ -160,6 +160,8 @@ impl Mastodon {
         "Returns the client account's relationship to a list of other accounts. \
          Such as whether they follow them or vice versa."
         (get ids: forms::account::IdList) relationships: "accounts/relationships" => Vec<Relationship>,
+        "Obtain a list of all accounts that follow a given account, filtered for accounts you follow."
+        (get ids: forms::account::IdList) familiar_followers: "accounts/familiar_followers" => Vec<Relationship>,
     }
 
     /// A new instance.
