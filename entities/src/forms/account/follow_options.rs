@@ -1,4 +1,4 @@
-use crate::forms::helpers::bool_qs_serialize;
+use crate::forms::helpers::bool_qs;
 use derive_builder::Builder;
 use isolang::Language;
 use serde::Serialize;
@@ -11,12 +11,12 @@ use serde::Serialize;
 )]
 pub struct FollowOptions {
     #[builder(default = "true")]
-    #[serde(skip_serializing_if = "bool_qs_serialize::is_true")]
-    #[serde(serialize_with = "bool_qs_serialize::serialize")]
+    #[serde(skip_serializing_if = "bool_qs::is_true")]
+    #[serde(serialize_with = "bool_qs::serialize")]
     reblogs: bool,
     #[builder(default)]
-    #[serde(skip_serializing_if = "bool_qs_serialize::is_false")]
-    #[serde(serialize_with = "bool_qs_serialize::serialize")]
+    #[serde(skip_serializing_if = "bool_qs::is_false")]
+    #[serde(serialize_with = "bool_qs::serialize")]
     notify: bool,
     #[builder(default, setter(into))]
     #[serde(skip_serializing_if = "Vec::is_empty")]

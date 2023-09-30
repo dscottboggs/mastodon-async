@@ -1,4 +1,4 @@
-pub(super) mod bool_qs_serialize {
+pub mod bool_qs {
     use serde::Serializer;
 
     pub fn is_false(b: &bool) -> bool {
