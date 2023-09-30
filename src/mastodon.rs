@@ -9,7 +9,7 @@ use crate::{
     errors::{Error, Result},
     helpers::read_response::read_response,
     polling_time::PollingTime,
-    AddFilterRequest, AddPushRequest, Data, NewStatus, Page, StatusesRequest, UpdatePushRequest,
+    AddFilterRequest, AddPushRequest, Data, NewStatus, Page, UpdatePushRequest,
 };
 use futures::TryStream;
 use reqwest::{multipart::Part, Client, RequestBuilder};
@@ -66,7 +66,7 @@ impl Mastodon {
         (get) instance_activity: "instance/activity" => instance::Activity,
         (get) instance_rules: "instance/rules" => instance::Rule,
         (get) reports: "reports" => Report,
-        (get (q: &'a str, #[serde(skip_serializing_if = "Option::is_none")] limit: Option<u64>, following: bool,)) search_accounts: "accounts/search" => Account,
+        (get::<forms::account::Search>) search_accounts: "accounts/search" => Account,
         (get) get_endorsements: "endorsements" => Account,
     }
 
@@ -81,6 +81,7 @@ impl Mastodon {
         (delete (domain: String,)) unblock_domain: "domain_blocks" => Empty,
         (get) instance: "instance" => Instance,
         (get) verify_credentials: "accounts/verify_credentials" => Account,
+        (get (acct: &'a str,)) lookup_account: "accounts/lookup" => Account,
         (post (account_id: &str, status_ids: Vec<&str>, comment: String,)) report: "reports" => Report,
         (post (domain: String,)) block_domain: "domain_blocks" => Empty,
         (post (id: &str,)) authorize_follow_request: "accounts/follow_requests/authorize" => Empty,
@@ -104,12 +105,16 @@ impl Mastodon {
 
     route_id! {
         (get) get_account[AccountId]: "accounts/{}" => Account,
-        (post) follow[AccountId]: "accounts/{}/follow" => Relationship,
         (post) unfollow[AccountId]: "accounts/{}/unfollow" => Relationship,
+        (post) remove_from_followers[AccountId]: "accounts/{}/remove_from_followers" => Relationship,
         (post) block[AccountId]: "accounts/{}/block" => Relationship,
         (post) unblock[AccountId]: "accounts/{}/unblock" => Relationship,
         (get) mute[AccountId]: "accounts/{}/mute" => Relationship,
         (get) unmute[AccountId]: "accounts/{}/unmute" => Relationship,
+        (post) feature_account[AccountId]: "accounts/{}/pin" => Relationship,
+        (post) stop_featuring_account[AccountId]: "accounts/{}/unpin" => Relationship,
+        (get) featured_tags[AccountId]: "accounts/{}/featured_tags" => Vec<tag::Featured>,
+        (get) in_lists[AccountId]: "accounts/{}/lists" => Vec<List>,
         (get) get_notification[NotificationId]: "notifications/{}" => Notification,
         (get) get_status[StatusId]: "statuses/{}" => Status,
         (get) get_context[StatusId]: "statuses/{}/context" => Context,
@@ -153,6 +158,11 @@ impl Mastodon {
     query_form_route! {
         "Obtain an access token, to be used during API calls that are not public."
         (post token_form: forms::oauth::TokenRequest) get_auth_token: "oauth/token" => Token,
+        "Returns the client account's relationship to a list of other accounts. \
+         Such as whether they follow them or vice versa."
+        (get ids: forms::account::IdList) relationships: "accounts/relationships" => Vec<Relationship>,
+        "Obtain a list of all accounts that follow a given account, filtered for accounts you follow."
+        (get ids: forms::account::IdList) familiar_followers: "accounts/familiar_followers" => Vec<Relationship>,
     }
 
     /// A new instance.
@@ -186,13 +196,22 @@ impl Mastodon {
 
     post_route! {
         "Update the user credentials"
-        [patch] update_credentials(account::Credentials)@"/api/v1/accounts/update_credentials" -> Account,
+        [patch] update_credentials(account::Credentials)@"accounts/update_credentials" -> Account,
         "Post a new status to the account."
-        [post] new_status(NewStatus)@"/api/v1/statuses" -> Status,
-        "Revoke an access token to make it no longer valid for use."
-        [post] revoke_auth(forms::oauth::token::Revocation)@"/oauth/revoke" -> auth::RevocationResponse,
+        [post] new_status(NewStatus)@"statuses" -> Status,
+        "Creates a user and account records."
+        [post] create_account(forms::account::Creation)@"accounts" -> Token,
     }
 
+    ///Revoke an access token to make it no longer valid for use.
+    pub async fn revoke_auth(
+        &self,
+        post_body: forms::oauth::token::Revocation,
+    ) -> Result<auth::RevocationResponse> {
+        let url = self.route("/oauth/revoke");
+        let response = self.client.post(&url).json(&post_body).send().await?;
+        read_response(response).await
+    }
     /// Edit existing status
     pub async fn update_status(&self, id: &StatusId, status: NewStatus) -> Result<Status> {
         let url = self.route(format!("/api/v1/statuses/{id}"));
@@ -203,6 +222,45 @@ impl Mastodon {
             .await?;
         debug!(
             response = as_value!(response, Response), updated_status_id = ?id, ?status,
+            "received API response"
+        );
+        read_response(response).await
+    }
+
+    /// Add a private note about an account
+    pub async fn add_note_to_account(
+        &self,
+        account: AccountId,
+        comment: String,
+    ) -> Result<Relationship> {
+        #[derive(Serialize)]
+        struct Note {
+            comment: String,
+        }
+        let url = self.route(format!("/api/v1/accounts/{account}/note"));
+        let note = Note { comment };
+        let response = self
+            .authenticated(self.client.post(&url))
+            .json(&note)
+            .send()
+            .await?;
+        debug!(response = as_value!(response, Response), ?account, comment=?note.comment, "received API response");
+        read_response(response).await
+    }
+
+    /// Follow an account, or update your follow preferences
+    pub async fn follow(
+        &self,
+        id: &AccountId,
+        options: forms::account::FollowOptions,
+    ) -> Result<Relationship> {
+        let url = self.route(format!(
+            "/api/v1/accounts/{id}/follow?{}",
+            serde_qs::to_string(&options)?
+        ));
+        let response = self.authenticated(self.client.post(&url)).send().await?;
+        debug!(
+            response = as_value!(response, Response), followed_account = ?id, ?options,
             "received API response"
         );
         read_response(response).await
@@ -240,53 +298,25 @@ impl Mastodon {
     /// tokio_test::block_on(async {
     ///     let data = Data::default();
     ///     let client = Mastodon::from(data);
-    ///     let mut request = StatusesRequest::new();
-    ///     request.only_media();
-    ///     let statuses = client.statuses(&AccountId::new("user-id"), request).await.unwrap();
+    ///     let mut options = forms::status_request::Options::builder();
+    ///     options.only_media(true);
+    ///     let statuses = client.statuses(&AccountId::new("user-id"), options.build()).await.unwrap();
     /// });
     /// ```
-    pub async fn statuses<'a, 'b: 'a>(
-        &'b self,
-        id: &'b AccountId,
-        request: StatusesRequest<'a>,
+    pub async fn statuses(
+        &self,
+        id: &AccountId,
+        options: forms::status_request::Options,
     ) -> Result<Page<Status>> {
         let call_id = Uuid::new_v4();
         let mut url = format!("{}/api/v1/accounts/{id}/statuses", self.data.base);
 
-        url += request.to_query_string()?.as_str();
+        url += options.to_query_string()?.as_str();
 
         debug!(
             url,
             method = stringify!($method),
             ?call_id,
-            "making API request"
-        );
-        let response = self.client.get(&url).send().await?;
-
-        Page::new(self.clone(), response, call_id).await
-    }
-
-    /// Returns the client account's relationship to a list of other accounts.
-    /// Such as whether they follow them or vice versa.
-    pub async fn relationships(&self, ids: &[&AccountId]) -> Result<Page<Relationship>> {
-        let call_id = Uuid::new_v4();
-        let mut url = self.route("/api/v1/accounts/relationships?");
-
-        if ids.len() == 1 {
-            url += "id=";
-            url += ids[0].as_ref();
-        } else {
-            for id in ids {
-                url += "id[]=";
-                url += id.as_ref();
-                url += "&";
-            }
-            url.pop();
-        }
-
-        debug!(
-            url, method = stringify!($method),
-            ?call_id, account_ids = ?ids,
             "making API request"
         );
         let response = self.client.get(&url).send().await?;
@@ -515,7 +545,7 @@ impl MastodonUnauthenticated {
         request: forms::oauth::AuthorizationRequest,
     ) -> Result<String> {
         let call_id = Uuid::new_v4();
-        let query = serde_urlencoded::to_string(request)?;
+        let query = serde_qs::to_string(&request)?;
         let url = self.route(format!("/oauth/authorize?{query}"));
         debug!(?url, method = "get", ?call_id, ?query, "making API request");
         let response = self.client.get(url).send().await?;

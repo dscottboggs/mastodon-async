@@ -71,7 +71,7 @@ impl AuthorizationRequest {
     /// The URL the user needs to visit to authorize the application.
     pub fn url(&self) -> Result<String> {
         let base = &self.instance;
-        match serde_urlencoded::to_string(self) {
+        match serde_qs::to_string(self) {
             Ok(query) => Ok(format!("{base}?{query}")),
             Err(error) => Err(Error::UrlEncodingError(error)),
         }

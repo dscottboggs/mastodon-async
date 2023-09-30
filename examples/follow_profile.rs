@@ -8,7 +8,7 @@ async fn run() -> Result<()> {
     let mastodon = register::get_mastodon_data().await?;
     let input = register::read_line("Enter the account id you'd like to follow: ")?;
     let account = AccountId::new(input.trim());
-    let new_follow = mastodon.follow(&account).await?;
+    let new_follow = mastodon.follow(&account, Default::default()).await?;
 
     println!("{:#?}", new_follow);
     Ok(())

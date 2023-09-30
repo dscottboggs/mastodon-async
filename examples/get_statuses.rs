@@ -1,20 +1,19 @@
 #![cfg_attr(not(feature = "toml"), allow(dead_code))]
 #![cfg_attr(not(feature = "toml"), allow(unused_imports))]
 mod register;
-use mastodon_async::Result;
+use mastodon_async::{errors::Result, prelude::*};
 
 #[cfg(feature = "toml")]
 async fn run() -> Result<()> {
     use futures_util::StreamExt;
-    use mastodon_async::StatusesRequest;
 
-    let mut filters = StatusesRequest::new();
+    let mut filters = forms::status_request::Options::builder();
     filters.limit(3);
     let mastodon = register::get_mastodon_data().await?;
     let you = mastodon.verify_credentials().await?;
 
     mastodon
-        .statuses(&you.id, filters)
+        .statuses(&you.id, filters.build())
         .await?
         .items_iter()
         .take(4)
