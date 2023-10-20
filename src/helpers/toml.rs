@@ -79,7 +79,7 @@ mod tests {
     use std::{fs::OpenOptions, io::Cursor};
     use tempfile::{tempdir, NamedTempFile};
 
-    const DOC: &'static str = indoc!(
+    const DOC: &str = indoc!(
         r#"
             base = "https://example.com"
             client_id = "adbc01234"
@@ -106,7 +106,7 @@ mod tests {
     #[test]
     fn test_from_slice() {
         let doc = DOC.as_bytes();
-        let desered = from_slice(&doc).expect("Couldn't deserialize Data");
+        let desered = from_slice(doc).expect("Couldn't deserialize Data");
         assert_eq!(
             desered,
             Data {
