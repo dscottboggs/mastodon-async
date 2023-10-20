@@ -39,7 +39,7 @@ jobs:
       - uses: swatinem/rust-cache@v2
       - uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: 1.65.0
+          toolchain: 1.67.0
           components: clippy
       - run: cargo clippy --all-features -- -D warnings
 
@@ -51,7 +51,7 @@ jobs:
       - uses: swatinem/rust-cache@v2
       - uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: 1.65.0
+          toolchain: 1.67.0
           components: rustfmt
       - run: cargo fmt --check
 
