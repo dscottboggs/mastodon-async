@@ -16,10 +16,7 @@ async fn run() -> Result<()> {
     info!("watching mastodon for events. This will run forever, press Ctrl+C to kill the program.");
     stream
         .try_for_each(|(event, _client)| async move {
-            match event {
-                // fill in how you want to handle events here.
-                _ => warn!(event = as_serde!(event); "unrecognized event received"),
-            }
+            warn!(event = as_serde!(event); "unrecognized event received");
             Ok(())
         })
         .await?;

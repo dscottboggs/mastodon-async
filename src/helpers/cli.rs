@@ -14,7 +14,7 @@ pub async fn authenticate(registration: Registered) -> Result<Mastodon> {
         let mut stdout = stdout.lock();
         let mut stdin = stdin.lock();
 
-        writeln!(&mut stdout, "Click this link to authorize: {}", url)?;
+        writeln!(&mut stdout, "Click this link to authorize: {url}")?;
         write!(&mut stdout, "Paste the returned authorization code: ")?;
         stdout.flush()?;
 

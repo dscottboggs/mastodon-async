@@ -87,7 +87,6 @@ impl Mastodon {
         (get  (local: bool,)) get_public_timeline: "timelines/public" => Vec<Status>,
         (post (uri: Cow<'static, str>,)) follows: "follows" => Account,
         (post) clear_notifications: "notifications/clear" => Empty,
-        (post (id: &str,)) dismiss_notification: "notifications/dismiss" => Empty,
         (get) get_push_subscription: "push/subscription" => Subscription,
         (delete) delete_push_subscription: "push/subscription" => Empty,
         (get) get_filters: "filters" => Vec<Filter>,
@@ -109,6 +108,7 @@ impl Mastodon {
         (get) mute[AccountId]: "accounts/{}/mute" => Relationship,
         (get) unmute[AccountId]: "accounts/{}/unmute" => Relationship,
         (get) get_notification[NotificationId]: "notifications/{}" => Notification,
+        (post) dismiss_notification[NotificationId]: "notifications/{}/dismiss" => Empty,
         (get) get_status[StatusId]: "statuses/{}" => Status,
         (get) get_context[StatusId]: "statuses/{}/context" => Context,
         (get) get_card[StatusId]: "statuses/{}/card" => Card,
@@ -171,7 +171,7 @@ impl Mastodon {
 
     /// PUT /api/v1/filters/:id
     pub async fn update_filter(&self, id: &str, request: &mut AddFilterRequest) -> Result<Filter> {
-        let url = self.route(format!("/api/v1/filters/{}", id));
+        let url = self.route(format!("/api/v1/filters/{id}"));
         let response = self.client.put(&url).json(&request).send().await?;
 
         read_response(response).await
@@ -207,9 +207,9 @@ impl Mastodon {
     pub async fn get_tagged_timeline(&self, hashtag: String, local: bool) -> Result<Vec<Status>> {
         let base = "/api/v1/timelines/tag/";
         let url = if local {
-            self.route(format!("{}{}?local=1", base, hashtag))
+            self.route(format!("{base}{hashtag}?local=1"))
         } else {
-            self.route(format!("{}{}", base, hashtag))
+            self.route(format!("{base}{hashtag}"))
         };
 
         self.get(url).await
