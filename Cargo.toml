@@ -101,7 +101,7 @@ skeptic = "0.13"
 tempfile = "3"
 # for examples:
 femme = "2.2.1"
-html2text = "0.6.0"
+html2text = "0.9.4"
 [dev-dependencies.criterion]
 version = "0.5.1"
 features = ["async_tokio"]
