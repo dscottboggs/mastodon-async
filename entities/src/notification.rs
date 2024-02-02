@@ -31,6 +31,8 @@ pub struct Notification {
 pub enum NotificationType {
     /// Someone mentioned the application client in another status.
     Mention,
+    /// Someone you enabled notifications for has posted a status.
+    Status,
     /// Someone reblogged one of the application client's statuses.
     Reblog,
     /// Someone favourited one of the application client's statuses.
@@ -42,4 +44,6 @@ pub enum NotificationType {
     FollowRequest,
     /// A poll the application client previously voted in has ended.
     Poll,
+    /// A status you boosted with has been edited.
+    Update,
 }
