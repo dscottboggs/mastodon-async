@@ -39,7 +39,6 @@ futures = "0.3.25"
 doc-comment = "0.3"
 serde_json = "1"
 serde_urlencoded = "0.7.1"
-tap-reader = "1"
 url = "2"
 futures-util = "0.3.25"
 static_assertions = "1.1.0"
@@ -97,14 +96,10 @@ features = ["io"]
 tokio-test = "0.4.2"
 futures-util = "0.3.25"
 indoc = "2.0"
-skeptic = "0.13"
 tempfile = "3"
 # for examples:
 femme = "2.2.1"
 html2text = "0.6.0"
-[dev-dependencies.criterion]
-version = "0.5.1"
-features = ["async_tokio"]
 
 [build-dependencies.skeptic]
 version = "0.13"
