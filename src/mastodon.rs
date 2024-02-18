@@ -12,8 +12,8 @@ use crate::{
     helpers::read_response::read_response,
     log_serde,
     polling_time::PollingTime,
-    AddFilterRequest, AddPushRequest, Data, NewStatus, Page, StatusesRequest, UpdateCredsRequest,
-    UpdatePushRequest,
+    AddFilterRequest, AddFilterV2Request, AddPushRequest, Data, NewStatus, Page, StatusesRequest,
+    UpdateCredsRequest, UpdatePushRequest,
 };
 use futures::TryStream;
 use log::{as_debug, as_serde, debug, error, trace};
@@ -94,6 +94,7 @@ impl Mastodon {
     }
 
     route_v2! {
+        (get) get_v2_filters: "filters" => Vec<Filter>,
         (get (q: &'a str, resolve: bool,)) search: "search" => SearchResult,
         (post multipart with description (file: impl AsRef<Path>,)) media: "media" => Attachment,
         (post multipart with description (file: impl AsRef<Path>, thumbnail: impl AsRef<Path>,)) media_with_thumbnail: "media" => Attachment,
@@ -123,6 +124,11 @@ impl Mastodon {
         (post) endorse_user[AccountId]: "accounts/{}/pin" => Relationship,
         (post) unendorse_user[AccountId]: "accounts/{}/unpin" => Relationship,
         (get) attachment[AttachmentId]: "media/{}" => Attachment,
+    }
+
+    route_v2_id! {
+        (get) get_v2_filter[FilterId]: "filters/{}" => Filter,
+        (delete) delete_v2_filter[FilterId]: "filters/{}" => Empty,
     }
 
     streaming! {
@@ -162,6 +168,18 @@ impl Mastodon {
         let response = self
             .client
             .post(self.route("/api/v1/filters"))
+            .json(&request)
+            .send()
+            .await?;
+
+        read_response(response).await
+    }
+
+    /// POST /api/v2/filters
+    pub async fn add_v2_filter(&self, request: &AddFilterV2Request) -> Result<Filter> {
+        let url = self.route("/api/v2/filters");
+        let response = self
+            .authenticated(self.client.post(&url))
             .json(&request)
             .send()
             .await?;

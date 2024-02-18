@@ -126,12 +126,12 @@ impl<'de> Deserialize<'de> for Action {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Keyword {
     /// The ID of the FilterKeyword in the database.
-    id: String,
+    pub id: String,
     /// The phrase to be matched against.
-    keyword: String,
+    pub keyword: String,
     /// Should the filter consider word boundaries? See [implementation guidelines
     /// for filters](https://docs.joinmastodon.org/api/guidelines/#filters).
-    whole_word: bool,
+    pub whole_word: bool,
 }
 
 /// Represents a status ID that, if matched, should cause the filter action to be taken.
@@ -146,9 +146,9 @@ pub struct Keyword {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Status {
     /// The ID of the FilterStatus in the database.
-    id: String,
+    pub id: String,
     /// The ID of the filtered Status in the database.
-    status_id: String,
+    pub status_id: String,
 }
 
 mod v1 {

@@ -114,6 +114,26 @@ macro_rules! paged_routes {
 }
 
 macro_rules! route_v2 {
+    ((get) $name:ident: $url:expr => $ret:ty, $($rest:tt)*) => {
+        doc_comment! {
+            concat!(
+                "Equivalent to `get /api/v2/",
+                $url,
+                "`\n# Errors\nIf `access_token` is not set."
+            ),
+            pub async fn $name<'a>(&self) -> Result<$ret> {
+                use uuid::Uuid;
+
+                let call_id = Uuid::new_v4();
+                let url = format!(concat!("/api/v2/", $url));
+
+                self.get_with_call_id(self.route(&url), call_id).await
+            }
+        }
+
+        route_v2!{$($rest)*}
+    };
+
     ((get ($($param:ident: $typ:ty,)*)) $name:ident: $url:expr => $ret:ty, $($rest:tt)*) => {
         doc_comment! {
             concat!(
@@ -459,6 +479,34 @@ macro_rules! route_id {
                 ),
                 pub async fn $name(&self, id: &$id_type) -> Result<$ret> {
                     self.$method(self.route(&format!(concat!("/api/v1/", $url), id))).await
+                }
+            }
+         )*
+    }
+
+}
+
+macro_rules! route_v2_id {
+
+    ($(($method:ident) $name:ident[$id_type:ty]: $url:expr => $ret:ty,)*) => {
+        $(
+            doc_comment! {
+                concat!(
+                    "Equivalent to `", stringify!($method), " /api/v2/",
+                    $url,
+                    "`\n# Errors\nIf `access_token` is not set.",
+                    "\n",
+                    "```no_run",
+                    "use mastodon_async::prelude::*;\n",
+                    "let data = Data::default();\n",
+                    "let client = Mastodon::from(data);\n",
+                    "client.", stringify!($name), "(\"42\");\n",
+                    "#   Ok(())\n",
+                    "# }\n",
+                    "```"
+                ),
+                pub async fn $name(&self, id: &$id_type) -> Result<$ret> {
+                    self.$method(self.route(&format!(concat!("/api/v2/", $url), id))).await
                 }
             }
          )*

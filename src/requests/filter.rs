@@ -1,5 +1,7 @@
 use crate::entities::filter::FilterContext;
+use mastodon_async_entities::filter::Action;
 use std::time::Duration;
+use time::{serde::iso8601, OffsetDateTime};
 
 /// Form used to create a filter
 ///
@@ -46,6 +48,60 @@ impl AddFilterRequest {
     /// Set `expires_in` to a duration
     pub fn expires_in(&mut self, d: Duration) -> &mut Self {
         self.expires_in = Some(d);
+        self
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+struct AddFilterV2Keyword {
+    /// The phrase to be matched against.
+    keyword: String,
+    /// Should the filter consider word boundaries? See [implementation guidelines
+    /// for filters](https://docs.joinmastodon.org/api/guidelines/#filters).
+    whole_word: bool,
+}
+
+/// Form used to create a v2 filter
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct AddFilterV2Request {
+    /// A title given by the user to name the filter.
+    title: String,
+    /// The contexts in which the filter should be applied.
+    context: Vec<FilterContext>,
+    /// When the filter should no longer be applied.
+    #[serde(with = "iso8601::option")]
+    expires_at: Option<OffsetDateTime>,
+    /// The action to be taken when a status matches this filter.
+    filter_action: Action,
+    /// The keywords grouped under this filter.
+    keywords_attributes: Vec<AddFilterV2Keyword>,
+}
+
+#[allow(dead_code)]
+impl AddFilterV2Request {
+    /// Create a new AddFilterV2Request
+    pub fn new(title: &str, context: Vec<FilterContext>, action: Action) -> AddFilterV2Request {
+        Self {
+            title: title.to_string(),
+            context,
+            expires_at: None,
+            filter_action: action,
+            keywords_attributes: vec![],
+        }
+    }
+
+    /// Set `expires_at` for the filter
+    pub fn expires_at(&mut self, d: OffsetDateTime) -> &mut Self {
+        self.expires_at = Some(d);
+        self
+    }
+
+    /// Adds a keyword to the filter
+    pub fn with_keyword(&mut self, keyword: &str, whole_word: bool) -> &mut Self {
+        self.keywords_attributes.push(AddFilterV2Keyword {
+            keyword: keyword.to_string(),
+            whole_word,
+        });
         self
     }
 }

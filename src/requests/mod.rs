@@ -1,5 +1,5 @@
 /// Data structure for the MastodonClient::add_filter method
-pub use self::filter::AddFilterRequest;
+pub use self::filter::{AddFilterRequest, AddFilterV2Request};
 /// Data structure for the MastodonClient::add_push_subscription method
 pub use self::push::{AddPushRequest, Keys, UpdatePushRequest};
 /// Data structure for the MastodonClient::statuses method
