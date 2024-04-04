@@ -1,7 +1,7 @@
 use super::{Mastodon, Result};
 use crate::{entities::itemsiter::ItemsIter, helpers::read_response::read_response, Error};
 use futures::Stream;
-use log::{as_debug, as_serde, debug, error, trace};
+use log::{debug, error, trace};
 use reqwest::{header::LINK, Response, Url};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -27,7 +27,7 @@ macro_rules! pages {
 
                 debug!(
                     url = url.as_str(), method = "get",
-                    call_id = as_debug!(self.call_id),
+                    call_id:? = self.call_id,
                     direction = stringify!($direction);
                     "making API request"
                 );
@@ -39,18 +39,18 @@ macro_rules! pages {
                         let response: Vec<T> = read_response(response).await?;
                         if response.is_empty() && prev.is_none() && next.is_none() {
                             debug!(
-                                url = url, method = "get", call_id = as_debug!(self.call_id),
+                                url = url, method = "get", call_id:? = self.call_id,
                                 direction = stringify!($direction);
                                 "received an empty page with no links"
                             );
                             return Ok(None);
                         }
                         debug!(
-                            url = url, method = "get",call_id = as_debug!(self.call_id),
+                            url = url, method = "get", call_id:? = self.call_id,
                             direction = stringify!($direction),
-                            prev = as_debug!(prev),
-                            next = as_debug!(next),
-                            response = as_serde!(response);
+                            prev:? = prev,
+                            next:? = next,
+                            response:serde = response;
                             "received next pages from API"
                         );
                         self.next = next;
@@ -59,9 +59,9 @@ macro_rules! pages {
                     }
                     Err(err) => {
                         error!(
-                            err = as_debug!(err), url = url,
+                            err:? = err, url = url,
                             method = stringify!($method),
-                            call_id = as_debug!(self.call_id);
+                            call_id:? = self.call_id;
                             "error making API request"
                         );
                         Err(err.into())
@@ -127,8 +127,8 @@ impl<'a, T: for<'de> Deserialize<'de> + Serialize> Page<T> {
             let (prev, next) = get_links(&response, call_id)?;
             let initial_items = read_response(response).await?;
             debug!(
-                initial_items = as_serde!(initial_items), prev = as_debug!(prev),
-                next = as_debug!(next), call_id = as_debug!(call_id);
+                initial_items:serde = initial_items, prev:? = prev,
+                next:? = next, call_id:? = call_id;
                 "received first page from API call"
             );
             Ok(Page {
@@ -185,13 +185,13 @@ fn get_links(response: &Response, call_id: Uuid) -> Result<(Option<Url>, Option<
     if let Some(link_header) = response.headers().get(LINK) {
         let link_header = link_header.to_str()?;
         let raw_link_header = link_header.to_string();
-        trace!(link_header = link_header, call_id = as_debug!(call_id); "parsing link header");
+        trace!(link_header = link_header, call_id:? = call_id; "parsing link header");
         let link_header = parse_link_header::parse(link_header)?;
         for (rel, link) in link_header.iter() {
             match rel.as_ref().map(|it| it.as_str()) {
                 Some("next") => next = Some(link.uri.clone()),
                 Some("prev") => prev = Some(link.uri.clone()),
-                None => debug!(link = as_debug!(link); "link header with no rel specified"),
+                None => debug!(link:? = link; "link header with no rel specified"),
                 Some(other) => {
                     return Err(Error::UnrecognizedRel {
                         rel: other.to_string(),

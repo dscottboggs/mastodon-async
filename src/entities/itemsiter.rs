@@ -1,5 +1,5 @@
 use futures::{stream::unfold, Stream};
-use log::{as_debug, as_serde, debug, info, warn};
+use log::{debug, info, warn};
 
 use crate::page::Page;
 use serde::{Deserialize, Serialize};
@@ -61,7 +61,7 @@ impl<'a, T: Clone + for<'de> Deserialize<'de> + Serialize> ItemsIter<T> {
                 Some(())
             }
             Err(err) => {
-                warn!(err = as_debug!(err); "error encountered filling next page");
+                warn!(err:? = err; "error encountered filling next page");
                 None
             }
             _ => None,
@@ -84,7 +84,7 @@ impl<'a, T: Clone + for<'de> Deserialize<'de> + Serialize> ItemsIter<T> {
                     this.cur_idx += 1;
                 }
                 let item = this.page.initial_items[idx].clone();
-                debug!(item = as_serde!(item), index = idx; "yielding item from initial items");
+                debug!(item:serde = item, index = idx; "yielding item from initial items");
                 // let item = Box::pin(item);
                 // pin_mut!(item);
                 Some((item, this))
@@ -95,7 +95,7 @@ impl<'a, T: Clone + for<'de> Deserialize<'de> + Serialize> ItemsIter<T> {
                 let idx = this.cur_idx;
                 this.cur_idx += 1;
                 let item = this.buffer[idx].clone();
-                debug!(item = as_serde!(item), index = idx; "yielding item from initial stream");
+                debug!(item:serde = item, index = idx; "yielding item from initial stream");
                 Some((item, this))
             }
         })

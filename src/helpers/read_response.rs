@@ -1,9 +1,9 @@
 use std::time::Duration;
 
-use crate::{errors::Result, log_serde, Error};
+use crate::{errors::Result, Error};
 use futures::pin_mut;
 use futures_util::StreamExt;
-use log::{as_debug, as_serde, debug, trace, warn};
+use log::{debug, trace, warn};
 use reqwest::Response;
 use serde::{Deserialize, Serialize};
 use tokio::time::timeout;
@@ -21,13 +21,15 @@ where
     let mut bytes = vec![];
     let url = response.url().clone();
     let status = response.status();
-    trace!(status = log_serde!(response Status), headers = log_serde!(response Headers); "attempting to stream response");
+    trace!(status:serde = crate::helpers::log::Status::from(&response), headers:serde = crate::helpers::log::Headers::from(&response); "attempting to stream response");
     let stream = response.bytes_stream();
     pin_mut!(stream);
     loop {
         if let Ok(data) = timeout(Duration::from_secs(10), stream.next()).await {
             // as of here, we did not time out
-            let Some(data) = data else { break; };
+            let Some(data) = data else {
+                break;
+            };
             // as of here, we have not hit the end of the stream yet
             let data = data?;
             // as of here, we did not hit an error while reading the body
@@ -58,14 +60,14 @@ where
         let result = serde_json::from_slice(bytes)?;
         debug!(
                 url = url.as_str(),
-            result = as_serde!(result);
+            result:serde = result;
             "result parsed successfully"
         );
         Ok(result)
     } else {
         // we've received an error message, let's deserialize that instead.
         let response = serde_json::from_slice(bytes)?;
-        debug!(status = as_debug!(status), response = as_serde!(response); "error received from API");
+        debug!(status:? = status, response:serde = response; "error received from API");
         Err(Error::Api { status, response })
     }
 }

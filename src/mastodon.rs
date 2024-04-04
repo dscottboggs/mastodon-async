@@ -10,13 +10,12 @@ use crate::{
     },
     errors::{Error, Result},
     helpers::read_response::read_response,
-    log_serde,
     polling_time::PollingTime,
     AddFilterRequest, AddPushRequest, Data, NewStatus, Page, StatusesRequest, UpdateCredsRequest,
     UpdatePushRequest,
 };
 use futures::TryStream;
-use log::{as_debug, as_serde, debug, error, trace};
+use log::{debug, error, trace};
 use mastodon_async_entities::attachment::ProcessedAttachment;
 use reqwest::{multipart::Part, Client, RequestBuilder};
 use url::Url;
@@ -195,8 +194,8 @@ impl Mastodon {
             .send()
             .await?;
         debug!(
-            status = log_serde!(response Status), url = url,
-            headers = log_serde!(response Headers);
+            status:serde = crate::helpers::log::Status::from(&response), url = url,
+            headers:serde = crate::helpers::log::Headers::from(&response);
             "received API response"
         );
         read_response(response).await
@@ -249,7 +248,7 @@ impl Mastodon {
 
         url += request.to_query_string()?.as_str();
 
-        debug!(url = url, method = stringify!($method), call_id = as_debug!(call_id); "making API request");
+        debug!(url = url, method = stringify!($method), call_id:? = call_id; "making API request");
         let response = self.client.get(&url).send().await?;
 
         Page::new(self.clone(), response, call_id).await
@@ -275,7 +274,7 @@ impl Mastodon {
 
         debug!(
             url = url, method = stringify!($method),
-            call_id = as_debug!(call_id), account_ids = as_serde!(ids);
+            call_id:? = call_id, account_ids:serde = ids;
             "making API request"
         );
         let response = self.client.get(&url).send().await?;
@@ -290,7 +289,7 @@ impl Mastodon {
         let url = &self.route("/api/v1/push/subscription");
         debug!(
             url = url, method = stringify!($method),
-            call_id = as_debug!(call_id), post_body = as_serde!(request);
+            call_id:? = call_id, post_body:serde = request;
             "making API request"
         );
         let response = self.client.post(url).json(&request).send().await?;
@@ -306,7 +305,7 @@ impl Mastodon {
         let url = &self.route("/api/v1/push/subscription");
         debug!(
             url = url, method = stringify!($method),
-            call_id = as_debug!(call_id), post_body = as_serde!(request);
+            call_id:? = call_id, post_body:serde = request;
             "making API request"
         );
         let response = self.client.post(url).json(&request).send().await?;
@@ -405,7 +404,7 @@ impl Mastodon {
                 Ok(Part::bytes(data).file_name(Cow::Owned(path.to_string_lossy().to_string())))
             }
             Err(err) => {
-                error!(path = as_debug!(path), error = as_debug!(err); "error reading file contents for multipart form");
+                error!(path:? = path, error:? = err; "error reading file contents for multipart form");
                 Err(err.into())
             }
         }

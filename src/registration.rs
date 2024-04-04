@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 
-use log::{as_debug, as_serde, debug, error, trace};
+use log::{debug, error, trace};
 use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
 use reqwest::Client;
 use uuid::Uuid;
@@ -8,7 +8,6 @@ use uuid::Uuid;
 use crate::{
     apps::{App, AppBuilder},
     helpers::read_response::read_response,
-    log_serde,
     scopes::Scopes,
     Data, Error, Mastodon, Result,
 };
@@ -196,24 +195,24 @@ impl<'a> Registration<'a> {
     async fn send_app(&self, app: &App) -> Result<OAuth> {
         let url = format!("{}/api/v1/apps", self.base);
         let call_id = Uuid::new_v4();
-        debug!(url = url, app = as_serde!(app), call_id = as_debug!(call_id); "registering app");
+        debug!(url = url, app:serde = app, call_id:? = call_id; "registering app");
         let response = self.client.post(&url).json(&app).send().await?;
 
         match response.error_for_status() {
             Ok(response) => {
                 let response = read_response(response).await?;
                 debug!(
-                    response = as_serde!(response), app = as_serde!(app),
+                    response:serde = response, app:serde = app,
                     url = url, method = stringify!($method),
-                    call_id = as_debug!(call_id);
+                    call_id:? = call_id;
                     "received API response"
                 );
                 Ok(response)
             }
             Err(err) => {
                 error!(
-                    err = as_debug!(err), url = url, method = stringify!($method),
-                    call_id = as_debug!(call_id);
+                    err:? = err, url = url, method = stringify!($method),
+                    call_id:? = call_id;
                     "error making API request"
                 );
                 Err(err.into())
@@ -361,14 +360,14 @@ impl Registered {
         debug!(url = url; "completing registration");
         let response = self.client.post(&url).send().await?;
         debug!(
-            status = log_serde!(response Status), url = url,
-            headers = log_serde!(response Headers);
+            status:serde = crate::helpers::log::Status::from(&response), url = url,
+            headers:serde = crate::helpers::log::Headers::from(&response);
             "received API response"
         );
         let token: AccessToken = read_response(response).await?;
-        debug!(url = url, body = as_serde!(token); "parsed response body");
+        debug!(url = url, body:serde = token; "parsed response body");
         let data = self.registered(token.access_token);
-        trace!(auth_data = as_serde!(data); "registered");
+        trace!(auth_data:serde = data; "registered");
 
         Ok(Mastodon::new(self.client.clone(), data))
     }
