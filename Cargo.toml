@@ -99,7 +99,7 @@ indoc = "2.0"
 tempfile = "3"
 # for examples:
 femme = "2.2.1"
-html2text = "0.6.0"
+html2text = "0.12.4"
 
 [build-dependencies.skeptic]
 version = "0.13"
