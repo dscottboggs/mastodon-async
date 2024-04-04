@@ -3,7 +3,7 @@
 mod register;
 
 use futures_util::TryStreamExt;
-use log::{as_serde, info};
+use log::info;
 use mastodon_async::Result;
 
 #[cfg(feature = "toml")]
@@ -16,7 +16,7 @@ async fn run() -> Result<()> {
     info!("watching mastodon for events. This will run forever, press Ctrl+C to kill the program.");
     stream
         .try_for_each(|(event, _client)| async move {
-            warn!(event = as_serde!(event); "unrecognized event received");
+            warn!(event:serde = event; "unrecognized event received");
             Ok(())
         })
         .await?;

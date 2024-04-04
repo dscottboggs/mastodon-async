@@ -2,7 +2,7 @@ use std::io;
 
 use crate::{errors::Result, prelude::*, Error};
 use futures::{stream::try_unfold, TryStream, TryStreamExt};
-use log::{as_debug, as_serde, debug, error, info, trace};
+use log::{debug, error, info, trace};
 use reqwest::Response;
 use tokio::io::AsyncBufReadExt;
 use tokio_util::io::StreamReader;
@@ -17,7 +17,7 @@ pub fn event_stream(
     client: &Mastodon,
 ) -> impl TryStream<Ok = (Event, Mastodon), Error = Error> + '_ {
     let stream = StreamReader::new(response.bytes_stream().map_err(|err| {
-        error!(err = as_debug!(err); "error reading stream");
+        error!(err:? = err; "error reading stream");
         io::Error::new(io::ErrorKind::BrokenPipe, format!("{err:?}"))
     }));
     let lines_iter = stream.lines();
@@ -32,7 +32,7 @@ pub fn event_stream(
             }
             lines.push(line);
             if let Ok(event) = make_event(&lines) {
-                info!(event = as_serde!(event), location = location; "received event");
+                info!(event:serde = event, location = location; "received event");
                 lines.clear();
                 return Ok(Some(((event, client.clone()), this)));
             } else {
