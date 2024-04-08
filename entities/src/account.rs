@@ -487,7 +487,7 @@ pub enum RolePermissions {
 mod fields_attributes_ser {
     use super::*;
     use serde::ser::{SerializeMap, Serializer};
-    pub fn ser<S>(attrs: &Vec<MetadataField>, serializer: S) -> Result<S::Ok, S::Error>
+    pub fn ser<S>(attrs: &[MetadataField], serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
