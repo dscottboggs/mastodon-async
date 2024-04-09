@@ -96,7 +96,7 @@ pub use mastodon_async_entities::{
     status::NewStatus, status::NewStatusBuilder, visibility::Visibility,
 };
 pub use registration::Registration;
-pub use requests::{AddFilterRequest, AddPushRequest, StatusesRequest, UpdatePushRequest};
+pub use requests::{AddPushRequest, StatusesRequest, UpdatePushRequest};
 
 /// Contains the struct that holds the client auth data
 pub mod data;

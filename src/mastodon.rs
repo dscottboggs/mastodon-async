@@ -5,7 +5,7 @@ use crate::{
     errors::{Error, Result},
     helpers::read_response::read_response,
     polling_time::PollingTime,
-    AddFilterRequest, AddPushRequest, Data, NewStatus, Page, StatusesRequest, UpdatePushRequest,
+    AddPushRequest, Data, NewStatus, Page, StatusesRequest, UpdatePushRequest,
 };
 use futures::TryStream;
 use log::{debug, error, trace};
@@ -95,6 +95,8 @@ impl Mastodon {
         (post multipart with description (file: impl AsRef<Path>,)) media: "media" => Attachment,
         (post multipart with description (file: impl AsRef<Path>, thumbnail: impl AsRef<Path>,)) media_with_thumbnail: "media" => Attachment,
         (get) get_filters: "filters" => Vec<Filter>,
+        (post (filter: forms::Filter,)) add_filter: "filters" => Filter,
+        (put (filter: forms::Filter,)) update_filter: "filters" => Filter,
     }
 
     route_id! {
@@ -156,26 +158,6 @@ impl Mastodon {
 
     fn route(&self, url: impl AsRef<str>) -> String {
         format!("{}{}", self.data.base, url.as_ref())
-    }
-
-    /// POST /api/v1/filters
-    pub async fn add_filter(&self, request: &mut AddFilterRequest) -> Result<Filter> {
-        let response = self
-            .client
-            .post(self.route("/api/v1/filters"))
-            .json(&request)
-            .send()
-            .await?;
-
-        read_response(response).await
-    }
-
-    /// PUT /api/v1/filters/:id
-    pub async fn update_filter(&self, id: &str, request: &mut AddFilterRequest) -> Result<Filter> {
-        let url = self.route(format!("/api/v1/filters/{id}"));
-        let response = self.client.put(&url).json(&request).send().await?;
-
-        read_response(response).await
     }
 
     /// Update the user credentials
