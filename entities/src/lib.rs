@@ -4,6 +4,7 @@ use serde::Serialize;
 
 /// Error types for this crate
 pub mod error;
+mod helpers;
 pub use error::Error;
 
 /// Data structures for ser/de of account-related resources
