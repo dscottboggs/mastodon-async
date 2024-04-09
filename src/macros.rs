@@ -239,6 +239,29 @@ macro_rules! route_v2 {
 
         route_v2!{$($rest)*}
     };
+
+    (($method:ident) $name:ident: $url:expr => $ret:ty, $($rest:tt)*) => {
+        doc_comment! {
+            concat!(
+                "Equivalent to `", stringify!($method), " /api/v2/",
+                $url,
+                "`\n# Errors\nIf `access_token` is not set.",
+                "\n",
+                "```no_run",
+                "use mastodon_async::prelude::*;\n",
+                "let data = Data::default();\n",
+                "let client = Mastodon::from(data);\n",
+                "client.", stringify!($name), "();\n",
+                "```"
+            ),
+            pub async fn $name(&self) -> Result<$ret> {
+                self.$method(self.route(concat!("/api/v2/", $url))).await
+            }
+        }
+
+        route!{$($rest)*}
+    };
+
     () => {}
 }
 
@@ -461,8 +484,34 @@ macro_rules! route_id {
             }
          )*
     }
-
 }
+
+macro_rules! route_v2_id {
+    ($(($method:ident) $name:ident[$id_type:ty]: $url:expr => $ret:ty,)*) => {
+        $(
+            doc_comment! {
+                concat!(
+                    "Equivalent to `", stringify!($method), " /api/v2/",
+                    $url,
+                    "`\n# Errors\nIf `access_token` is not set.",
+                    "\n",
+                    "```no_run",
+                    "use mastodon_async::prelude::*;\n",
+                    "let data = Data::default();\n",
+                    "let client = Mastodon::from(data);\n",
+                    "client.", stringify!($name), "(\"42\");\n",
+                    "#   Ok(())\n",
+                    "# }\n",
+                    "```"
+                ),
+                pub async fn $name(&self, id: &$id_type) -> Result<$ret> {
+                    self.$method(self.route(&format!(concat!("/api/v2/", $url), id))).await
+                }
+            }
+         )*
+    }
+}
+
 macro_rules! paged_routes_with_id {
 
     (($method:ident) $name:ident: $url:expr => $ret:ty, $($rest:tt)*) => {

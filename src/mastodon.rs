@@ -85,7 +85,6 @@ impl Mastodon {
         (post) clear_notifications: "notifications/clear" => Empty,
         (get) get_push_subscription: "push/subscription" => Subscription,
         (delete) delete_push_subscription: "push/subscription" => Empty,
-        (get) get_filters: "filters" => Vec<Filter>,
         (get) get_follow_suggestions: "suggestions" => Vec<Account>,
         (post (app: forms::Application,)) create_app: "apps" => Application,
         (get) verify_app: "apps/verify_credentials" => Application,
@@ -95,6 +94,7 @@ impl Mastodon {
         (get (q: &'a str, resolve: bool,)) search: "search" => SearchResult,
         (post multipart with description (file: impl AsRef<Path>,)) media: "media" => Attachment,
         (post multipart with description (file: impl AsRef<Path>, thumbnail: impl AsRef<Path>,)) media_with_thumbnail: "media" => Attachment,
+        (get) get_filters: "filters" => Vec<Filter>,
     }
 
     route_id! {
@@ -115,12 +115,15 @@ impl Mastodon {
         (post) favourite[StatusId]: "statuses/{}/favourite" => Status,
         (post) unfavourite[StatusId]: "statuses/{}/unfavourite" => Status,
         (delete) delete_status[StatusId]: "statuses/{}" => Empty,
-        (get) get_filter[FilterId]: "filters/{}" => Filter,
-        (delete) delete_filter[FilterId]: "filters/{}" => Empty,
         (delete) delete_from_suggestions[AccountId]: "suggestions/{}" => Empty,
         (post) endorse_user[AccountId]: "accounts/{}/pin" => Relationship,
         (post) unendorse_user[AccountId]: "accounts/{}/unpin" => Relationship,
         (get) attachment[AttachmentId]: "media/{}" => Attachment,
+    }
+
+    route_v2_id! {
+        (get) get_filter[FilterId]: "filters/{}" => Filter,
+        (delete) delete_filter[FilterId]: "filters/{}" => Empty,
     }
 
     streaming! {
