@@ -130,6 +130,7 @@ impl Mastodon {
         (post<-forms::filter::add::Keyword) add_keyword_to_filter[FilterId]: "filters/{}/keywords" => filter::Keyword,
         (get) get_filter_keyword[KeywordId]: "filters/keywords/{}" => filter::Keyword,
         (put<-forms::filter::add::Keyword) update_filter_keyword[KeywordId]: "filters/keywords/{}" => filter::Keyword,
+        (delete) delete_filter_keyword[KeywordId]: "filters/keywords/{}" => Empty,
     }
 
     streaming! {
