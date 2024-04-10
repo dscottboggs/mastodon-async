@@ -134,6 +134,7 @@ impl Mastodon {
         (get) filter_statuses[FilterId]: "filters/{}/statuses" => Vec<filter::Status>,
         (post<-forms::filter::Status) add_status_to_filter[FilterId]: "filters/{}/statuses" => filter::Status,
         (get) filter_status[StatusId]: "filters/statuses/{}" => filter::Status,
+        (delete) disassociate_status_from_filter[StatusId]: "filters/statuses/{}" => Empty,
     }
 
     streaming! {
