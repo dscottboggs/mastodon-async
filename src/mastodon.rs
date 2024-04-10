@@ -132,6 +132,7 @@ impl Mastodon {
         (put<-forms::filter::add::Keyword) update_filter_keyword[KeywordId]: "filters/keywords/{}" => filter::Keyword,
         (delete) delete_filter_keyword[KeywordId]: "filters/keywords/{}" => Empty,
         (get) filter_statuses[FilterId]: "filters/{}/statuses" => Vec<filter::Status>,
+        (post<-forms::filter::Status) add_status_to_filter[FilterId]: "filters/{}/statuses" => filter::Status,
     }
 
     streaming! {

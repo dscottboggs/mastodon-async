@@ -4,7 +4,7 @@ use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    filter::{self},
+    prelude::*,
     helpers::serde_opt_duration_as_seconds,
 };
 
@@ -273,5 +273,16 @@ pub mod update {
         pub fn builder() -> KeywordBuilder {
             Default::default()
         }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Status {
+    status_id: StatusId
+}
+
+impl Status {
+    pub fn new(status_id: StatusId) -> Self {
+        Self { status_id }
     }
 }
