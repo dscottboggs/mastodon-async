@@ -94,7 +94,7 @@ impl Mastodon {
         (get (q: &'a str, resolve: bool,)) search: "search" => SearchResult,
         (post multipart with description (file: impl AsRef<Path>,)) media: "media" => Attachment,
         (post multipart with description (file: impl AsRef<Path>, thumbnail: impl AsRef<Path>,)) media_with_thumbnail: "media" => Attachment,
-        (get) get_filters: "filters" => Vec<Filter>,
+        (get) filters: "filters" => Vec<Filter>,
         (post<-forms::filter::Add) add_filter: "filters" => Filter,
     }
 
@@ -123,12 +123,12 @@ impl Mastodon {
     }
 
     route_v2_id! {
-        (get) get_filter[FilterId]: "filters/{}" => Filter,
+        (get) filter[FilterId]: "filters/{}" => Filter,
         (delete) delete_filter[FilterId]: "filters/{}" => Empty,
         (put<-forms::filter::Update) update_filter[FilterId]: "filters/{}" => Filter,
-        (get) get_filter_keywords[FilterId]: "filters/{}/keywords" => Vec<filter::Keyword>,
+        (get) filter_keywords[FilterId]: "filters/{}/keywords" => Vec<filter::Keyword>,
         (post<-forms::filter::add::Keyword) add_keyword_to_filter[FilterId]: "filters/{}/keywords" => filter::Keyword,
-        (get) get_filter_keyword[KeywordId]: "filters/keywords/{}" => filter::Keyword,
+        (get) filter_keyword[KeywordId]: "filters/keywords/{}" => filter::Keyword,
         (put<-forms::filter::add::Keyword) update_filter_keyword[KeywordId]: "filters/keywords/{}" => filter::Keyword,
         (delete) delete_filter_keyword[KeywordId]: "filters/keywords/{}" => Empty,
         (get) filter_statuses[FilterId]: "filters/{}/statuses" => Vec<filter::Status>,
