@@ -95,7 +95,7 @@ impl Mastodon {
         (post multipart with description (file: impl AsRef<Path>,)) media: "media" => Attachment,
         (post multipart with description (file: impl AsRef<Path>, thumbnail: impl AsRef<Path>,)) media_with_thumbnail: "media" => Attachment,
         (get) get_filters: "filters" => Vec<Filter>,
-        (post forms::filter::Add) add_filter: "filters" => Filter,
+        (post<-forms::filter::Add) add_filter: "filters" => Filter,
     }
 
     route_id! {
@@ -125,7 +125,8 @@ impl Mastodon {
     route_v2_id! {
         (get) get_filter[FilterId]: "filters/{}" => Filter,
         (delete) delete_filter[FilterId]: "filters/{}" => Empty,
-        (put forms::filter::Update) update_filter[FilterId]: "filters/{}" => Filter,
+        (put<-forms::filter::Update) update_filter[FilterId]: "filters/{}" => Filter,
+        (get) get_filter_keywords[FilterId]: "filters/{}/keywords" => Vec<filter::Keyword>,
     }
 
     streaming! {
