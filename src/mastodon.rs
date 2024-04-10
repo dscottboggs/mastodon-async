@@ -129,6 +129,7 @@ impl Mastodon {
         (get) get_filter_keywords[FilterId]: "filters/{}/keywords" => Vec<filter::Keyword>,
         (post<-forms::filter::add::Keyword) add_keyword_to_filter[FilterId]: "filters/{}/keywords" => filter::Keyword,
         (get) get_filter_keyword[KeywordId]: "filters/keywords/{}" => filter::Keyword,
+        (put<-forms::filter::add::Keyword) update_filter_keyword[KeywordId]: "filters/keywords/{}" => filter::Keyword,
     }
 
     streaming! {
