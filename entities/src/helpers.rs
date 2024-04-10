@@ -1,5 +1,10 @@
+/// Returns true if the given value refers to "false"
+pub fn is_false(value: &bool) -> bool {
+    !*value
+}
+
 pub(crate) mod serde_opt_duration_as_seconds {
-    use std::time::Duration;
+    use time::{ext::NumericalDuration, Duration};
 
     use serde::de;
 
@@ -11,7 +16,7 @@ pub(crate) mod serde_opt_duration_as_seconds {
         S: serde::Serializer,
     {
         if let Some(duration) = duration {
-            serializer.serialize_u64(duration.as_secs())
+            serializer.serialize_i64(duration.whole_seconds())
         } else {
             serializer.serialize_none()
         }
@@ -31,14 +36,23 @@ pub(crate) mod serde_opt_duration_as_seconds {
             type Value = Option<Duration>;
 
             fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-                write!(formatter, "unsigned integer")
+                write!(formatter, "signed 64-bit integer")
+            }
+
+            fn visit_i64<E>(self, v: i64) -> Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                Ok(Some(v.seconds()))
             }
 
             fn visit_u64<E>(self, v: u64) -> Result<Self::Value, E>
             where
-                E: serde::de::Error,
+                E: de::Error,
             {
-                Ok(Some(Duration::from_secs(v)))
+                i64::try_from(v)
+                    .map(|v| Some(v.seconds()))
+                    .map_err(|_| de::Error::invalid_value(de::Unexpected::Unsigned(v), &self))
             }
 
             fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
@@ -49,7 +63,7 @@ pub(crate) mod serde_opt_duration_as_seconds {
                     Ok(None)
                 } else {
                     v.parse()
-                        .map(|n| Some(Duration::from_secs(n)))
+                        .map(|n: i64| Some(n.seconds()))
                         .map_err(|_| de::Error::invalid_value(de::Unexpected::Str(v), &self))
                 }
             }
@@ -67,7 +81,7 @@ pub(crate) mod serde_opt_duration_as_seconds {
 #[cfg(test)]
 mod tests {
     use serde::{Deserialize, Serialize};
-    use std::time::Duration;
+    use time::{ext::NumericalDuration, Duration};
 
     use super::*;
 
@@ -84,7 +98,7 @@ mod tests {
     impl Default for TestDuration {
         fn default() -> Self {
             TestDuration {
-                dur: Some(Duration::from_secs(10)),
+                dur: Some(10.seconds()),
             }
         }
     }
@@ -113,10 +127,10 @@ mod tests {
     fn test_deserialize_duration() {
         let text = r#"{"dur": 10}"#;
         let duration: TestDuration = serde_json::from_str(text).expect("deserialize");
-        assert_eq!(duration.dur.unwrap().as_secs(), 10);
+        assert_eq!(duration.dur.unwrap().whole_seconds(), 10);
         let text = r#"{"dur": "10"}"#;
         let duration: TestDuration = serde_json::from_str(text).expect("deserialize");
-        assert_eq!(duration.dur.unwrap().as_secs(), 10);
+        assert_eq!(duration.dur.unwrap().whole_seconds(), 10);
     }
 
     #[test]

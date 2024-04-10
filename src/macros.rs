@@ -259,9 +259,43 @@ macro_rules! route_v2 {
             }
         }
 
-        route!{$($rest)*}
+        route_v2!{$($rest)*}
     };
 
+    (($method:ident<-$typ:ty) $name:ident: $url:expr => $ret:ty, $($rest:tt)*) => {
+        doc_comment! {
+            concat!(
+                "Equivalent to `", stringify!($method), " /api/v2/",
+                $url,
+                "`\n# Errors\nIf `access_token` is not set.",
+            ),
+            pub async fn $name(&self, form: $typ) -> Result<$ret> {
+                use log::debug;
+                use uuid::Uuid;
+
+                let call_id = Uuid::new_v4();
+
+                let form_data = serde_urlencoded::to_string(&form)?;
+
+                let url = &self.route(format!("/api/v2/{}?{form_data}", $url));
+                debug!(
+                    url = url.as_str(), method = stringify!($method),
+                    call_id:? = call_id,
+                    form_data:serde = &form;
+                    "making API request"
+                );
+
+                let response = self.authenticated(self.client.$method(url))
+                    .header("Accept", "application/json")
+                    .send()
+                    .await?;
+
+                read_response(response).await
+            }
+        }
+
+        route_v2!{$($rest)*}
+    };
     () => {}
 }
 
@@ -487,29 +521,64 @@ macro_rules! route_id {
 }
 
 macro_rules! route_v2_id {
-    ($(($method:ident) $name:ident[$id_type:ty]: $url:expr => $ret:ty,)*) => {
-        $(
-            doc_comment! {
-                concat!(
-                    "Equivalent to `", stringify!($method), " /api/v2/",
-                    $url,
-                    "`\n# Errors\nIf `access_token` is not set.",
-                    "\n",
-                    "```no_run",
-                    "use mastodon_async::prelude::*;\n",
-                    "let data = Data::default();\n",
-                    "let client = Mastodon::from(data);\n",
-                    "client.", stringify!($name), "(\"42\");\n",
-                    "#   Ok(())\n",
-                    "# }\n",
-                    "```"
-                ),
-                pub async fn $name(&self, id: &$id_type) -> Result<$ret> {
-                    self.$method(self.route(&format!(concat!("/api/v2/", $url), id))).await
-                }
+    (($method:ident) $name:ident[$id_type:ty]: $url:expr => $ret:ty, $($rest:tt)*) => {
+        doc_comment! {
+            concat!(
+                "Equivalent to `", stringify!($method), " /api/v2/",
+                $url,
+                "`\n# Errors\nIf `access_token` is not set.",
+                "\n",
+                "```no_run",
+                "use mastodon_async::prelude::*;\n",
+                "let data = Data::default();\n",
+                "let client = Mastodon::from(data);\n",
+                "client.", stringify!($name), "(\"42\");\n",
+                "#   Ok(())\n",
+                "# }\n",
+                "```"
+            ),
+            pub async fn $name(&self, id: &$id_type) -> Result<$ret> {
+                self.$method(self.route(&format!(concat!("/api/v2/", $url), id))).await
             }
-         )*
-    }
+        }
+
+        route_v2_id!{$($rest)*}
+    };
+    (($method:ident<-$typ:ty) $name:ident[$id_type:ty]: $url:expr => $ret:ty, $($rest:tt)*) => {
+        doc_comment! {
+            concat!(
+                "Equivalent to `", stringify!($method), " /api/v2/",
+                $url,
+                "`\n# Errors\nIf `access_token` is not set.",
+            ),
+            pub async fn $name(&self, id: $id_type, form: $typ) -> Result<$ret> {
+                use log::debug;
+                use uuid::Uuid;
+
+                let call_id = Uuid::new_v4();
+
+                let form_data = serde_urlencoded::to_string(&form)?;
+
+                let url = &self.route(format!("/api/v2/{}?{form_data}", format!($url, id)));
+                debug!(
+                    url = url.as_str(), method = stringify!($method),
+                    call_id:? = call_id,
+                    form_data:serde = &form;
+                    "making API request"
+                );
+
+                let response = self.authenticated(self.client.$method(url))
+                    .header("Accept", "application/json")
+                    .send()
+                    .await?;
+
+                read_response(response).await
+            }
+        }
+
+        route_v2_id!{$($rest)*}
+    };
+    () => {};
 }
 
 macro_rules! paged_routes_with_id {
