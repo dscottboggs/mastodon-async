@@ -42,7 +42,7 @@ pub struct Filter {
     /// A title given by the user to name the filter.
     pub title: String,
     /// The contexts in which the filter should be applied.
-    pub context: Vec<FilterContext>,
+    pub context: Vec<Context>,
     /// When the filter should no longer be applied.
     #[serde(with = "iso8601::option")]
     pub expires_at: Option<OffsetDateTime>,
@@ -57,7 +57,7 @@ pub struct Filter {
 /// Represents the various types of Filter contexts
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, is_enum_variant)]
 #[serde(rename_all = "lowercase")]
-pub enum FilterContext {
+pub enum Context {
     /// Represents the "home" context
     Home,
     /// Represents the "notifications" context
@@ -154,7 +154,7 @@ pub struct Status {
 mod v1 {
     use crate::FilterId;
 
-    pub use super::FilterContext;
+    pub use super::Context;
     use serde::{Deserialize, Serialize};
     use time::{serde::iso8601, OffsetDateTime};
 
@@ -166,7 +166,7 @@ mod v1 {
         /// The text to be filtered.
         pub phrase: String,
         /// The contexts in which the filter should be applied.
-        pub context: Vec<FilterContext>,
+        pub context: Vec<Context>,
         /// When the filter should no longer be applied.
         ///
         /// `None` indicates that the filter does not expire.

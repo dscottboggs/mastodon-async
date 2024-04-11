@@ -5,7 +5,7 @@ use crate::{
     errors::{Error, Result},
     helpers::read_response::read_response,
     polling_time::PollingTime,
-    AddFilterRequest, AddPushRequest, Data, NewStatus, Page, StatusesRequest, UpdatePushRequest,
+    AddPushRequest, Data, NewStatus, Page, StatusesRequest, UpdatePushRequest,
 };
 use futures::TryStream;
 use log::{debug, error, trace};
@@ -85,7 +85,6 @@ impl Mastodon {
         (post) clear_notifications: "notifications/clear" => Empty,
         (get) get_push_subscription: "push/subscription" => Subscription,
         (delete) delete_push_subscription: "push/subscription" => Empty,
-        (get) get_filters: "filters" => Vec<Filter>,
         (get) get_follow_suggestions: "suggestions" => Vec<Account>,
         (post (app: forms::Application,)) create_app: "apps" => Application,
         (get) verify_app: "apps/verify_credentials" => Application,
@@ -95,6 +94,8 @@ impl Mastodon {
         (get (q: &'a str, resolve: bool,)) search: "search" => SearchResult,
         (post multipart with description (file: impl AsRef<Path>,)) media: "media" => Attachment,
         (post multipart with description (file: impl AsRef<Path>, thumbnail: impl AsRef<Path>,)) media_with_thumbnail: "media" => Attachment,
+        (get) filters: "filters" => Vec<Filter>,
+        (post<-forms::filter::Add) add_filter: "filters" => Filter,
     }
 
     route_id! {
@@ -115,12 +116,25 @@ impl Mastodon {
         (post) favourite[StatusId]: "statuses/{}/favourite" => Status,
         (post) unfavourite[StatusId]: "statuses/{}/unfavourite" => Status,
         (delete) delete_status[StatusId]: "statuses/{}" => Empty,
-        (get) get_filter[FilterId]: "filters/{}" => Filter,
-        (delete) delete_filter[FilterId]: "filters/{}" => Empty,
         (delete) delete_from_suggestions[AccountId]: "suggestions/{}" => Empty,
         (post) endorse_user[AccountId]: "accounts/{}/pin" => Relationship,
         (post) unendorse_user[AccountId]: "accounts/{}/unpin" => Relationship,
         (get) attachment[AttachmentId]: "media/{}" => Attachment,
+    }
+
+    route_v2_id! {
+        (get) filter[FilterId]: "filters/{}" => Filter,
+        (delete) delete_filter[FilterId]: "filters/{}" => Empty,
+        (put<-forms::filter::Update) update_filter[FilterId]: "filters/{}" => Filter,
+        (get) filter_keywords[FilterId]: "filters/{}/keywords" => Vec<filter::Keyword>,
+        (post<-forms::filter::add::Keyword) add_keyword_to_filter[FilterId]: "filters/{}/keywords" => filter::Keyword,
+        (get) filter_keyword[KeywordId]: "filters/keywords/{}" => filter::Keyword,
+        (put<-forms::filter::add::Keyword) update_filter_keyword[KeywordId]: "filters/keywords/{}" => filter::Keyword,
+        (delete) delete_filter_keyword[KeywordId]: "filters/keywords/{}" => Empty,
+        (get) filter_statuses[FilterId]: "filters/{}/statuses" => Vec<filter::Status>,
+        (post<-forms::filter::Status) add_status_to_filter[FilterId]: "filters/{}/statuses" => filter::Status,
+        (get) filter_status[StatusId]: "filters/statuses/{}" => filter::Status,
+        (delete) disassociate_status_from_filter[StatusId]: "filters/statuses/{}" => Empty,
     }
 
     streaming! {
@@ -153,26 +167,6 @@ impl Mastodon {
 
     fn route(&self, url: impl AsRef<str>) -> String {
         format!("{}{}", self.data.base, url.as_ref())
-    }
-
-    /// POST /api/v1/filters
-    pub async fn add_filter(&self, request: &mut AddFilterRequest) -> Result<Filter> {
-        let response = self
-            .client
-            .post(self.route("/api/v1/filters"))
-            .json(&request)
-            .send()
-            .await?;
-
-        read_response(response).await
-    }
-
-    /// PUT /api/v1/filters/:id
-    pub async fn update_filter(&self, id: &str, request: &mut AddFilterRequest) -> Result<Filter> {
-        let url = self.route(format!("/api/v1/filters/{id}"));
-        let response = self.client.put(&url).json(&request).send().await?;
-
-        read_response(response).await
     }
 
     /// Update the user credentials
