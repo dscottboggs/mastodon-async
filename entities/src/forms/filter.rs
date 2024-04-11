@@ -3,10 +3,7 @@ use time::Duration;
 use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    prelude::*,
-    helpers::serde_opt_duration_as_seconds,
-};
+use crate::{helpers::serde_opt_duration_as_seconds, prelude::*};
 
 #[derive(Builder, Debug, Default, Deserialize, Serialize, Clone)]
 #[builder(derive(Debug), build_fn(error = "crate::Error"))]
@@ -278,7 +275,7 @@ pub mod update {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Status {
-    status_id: StatusId
+    status_id: StatusId,
 }
 
 impl Status {
