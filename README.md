@@ -5,6 +5,20 @@
 [![Docs](https://docs.rs/mastodon-async/badge.svg)](https://docs.rs/mastodon-async)
 [![MIT/APACHE-2.0](https://img.shields.io/crates/l/mastodon-async.svg)](https://crates.io/crates/mastodon-async)
 
+# V2 WIP
+
+This is a branch tracking version 2 of this library, which will bring the
+library current with all documented routes and entities, and come with some
+breaking changes. Once the process of "combing" the documentation is complete,
+v2 RCs and then a release will be cut from this branch, which will then be
+renamed `main`.
+
+V1 is still being used in some capacity by some projects, but new features are
+not being developed for it. Please develop new features targeting this branch,
+and review the work already done starting at issue #54.
+
+---
+
 [Documentation](https://docs.rs/mastodon-async/)
 
 A type-safe, async wrapper around the client [API](https://docs.joinmastodon.org/client/intro/)
