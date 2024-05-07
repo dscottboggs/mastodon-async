@@ -16,8 +16,11 @@ async fn run() -> Result<()> {
                 "\ttoot from {}:\n{}",
                 status.account.display_name,
                 html2text::parse(status.content.as_bytes())
+                    .expect("parse status html")
                     .render_plain(90)
+                    .expect("render html")
                     .into_string()
+                    .expect("convert to string")
             )
         })
         .await;
