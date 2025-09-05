@@ -380,6 +380,11 @@ impl Mastodon {
         }
     }
 
+    /// Creates a mastodon instance from the data struct, with a custom client.
+    pub fn from_with_client(data: Data, client: Client) -> Mastodon {
+        Mastodon::new(client, data)
+    }
+
     /// Set the bearer authentication token
     pub(crate) fn authenticated(&self, request: RequestBuilder) -> RequestBuilder {
         request.bearer_auth(&self.data.token)
